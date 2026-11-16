@@ -1,0 +1,15 @@
+# DevLearn .gitignore
+node_modules/
+dist/
+.next/
+.env
+.env.local
+.env.test
+.env*.local
+*.log
+.DS_Store
+Thumbs.db
+prisma/migrations/*.sql.bak
+
+# KB build artifacts
+docs/kb/tools/__pycache__/

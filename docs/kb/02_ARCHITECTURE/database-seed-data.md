@@ -1,0 +1,67 @@
+---
+id: database-seed-data
+title: Dữ liệu seed & ID cố định (dùng chung cho mock và DB thật)
+type: database
+status: stable
+tags: [seed, fixtures, mock, test-data]
+related: [adr-015-ui-first-mock-adapters, workflow-ui-mock-wire-backend, database-erd, plan-phase-00-foundation]
+source: "Thiết kế của Tech Lead; tên khóa học lấy từ file UI"
+updated: 2026-11-15
+---
+# Dữ liệu seed
+
+**Mục tiêu**: cùng một bộ dữ liệu cho (a) mock fixtures của FE và (b) `prisma db seed`, để khi đổi mock → API thật, màn hình trông **giống hệt** và URL không đổi.
+
+## ID cố định
+`backend/src/types/seed-ids.ts` xuất hằng UUID cố định (ví dụ `COURSE_PYTHON_ID`, `EXAM_PY_M1_ID`, `USER_STUDENT_NA_ID`). Cả `backend/prisma/seed.ts` và `frontend/src/mocks/fixtures/*` (qua bản copy `frontend/src/types/seed-ids.ts`) import từ đây. Quy ước tạo: UUID dạng `00000000-0000-4000-8000-0000000000NN` tăng dần theo thực thể, ghi chú tên ở comment.
+
+## Tài khoản (chỉ môi trường dev/demo)
+| Email | Vai trò | Mật khẩu | Ghi chú |
+|---|---|---|---|
+| `admin@edu.vn` | ADMIN | `Passw0rd!` | khớp placeholder ADMIN·00 |
+| `teacher@edu.vn` | TEACHER | `Passw0rd!` | chủ khóa Python, SQL, Next.js |
+| `teacher2@edu.vn` | TEACHER | `Passw0rd!` | chủ khóa Java, PostgreSQL, Kiểm thử — dùng test `403` owner-only |
+| `na@stu.edu.vn` | STUDENT | `Passw0rd!` | avatar "NA"; MSSV `DH52301350`; ghi danh Python (35%), SQL (70%), Next.js (0%) |
+| `sv02…sv12@stu.edu.vn` | STUDENT | `Passw0rd!` | 11 SV để thống kê có số liệu |
+| `locked@stu.edu.vn` | STUDENT, `LOCKED` | `Passw0rd!` | test `ACCOUNT_LOCKED` |
+
+## Khóa học (khớp màn UI)
+| Khóa | Chủ đề | Cấp độ | Trạng thái | GV |
+|---|---|---|---|---|
+| Nhập môn Python | PROGRAMMING | BEGINNER | PUBLISHED | teacher |
+| Java hướng đối tượng | PROGRAMMING | INTERMEDIATE | PUBLISHED | teacher2 |
+| SQL cơ bản | DATABASE | BEGINNER | **DRAFT** (khớp A02) → seed thêm bản PUBLISHED để SV `na` học; xem ghi chú | teacher |
+| Next.js thực chiến | WEB | INTERMEDIATE | PUBLISHED | teacher |
+| PostgreSQL nâng cao | DATABASE | INTERMEDIATE | PUBLISHED | teacher2 |
+| Kiểm thử phần mềm | SOFTWARE_ENGINEERING | BEGINNER | PUBLISHED | teacher2 |
+
+> Ghi chú: UI A02 minh họa "SQL cơ bản" là Bản nháp nhưng C08 cho SV đang học 70% khóa này. Seed dùng **SQL cơ bản = PUBLISHED**, và thêm khóa phụ "Git và GitHub cơ bản" = `DRAFT` để có ví dụ bản nháp.
+
+## Cấu trúc mỗi khóa
+3 module × 4–6 bài (xen VIDEO/PDF, link video mẫu công khai / YouTube không công khai giả; PDF mẫu nhỏ). Bài số 5 của Module 3 `is_published = false` (test lọc). Mỗi khóa có `description` 2–3 câu.
+
+## Bài kiểm tra
+| Bài | Trạng thái | Nội dung |
+|---|---|---|
+| Python · Kiểm tra Module 1 | `OPEN` | 10 câu, 15 phút, `passScore = 5` — khớp C06 ("Câu 4/10", "12:45") |
+| Python · Kiểm tra Module 2 | `OPEN` | 10 câu |
+| SQL · Kiểm tra cuối khóa | `OPEN` | 10 câu |
+| Next.js · Kiểm tra Module 1 | `DRAFT` | 3 câu |
+| Java · Kiểm tra Module 1 | `CLOSED` | 5 câu |
+
+## Lượt làm (để màn kết quả/thống kê có dữ liệu)
+- `na`: Python M1 — 2 lượt (6/10 rồi **8/10 → Đạt**), Python M2 — 1 lượt **4/10 → Chưa đạt**, SQL cuối khóa — **7/10 → Đạt** (khớp C09).
+- 10 SV còn lại: 6 người nộp Python M1 với điểm 3–10, một số làm 2–3 lần; 1 bài có câu **bỏ trống** (test "Chưa trả lời").
+
+## Tài liệu AI
+| File | Khóa | Trạng thái |
+|---|---|---|
+| `python-co-ban.pdf` | Python | `READY` |
+| `sql-co-ban.pdf` | SQL | `PROCESSING` (khớp A05) |
+| `scan-ghi-chu.pdf` | Python | `FAILED` / `NO_TEXT_LAYER` |
+
+## Lịch sử AI
+3 lượt hỏi mẫu của `na` ở khóa Python, trong đó có 1 câu `found=false`.
+
+## Lệnh
+`cd backend && npm run db:reset` (xóa, migrate lại & seed) — **chỉ dev**. Seed **không** chạy ở production (`NODE_ENV` guard).

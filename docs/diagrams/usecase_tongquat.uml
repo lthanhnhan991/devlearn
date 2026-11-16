@@ -1,0 +1,44 @@
+@startuml
+skinparam handwritten true
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontSize 13
+left to right direction
+
+actor "Sinh viên" as SV
+actor "Quản trị viên" as AD
+actor "Giảng viên" as GV
+actor "Trợ lý AI" as AI
+
+rectangle "Hệ thống học tập tích hợp Trợ lý AI" {
+  usecase "Đăng ký, đăng nhập,\nquản lý tài khoản (F1)" as U1
+  usecase "Đăng ký học khóa học,\nxem bài giảng (F2.4, F2.5)" as U3
+  usecase "Theo dõi tiến độ học (F2.6)" as U4
+  usecase "Làm bài kiểm tra,\nxem kết quả (F3.2, F3.4)" as U6
+  usecase "Tự động chấm điểm (F3.3)" as U6a
+  usecase "Hỏi đáp với Trợ lý AI (F4.2)" as U9
+  usecase "Quản lý khóa học, module,\nbài giảng (F2.1 - F2.3)" as U2
+  usecase "Tạo bài kiểm tra\nvà câu hỏi (F3.1)" as U5
+  usecase "Xem thống kê\nbài kiểm tra (F3.5)" as U7
+  usecase "Quản lý tài liệu PDF\ncho Trợ lý AI (F4.1)" as U8
+  usecase "Quản lý người dùng (F5.1)" as U10
+  usecase "Thống kê khóa học\nvà kết quả (F5.2)" as U11
+}
+
+SV --> U1
+SV --> U3
+SV --> U4
+SV --> U6
+SV --> U9
+AD --> U1
+AD --> U10
+AD --> U11
+U1 <-- GV
+U2 <-- GV
+U5 <-- GV
+U7 <-- GV
+U8 <-- GV
+U6 ..> U6a : <<include>>
+U9 <-- AI
+U8 <-- AI
+@enduml

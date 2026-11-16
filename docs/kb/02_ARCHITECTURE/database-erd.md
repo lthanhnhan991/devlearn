@@ -1,0 +1,93 @@
+---
+id: database-erd
+title: Database — ERD, ràng buộc, chỉ mục
+type: database
+status: stable
+tags: [database, erd, postgres, prisma, indexes]
+related: [database-prisma-schema, database-prisma-schema-exam-ai, database-seed-data, delta-vs-thesis, adr-004-postgres-prisma, adr-010-unify-documents-into-ai-documents]
+source: "Đồ án §3.1 (mức ý niệm, luận lý, vật lý), drawio H3-1"
+updated: 2026-11-15
+---
+# Database
+
+PostgreSQL 16 + Prisma. Mã nguồn schema đầy đủ: [[database-prisma-schema]] (người dùng, khóa học, tiến độ) và [[database-prisma-schema-exam-ai]] (kiểm tra, AI). **Ghép hai file theo thứ tự thành một `backend/prisma/schema.prisma`.**
+
+```mermaid
+erDiagram
+  USERS ||--o{ COURSES : "teacher_id (phụ trách)"
+  USERS ||--o{ ENROLLMENTS : ghi_danh
+  COURSES ||--o{ ENROLLMENTS : co
+  COURSES ||--o{ MODULES : gom
+  MODULES ||--o{ LESSONS : chua
+  USERS ||--o{ LESSON_PROGRESS : hoan_thanh
+  LESSONS ||--o{ LESSON_PROGRESS : co
+  COURSES ||--o{ EXAMS : co
+  MODULES |o--o{ EXAMS : "module_id (NULL = cuối khóa)"
+  EXAMS ||--o{ QUESTIONS : gom
+  QUESTIONS ||--o{ OPTIONS : co
+  USERS ||--o{ ATTEMPTS : thuc_hien
+  EXAMS ||--o{ ATTEMPTS : co
+  ATTEMPTS ||--o{ ANSWERS : gom
+  QUESTIONS ||--o{ ANSWERS : ve
+  OPTIONS ||--o{ ANSWERS : chon
+  COURSES ||--o{ AI_DOCUMENTS : co
+  USERS ||--o{ AI_DOCUMENTS : tai_len
+  LESSONS |o--o| AI_DOCUMENTS : "lesson_id (tùy chọn)"
+  USERS ||--o{ AI_MESSAGES : dat
+  COURSES ||--o{ AI_MESSAGES : ve
+```
+
+## 14 bảng
+| Bảng | Khóa chính | Ghi chú |
+|---|---|---|
+| `users` | `id uuid` | `email` unique (lưu lowercase); `student_code` unique, nullable |
+| `courses` | `id` | FK `teacher_id → users` |
+| `modules` | `id` | FK `course_id` (cascade) |
+| `lessons` | `id` | FK `module_id` (cascade); **+** `duration_seconds`, `file_public_id` |
+| `enrollments` | `(user_id, course_id)` | `completed_at` null cho đến khi hoàn thành |
+| `lesson_progress` | `(user_id, lesson_id)` | |
+| `exams` | `id` | `module_id` null ⇒ cuối khóa |
+| `questions` | `id` | |
+| `options` | `id` | **+** `position` (0–3) |
+| `attempts` | `id` | `UNIQUE(exam_id, student_id, attempt_no)` |
+| `answers` | `id` | `UNIQUE(attempt_id, question_id)`; chỉ lưu câu đã trả lời |
+| `ai_documents` | `id` | **gộp** bảng `documents`; **+** `lesson_id`, `file_public_id`, `error_message` |
+| `ai_messages` | `id` | **+** `sources jsonb` |
+| *(Chroma)* | — | vector nằm ngoài Postgres |
+
+Mọi thay đổi so với Đồ án đánh dấu **+** được lý giải ở [[delta-vs-thesis]] (D-01…D-07).
+
+## Chỉ mục (tối thiểu)
+| Bảng | Chỉ mục |
+|---|---|
+| `users` | `email` (unique), `student_code` (unique) |
+| `courses` | `teacher_id`, `(status)` |
+| `modules` | `(course_id, position)` |
+| `lessons` | `(module_id, position)` |
+| `enrollments` | PK + `course_id` |
+| `lesson_progress` | PK + `lesson_id` |
+| `exams` | `course_id`, `module_id` |
+| `questions` / `options` | `(exam_id, position)` / `(question_id, position)` |
+| `attempts` | `exam_id`, `student_id`, unique ba cột |
+| `answers` | `attempt_id` |
+| `ai_documents` | `course_id`, `uploaded_by`, `lesson_id` (unique) |
+| `ai_messages` | `(user_id, course_id, created_at)` |
+
+## Ràng buộc bổ sung (SQL thô trong migration đầu tiên)
+```sql
+ALTER TABLE exams    ADD CONSTRAINT exams_pass_score_chk CHECK (pass_score BETWEEN 0 AND 10);
+ALTER TABLE exams    ADD CONSTRAINT exams_duration_chk   CHECK (duration_minutes BETWEEN 1 AND 300);
+ALTER TABLE attempts ADD CONSTRAINT attempts_score_chk   CHECK (score BETWEEN 0 AND 10 AND correct_count <= total_questions);
+ALTER TABLE options  ADD CONSTRAINT options_pos_chk      CHECK (position BETWEEN 0 AND 3);
+-- Mỗi câu hỏi có đúng 1 đáp án đúng (đảm bảo bằng chỉ mục unique từng phần):
+CREATE UNIQUE INDEX options_one_correct_per_question ON options (question_id) WHERE is_correct;
+```
+
+## Quy ước
+- Cột `snake_case` (`@map`), bảng số nhiều (`@@map`); thời gian `timestamptz`; `uuid` mặc định `gen_random_uuid()` (Prisma `@default(uuid())`).
+- Xóa cascade chỉ dùng cho quan hệ **sở hữu** (khóa→module→bài…). `answers → questions/options` và `attempts → exams` dùng **Restrict** để không mất lịch sử.
+- Email chuẩn hóa lowercase ở service trước khi ghi/so khớp.
+- Không dùng soft-delete (YAGNI).
+
+## Truy vấn tổng hợp quan trọng
+Xem [[concept-exam-statistics]] (thống kê bài), [[concept-enrollment-progress]] (tiến độ), [[concept-admin-users-dashboard]] (dashboard).
