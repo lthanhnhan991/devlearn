@@ -21,7 +21,7 @@ Quy ước trạng thái: xem [[FILE_MAPPING]]. Tất cả page ở `W:app/admin
 
 | ID | Tính năng (UC) | Màn | File page (UI) | Component chính | Service FE | API | Module BE | Prisma | Phase | Trạng thái |
 |---|---|---|---|---|---|---|---|---|---|---|
-| AD-01 | Đăng nhập quản trị (UC02) | A00 | `W:app/admin/login/page.tsx` | `AdminLoginForm` | `auth.service.ts` | `POST /auth/admin/login` | `A:modules/auth/` | User | P01 | ⬜ TODO |
+| AD-01 | Đăng nhập quản trị (UC02) | A00 | `W:app/admin/login/page.tsx` | `AdminLoginForm` | `auth.service.ts` | `POST /auth/admin/login` | `A:modules/auth/` | User | P01 | ✅ Tested |
 | AD-02 | Dashboard (UC14) | A01 | `…/(panel)/page.tsx` | `StatCard`, `BarChart`, `ActivityTable` | `dashboard.service.ts` | `GET /admin/dashboard` | `A:modules/dashboard/` | Enrollment, Attempt, AiMessage | P09 | ⬜ TODO |
 | AD-03 | Quản lý khóa học (UC08) | A02 | `…/courses/page.tsx` | `CourseTable`, `CourseFormModal`, `ConfirmDialog` | `admin-course.service.ts` | `GET/POST /admin/courses`, `GET/PATCH/DELETE /admin/courses/:id`, `PATCH …/status` | `A:modules/courses/` | Course | P04 | ⬜ TODO |
 | AD-04 | Soạn module & bài học (UC09) | A03 | `…/lessons/page.tsx` | `StructureTree`, `LessonForm`, `ModuleDialog` | `admin-content.service.ts` | `GET …/structure`, module & lesson CRUD, `PUT …/order` | `A:modules/modules/`, `lessons/` | Module, Lesson | P04 | ⬜ TODO |
@@ -32,7 +32,7 @@ Quy ước trạng thái: xem [[FILE_MAPPING]]. Tất cả page ở `W:app/admin
 | AD-09 | Chi tiết bài làm SV (UC12) | A08 | `…/exam-stats/[examId]/students/[studentId]/page.tsx` | `AttemptReview`, `AttemptSelect` | `admin-stats.service.ts` | `GET …/students/:sid/attempts`, `GET …/attempts/:id` | `A:modules/exam-stats/` | Attempt, Answer | P06 | ⬜ TODO |
 | AD-10 | Tài liệu AI (UC11, UC15) | A05 | `…/ai-documents/page.tsx` | `AiDocumentTable`, `FileDropzone`, `CourseSelect` | `admin-ai-docs.service.ts` | `GET/POST /admin/ai-documents`, `POST …/reingest`, `DELETE …` | `A:modules/ai-documents/` | AiDocument | P08 | ⬜ TODO |
 | AD-11 | Người dùng & phân quyền (UC13) | A06 | `…/users/page.tsx` | `UserTable`, `UserFormModal` | `admin-user.service.ts` | `GET/POST /admin/users`, `PATCH /admin/users/:id` | `A:modules/users/` | User | P09 | ⬜ TODO |
-| AD-12 | AdminShell + sidebar + guards | A01–A08 | `…/(panel)/layout.tsx` | `AdminShell`, `AdminSidebar`, `AdminTopbar`, `InfoBanner` | — | `GET /auth/me` | — | — | P01 | ⬜ TODO |
+| AD-12 | AdminShell + sidebar + guards | A01–A08 | `…/(panel)/layout.tsx` | `AdminShell`, `AdminSidebar`, `AdminTopbar`, `InfoBanner` | — | `GET /auth/me` | — | — | P01 | ✅ Tested |
 
 ## Ghi chú
 - Thống kê (AD-08/09) **owner-only** — test 403 bắt buộc ([[adr-013-exam-stats-owner-only]]).

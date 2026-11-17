@@ -16,7 +16,7 @@ updated: 2026-11-15
 | Phase | Nội dung | A UI+Mock | B Review | C Wire | D Backend | E Test | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | P00 | [[plan-phase-00-foundation]] | — | — | — | — | ✅ | làm lại theo ADR-016 |
-| P01 | [[plan-phase-01-auth]] | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | Hoàn thành Giai đoạn A |
+| P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
 | P02 | [[plan-phase-02-course-catalog]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
 | P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -33,6 +33,12 @@ Ký hiệu: ⬜ chưa · 🟡 đang làm · ✅ xong · ⛔ bị chặn (ghi lý
 Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô tả> — <ảnh hưởng> — <đề xuất>`.
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-17 · P01 · Tech Lead — Đóng Phase 01 Auth (test DB thực tế thành công)
+- **Tác vụ**: Đóng toàn bộ Phase 01 (A→B→C→D→E).
+- **Đã làm**: Test thực tế với PostgreSQL: đăng ký, đăng nhập (CLIENT & ADMIN), đăng xuất, GET /auth/me; xác nhận đủ nhánh lỗi INVALID_CREDENTIALS, ACCOUNT_LOCKED, WRONG_PORTAL, EMAIL_TAKEN, STUDENT_CODE_TAKEN; cookie httpOnly devlearn_token đặt/xóa đúng; rate limit hoạt động.
+- **Lệch/Quyết định**: Không.
+- **Tiếp theo**: Phase 02 — Course Catalog (UI + Mock → Wire → Backend).
 
 ### 2026-11-17 · P01 · Giai đoạn A hoàn thành (UI + Mock Auth)
 - **Tác vụ**: Sửa lỗi hiển thị Tailwind CSS, hoàn thiện ClientShell, Navbar, AdminShell, StaffGuard layout cho admin/(panel).

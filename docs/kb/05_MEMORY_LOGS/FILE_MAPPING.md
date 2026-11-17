@@ -34,8 +34,8 @@ Mỗi tính năng `x` có: service `W:services/x.service.ts` + `W:services/http/
 ## CLIENT (sinh viên)
 | ID | Tính năng (UC) | Màn | File page (UI) | Component chính | Service FE | API | Module BE | Prisma | Phase | Trạng thái |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CL-01 | Đăng nhập SV (UC02) | C01 | `W:app/(auth)/login/page.tsx` | `LoginForm`, `AuthSplitLayout` | `auth.service.ts` | `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | `A:modules/auth/` | User | P01 | ⬜ TODO |
-| CL-02 | Đăng ký SV (UC01) | C01 (tab) | `W:app/(auth)/login/page.tsx?tab=register` | `RegisterForm` | `auth.service.ts` | `POST /auth/register` | `A:modules/auth/` | User | P01 | ⬜ TODO |
+| CL-01 | Đăng nhập SV (UC02) | C01 | `W:app/(auth)/login/page.tsx` | `LoginForm`, `AuthSplitLayout` | `auth.service.ts` | `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` | `A:modules/auth/` | User | P01 | ✅ Tested |
+| CL-02 | Đăng ký SV (UC01) | C01 (tab) | `W:app/(auth)/login/page.tsx?tab=register` | `RegisterForm` | `auth.service.ts` | `POST /auth/register` | `A:modules/auth/` | User | P01 | ✅ Tested |
 | CL-03 | Trang chủ (UC03) | C02 | `W:app/(client)/page.tsx` | `Navbar`, `Hero`, `StatStrip`, `TopicTile`, `CourseCard` | `catalog.service.ts` | `GET /public/stats`, `GET /courses?sort=popular` | `A:modules/public/`, `courses/` | Course, Enrollment, User | P02 | ⬜ TODO |
 | CL-04 | Danh mục + lọc/tìm (UC03) | C03 | `W:app/(client)/courses/page.tsx` | `CourseFilterSidebar`, `CourseCard`, `Pagination` | `catalog.service.ts` | `GET /courses` | `A:modules/courses/` | Course | P02 | ⬜ TODO |
 | CL-05 | Chi tiết khóa (UC03) | C04a/b | `W:app/(client)/courses/[courseId]/page.tsx` | `CourseInfoCard`, `EnrollPanel`, `ModuleAccordion`, `Tabs` | `catalog.service.ts` | `GET /courses/:id` | `A:modules/courses/` | Course, Module, Lesson, Exam | P02 | ⬜ TODO |
@@ -54,7 +54,7 @@ Mỗi tính năng `x` có: service `W:services/x.service.ts` + `W:services/http/
 | IN-02 | Kiểu dùng chung (schema, labels, seed-ids, computeScore) + script đồng bộ | `C:*` (`backend/src/types/*` → `frontend/src/types/*`), `sync-types.sh` | P00 | ⬜ TODO |
 | IN-03 | Prisma schema + migration + seed | `backend/prisma/*` | P00 | ⬜ TODO |
 | IN-04 | Design tokens + `ui/` nguyên tử + shells | `W:components/ui`, `tailwind.config.ts` | P00 | ⬜ TODO |
-| IN-05 | `apiClient`, `AuthContext`, guards, services factory | `W:lib/*`, `W:services/index.ts` | P00–P01 | ⬜ TODO |
+| IN-05 | `apiClient`, `AuthContext`, guards, services factory | `W:lib/*`, `W:services/index.ts` | P00–P01 | ✅ Tested |
 | IN-06 | Express skeleton: env, error handler, validate, authenticate | `A:middlewares/*`, `A:config/env.ts` | P00 | ⬜ TODO |
 | IN-07 | RAG service: ingest / query / delete / health | `R:*` | P07 | ⬜ TODO |
 | IN-08 | `rag-client`, callback `/internal`, job quét treo | `A:lib/rag-client.ts`, `A:modules/internal/`, `A:jobs/*` | P08 | ⬜ TODO |

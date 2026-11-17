@@ -21,19 +21,19 @@ updated: 2026-11-15
 - [x] P01-A5 `AuthContext` + `useAuth`; `StudentGuard`, `StaffGuard`, `AdminOnlyGuard`; điều hướng `?next=`
 - [x] P01-A6 Navbar: trạng thái chưa đăng nhập (nút Đăng nhập/Đăng ký) và đã đăng nhập (avatar chữ cái đầu + menu G-15)
 ## B — Review
-- [x] P01-B1 Khớp C01/A00 · [ ] đủ trạng thái lỗi · [ ] G-01, G-15 được duyệt
+- [x] P01-B1 Khớp C01/A00 · [x] đủ trạng thái lỗi · [x] G-01, G-15 được duyệt
 ## C — Wire
-- [ ] P01-C1 `auth.http.ts`; `GET /auth/me` khi khởi động; xử lý `401` toàn cục ([[error-handling-conventions]])
+- [x] P01-C1 `auth.http.ts`; `GET /auth/me` khi khởi động; xử lý `401` toàn cục ([[error-handling-conventions]])
 ## D — Backend
-- [ ] P01-D1 `lib/password.ts` (bcrypt 12), `lib/jwt.ts`; cookie options theo env
-- [ ] P01-D2 `auth.repository/service/controller/routes`: `register`, `login`, `admin/login`, `logout`, `me`
-- [ ] P01-D3 Middleware `authenticate` (cookie → Bearer, tra DB trạng thái), `optionalAuthenticate`, `requireRole`
-- [ ] P01-D4 Rate limit login/register; chuẩn hóa email; unique `studentCode`
+- [x] P01-D1 `lib/password.ts` (bcrypt 12), `lib/jwt.ts`; cookie options theo env
+- [x] P01-D2 `auth.repository/service/controller/routes`: `register`, `login`, `admin/login`, `logout`, `me`
+- [x] P01-D3 Middleware `authenticate` (cookie → Bearer, tra DB trạng thái), `optionalAuthenticate`, `requireRole`
+- [x] P01-D4 Rate limit login/register; chuẩn hóa email; unique `studentCode`
 ## E — Test
-- [ ] P01-E1 API: đăng ký ok/trùng email/trùng MSSV/validate; login ok/sai mật khẩu/`LOCKED`/`WRONG_PORTAL` cả hai cổng
-- [ ] P01-E2 **Khóa tài khoản có hiệu lực ngay** dù token còn hạn
-- [ ] P01-E3 Gỡ `auth` khỏi `NEXT_PUBLIC_MOCK_FEATURES`; e2e: đăng ký → đăng nhập → đăng xuất; GV vào admin, SV bị từ chối
-- [ ] P01-E4 DoD + cập nhật FILE_MAPPING/PROGRESS
+- [x] P01-E1 API: đăng ký ok/trùng email/trùng MSSV/validate; login ok/sai mật khẩu/`LOCKED`/`WRONG_PORTAL` cả hai cổng
+- [x] P01-E2 **Khóa tài khoản có hiệu lực ngay** dù token còn hạn
+- [x] P01-E3 Gỡ `auth` khỏi `NEXT_PUBLIC_MOCK_FEATURES`; e2e: đăng ký → đăng nhập → đăng xuất; GV vào admin, SV bị từ chối
+- [x] P01-E4 DoD + cập nhật FILE_MAPPING/PROGRESS
 
 ## Rủi ro
 Cookie cross-origin (`localhost:3000` ↔ `localhost:4000`): kiểm `SameSite`, `credentials`, CORS origin cụ thể ngay ở P01-C1.
