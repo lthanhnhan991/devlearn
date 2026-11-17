@@ -23,12 +23,16 @@ export function signAuthToken(payload: { sub: string; role: Role }): string {
   return jwt.sign(payload, env.JWT_SECRET, options);
 }
 
+export const signToken = signAuthToken;
+
 /**
  * Xác thực token JWT, ném lỗi nếu không hợp lệ hoặc hết hạn.
  */
 export function verifyAuthToken(token: string): AuthJwtPayload {
   return jwt.verify(token, env.JWT_SECRET, { algorithms: ['HS256'] }) as AuthJwtPayload;
 }
+
+export const verifyToken = verifyAuthToken;
 
 /**
  * Cấu hình cookie httpOnly cho devlearn_token (adr-008, concept-auth).
