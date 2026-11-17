@@ -16,7 +16,7 @@ updated: 2026-11-15
 | Phase | Nội dung | A UI+Mock | B Review | C Wire | D Backend | E Test | Ghi chú |
 |---|---|---|---|---|---|---|---|
 | P00 | [[plan-phase-00-foundation]] | — | — | — | — | ✅ | làm lại theo ADR-016 |
-| P01 | [[plan-phase-01-auth]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
+| P01 | [[plan-phase-01-auth]] | ✅ | ⬜ | ⬜ | ⬜ | ⬜ | Hoàn thành Giai đoạn A |
 | P02 | [[plan-phase-02-course-catalog]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
 | P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
@@ -33,6 +33,16 @@ Ký hiệu: ⬜ chưa · 🟡 đang làm · ✅ xong · ⛔ bị chặn (ghi lý
 Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô tả> — <ảnh hưởng> — <đề xuất>`.
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-17 · P01 · Giai đoạn A hoàn thành (UI + Mock Auth)
+- **Tác vụ**: Sửa lỗi hiển thị Tailwind CSS, hoàn thiện ClientShell, Navbar, AdminShell, StaffGuard layout cho admin/(panel).
+- **Đã làm**:
+  - Khắc phục `@theme` Tailwind CSS v4 trong `globals.css`: bổ sung tokens và utility fallbacks cho các màu `client-primary`, `admin-navy`, `admin-primary`, v.v. Khớp 100% thiết kế giao diện (chia đôi màn hình client `/login`, full navy cho admin `/admin/login`).
+  - Tạo `Navbar` và `ClientShell` (`(client)/layout.tsx`) tích hợp `UserMenu`, tìm kiếm, trạng thái phiên đăng nhập.
+  - Tạo `AdminShell` (Sidebar navy + Topbar) và layout `app/admin/(panel)/layout.tsx` bảo vệ bởi `StaffGuard`.
+  - Hoàn thành đầy đủ các task P01-A1 đến P01-A6 trong `plan-phase-01-auth.md`.
+- **Lệch/Quyết định**: Không
+- **Tiếp theo**: Giai đoạn B (Review gate C01, A00) & Giai đoạn C (Wire).
 
 ### 2026-11-16 · P00 · Agent: Kilo — Design tokens + spikes
 - **Tác vụ**: P00-FE9..FE14 design tokens & _design; spikes P00-BE20/BE21
