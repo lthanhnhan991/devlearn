@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
+import { authRouter } from './modules/auth/auth.routes';
 
 export function createApp() {
   const app = express();
@@ -15,6 +16,9 @@ export function createApp() {
   app.get('/api/v1/health', (_req, res) => {
     res.json({ data: { status: 'ok' } });
   });
+
+  // Modules
+  app.use('/api/v1/auth', authRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
