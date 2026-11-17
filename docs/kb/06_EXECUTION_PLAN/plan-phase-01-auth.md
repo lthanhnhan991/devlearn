@@ -21,7 +21,7 @@ updated: 2026-11-15
 - [x] P01-A5 `AuthContext` + `useAuth`; `StudentGuard`, `StaffGuard`, `AdminOnlyGuard`; điều hướng `?next=`
 - [x] P01-A6 Navbar: trạng thái chưa đăng nhập (nút Đăng nhập/Đăng ký) và đã đăng nhập (avatar chữ cái đầu + menu G-15)
 ## B — Review
-- [ ] P01-B1 Khớp C01/A00 · [ ] đủ trạng thái lỗi · [ ] G-01, G-15 được duyệt
+- [x] P01-B1 Khớp C01/A00 · [ ] đủ trạng thái lỗi · [ ] G-01, G-15 được duyệt
 ## C — Wire
 - [ ] P01-C1 `auth.http.ts`; `GET /auth/me` khi khởi động; xử lý `401` toàn cục ([[error-handling-conventions]])
 ## D — Backend
