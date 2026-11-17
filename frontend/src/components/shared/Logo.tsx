@@ -13,20 +13,20 @@ export interface LogoProps {
 export function Logo({ tone = 'client' }: LogoProps) {
   const isAdmin = tone === 'admin' || tone === 'adminOnDark';
   return (
-    <span className="inline-flex items-center gap-3">
+    <span className="inline-flex items-center gap-2.5">
       <span
         className={cn(
           'font-bold tracking-tight',
           tone === 'client' && 'text-xl text-client-primary',
-          tone === 'onDark' && 'text-lg font-semibold text-white',
-          tone === 'admin' && 'text-lg text-admin-navy',
-          tone === 'adminOnDark' && 'text-lg text-white',
+          tone === 'onDark' && 'text-2xl font-bold text-white',
+          tone === 'admin' && 'text-2xl font-bold text-admin-navy',
+          tone === 'adminOnDark' && 'text-xl font-bold text-white',
         )}
       >
         DevLearn
       </span>
       {isAdmin ? (
-        <span className="rounded-md bg-admin-primary px-2 py-1 text-xs font-bold text-white">
+        <span className="rounded bg-admin-primary px-2 py-0.5 text-xs font-bold text-white">
           ADMIN
         </span>
       ) : null}

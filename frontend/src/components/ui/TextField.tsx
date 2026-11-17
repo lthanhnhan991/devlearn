@@ -42,9 +42,9 @@ export function TextField({ label, error, hint, tone = 'client', id, ...rest }: 
         aria-invalid={hasError || undefined}
         aria-describedby={hasMessage ? messageId : undefined}
         className={cn(
-          'h-12 w-full rounded-lg border bg-white px-4 text-base placeholder:text-slate-500',
+          'h-12 w-full rounded-lg border bg-white px-4 text-base placeholder:text-slate-400',
           'focus-visible:outline-2 focus-visible:-outline-offset-1 disabled:bg-slate-100',
-          hasError ? 'border-status-danger-fg' : 'border-slate-500',
+          hasError ? 'border-status-danger-fg' : 'border-slate-300',
           INPUT_TONE_CLASSES[tone],
         )}
       />

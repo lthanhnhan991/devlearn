@@ -47,7 +47,7 @@ export function LoginView() {
   if (status === 'authenticated') return <AuthCardSkeleton />;
 
   return (
-    <div className="w-full max-w-md rounded-lg border border-client-border bg-white p-8">
+    <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
       <Tabs
         tabs={TABS}
         value={activeTab}

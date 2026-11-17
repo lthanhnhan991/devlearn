@@ -28,8 +28,10 @@ export function AdminLoginView() {
   if (isStaff) return <AuthCardSkeleton tone="admin" />;
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-4 rounded-lg bg-white p-8">
-      <Logo tone="admin" />
+    <div className="flex w-full max-w-md flex-col gap-6 rounded-lg bg-white p-8 shadow-2xl">
+      <div className="flex items-center">
+        <Logo tone="admin" />
+      </div>
       <h1 className="text-2xl font-bold text-admin-navy">Đăng nhập quản trị</h1>
       <AdminLoginForm />
     </div>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AdminLoginPage() {
   return (
-    <main className="flex flex-1 items-center justify-center bg-admin-navy px-6 py-10">
+    <main className="flex min-h-screen w-full flex-1 items-center justify-center bg-admin-navy px-6 py-12">
       <Suspense fallback={<AuthCardSkeleton tone="admin" />}>
         <AdminLoginView />
       </Suspense>

@@ -13,10 +13,10 @@ export const metadata: Metadata = {
   description: "Học phát triển phần mềm cùng trợ lý AI.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">
+      <body className="min-h-screen flex flex-col font-sans antialiased">
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
