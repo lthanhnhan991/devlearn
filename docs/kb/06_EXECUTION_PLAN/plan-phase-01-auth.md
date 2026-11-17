@@ -14,10 +14,10 @@ updated: 2026-11-15
 **Phụ thuộc**: P00. **FILE_MAPPING**: CL-01, CL-02, AD-01, AD-12, IN-05. **Cỡ**: S.
 
 ## A — UI + Mock
-- [ ] P01-A1 Types (`backend/src/types/dto/…` rồi `./sync-types.sh`): `UserDto`, request/response register/login ([[api-auth]])
-- [ ] P01-A2 Fixtures: tài khoản seed; `auth.mock.ts` (đúng `WRONG_PORTAL`, `ACCOUNT_LOCKED`, `INVALID_CREDENTIALS`, `EMAIL_TAKEN`)
-- [ ] P01-A3 C01: layout chia đôi, tab Đăng nhập/Đăng ký (G-01 form đăng ký), validate zod, hiển thị lỗi theo mã
-- [ ] P01-A4 A00: trang đăng nhập quản trị (navy, badge ADMIN, link về trang người học)
+- [x] P01-A1 Types (`backend/src/types/dto/…` rồi `./sync-types.sh`): `UserDto`, request/response register/login ([[api-auth]])
+- [x] P01-A2 Fixtures: tài khoản seed; `auth.mock.ts` (đúng `WRONG_PORTAL`, `ACCOUNT_LOCKED`, `INVALID_CREDENTIALS`, `EMAIL_TAKEN`)
+- [x] P01-A3 C01: layout chia đôi, tab Đăng nhập/Đăng ký (G-01 form đăng ký), validate zod, hiển thị lỗi theo mã
+- [x] P01-A4 A00: trang đăng nhập quản trị (navy, badge ADMIN, link về trang người học)
 - [ ] P01-A5 `AuthContext` + `useAuth`; `StudentGuard`, `StaffGuard`, `AdminOnlyGuard`; điều hướng `?next=`
 - [ ] P01-A6 Navbar: trạng thái chưa đăng nhập (nút Đăng nhập/Đăng ký) và đã đăng nhập (avatar chữ cái đầu + menu G-15)
 ## B — Review
