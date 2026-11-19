@@ -5,3 +5,4 @@ export * from './scoring';
 export * from './seed-ids';
 export * from './dto/common';
 export * from './dto/auth';
+export * from './dto/catalog';

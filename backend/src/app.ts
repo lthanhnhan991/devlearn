@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import { errorHandler, notFoundHandler } from './middlewares/error-handler';
 import { authRouter } from './modules/auth/auth.routes';
+import { publicRouter } from './modules/public/public.routes';
+import { coursesRouter } from './modules/courses/courses.routes';
 
 export function createApp() {
   const app = express();
@@ -19,6 +21,8 @@ export function createApp() {
 
   // Modules
   app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/public', publicRouter);
+  app.use('/api/v1/courses', coursesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

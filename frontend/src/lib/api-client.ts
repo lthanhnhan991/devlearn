@@ -11,9 +11,9 @@ function getBaseUrl(): string {
   return DEFAULT_BASE_URL;
 }
 
-export interface ApiEnvelope<T> {
+export interface ApiEnvelope<T, M = Record<string, unknown>> {
   data: T;
-  meta?: Record<string, unknown>;
+  meta?: M;
 }
 
 export interface ApiErrorEnvelope {
@@ -28,14 +28,7 @@ export interface RequestOptions extends Omit<RequestInit, 'body'> {
   body?: unknown;
 }
 
-/**
- * apiClient tuân thủ architecture-frontend:
- * - base NEXT_PUBLIC_API_BASE_URL
- * - credentials: 'include' (cookie httpOnly)
- * - parse envelope { data, error }
- * - ném ApiError khi HTTP >= 400 hoặc cấu trúc lỗi
- */
-async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+async function executeFetch(path: string, options: RequestOptions = {}): Promise<Response> {
   const baseUrl = getBaseUrl();
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   const url = `${baseUrl}${cleanPath}`;
@@ -65,9 +58,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     fetchInit.body = body;
   }
 
-  let res: Response;
   try {
-    res = await fetch(url, fetchInit);
+    return await fetch(url, fetchInit);
   } catch (cause) {
     throw new ApiError(
       0,
@@ -75,39 +67,47 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
       'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.',
     );
   }
+}
 
-  // 204 No Content (ví dụ logout)
+async function handleResponseError(res: Response): Promise<never> {
+  const contentType = res.headers.get('content-type') ?? '';
+  const isJson = contentType.includes('application/json');
+
+  if (isJson) {
+    try {
+      const errorJson = (await res.json()) as ApiErrorEnvelope;
+      if (errorJson.error) {
+        throw new ApiError(
+          res.status,
+          errorJson.error.code || ERROR_CODES.INTERNAL_ERROR,
+          errorJson.error.message || 'Yêu cầu không hợp lệ.',
+          errorJson.error.details ?? [],
+        );
+      }
+    } catch (e) {
+      if (e instanceof ApiError) throw e;
+    }
+  }
+  throw new ApiError(
+    res.status,
+    ERROR_CODES.INTERNAL_ERROR,
+    `Yêu cầu thất bại với mã trạng thái ${res.status}.`,
+  );
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const res = await executeFetch(path, options);
+
   if (res.status === 204) {
     return undefined as unknown as T;
   }
 
-  const contentType = res.headers.get('content-type') ?? '';
-  const isJson = contentType.includes('application/json');
-
   if (!res.ok) {
-    if (isJson) {
-      try {
-        const errorJson = (await res.json()) as ApiErrorEnvelope;
-        if (errorJson.error) {
-          throw new ApiError(
-            res.status,
-            errorJson.error.code || ERROR_CODES.INTERNAL_ERROR,
-            errorJson.error.message || 'Yêu cầu không hợp lệ.',
-            errorJson.error.details ?? [],
-          );
-        }
-      } catch (e) {
-        if (e instanceof ApiError) throw e;
-      }
-    }
-    throw new ApiError(
-      res.status,
-      ERROR_CODES.INTERNAL_ERROR,
-      `Yêu cầu thất bại với mã trạng thái ${res.status}.`,
-    );
+    await handleResponseError(res);
   }
 
-  if (!isJson) {
+  const contentType = res.headers.get('content-type') ?? '';
+  if (!contentType.includes('application/json')) {
     return undefined as unknown as T;
   }
 
@@ -115,9 +115,25 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   return envelope.data;
 }
 
+async function requestWithMeta<T, M>(path: string, options: RequestOptions = {}): Promise<{ data: T; meta: M }> {
+  const res = await executeFetch(path, options);
+
+  if (!res.ok) {
+    await handleResponseError(res);
+  }
+
+  const envelope = (await res.json()) as ApiEnvelope<T, M>;
+  return {
+    data: envelope.data,
+    meta: envelope.meta as M,
+  };
+}
+
 export const apiClient = {
   get: <T>(path: string, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'GET' }),
+  getWithMeta: <T, M>(path: string, options?: RequestOptions) =>
+    requestWithMeta<T, M>(path, { ...options, method: 'GET' }),
   post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
     request<T>(path, { ...options, method: 'POST', body }),
   put: <T>(path: string, body?: unknown, options?: RequestOptions) =>

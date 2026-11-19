@@ -18,7 +18,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 |---|---|---|---|---|---|
 | P00 | [[plan-phase-00-foundation]] | — | — | ✅ | Hoàn thành thực tế; spike Cloudinary/Gemini hoãn (Q-09/Q-10) |
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
-| P02 | [[plan-phase-02-course-catalog]] | ⬜ | ⬜ | ⬜ | |
+| P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | 🟡 | Chờ Tech Lead migrate, seed & test |
 | P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
@@ -36,6 +36,16 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-19 · Phase 02 · Agent — Danh mục khóa học & Ghi danh (UC03, UC04)
+- **Tác vụ**: Hoàn thành Bước 1 (DTO + UI + Wire) và Bước 2 (Backend + DB) theo quy trình Solo Dev (`workflow-solo-dev.md`).
+- **Đã làm**:
+  - **DTO & Types**: Tạo `types/dto/catalog.ts` (`CourseCardDto`, `CourseDetailDto`, `PublicStatsDto`, `EnrollResultDto`, `ListCoursesQuery`), cập nhật `labels.ts`, `errors.ts`, `seed-ids.ts`.
+  - **FE — Components & Pages**: Tạo `CourseCard`, `TopicTile`, `StatStrip`, `Pagination`, `CourseFilterSidebar`, `CourseInfoCard`, `ModuleAccordion`, `EnrollPanel`, `CourseDetailTabs`. Xây dựng C02 Trang chủ (`/`), C03 Danh mục khóa học (`/courses`), C04 Chi tiết khóa học (`/courses/[courseId]`).
+  - **FE — Wire API**: Tạo `services/http/catalog.http.ts` (`getPublicStats`, `listCourses`, `getCourseDetail`, `enrollCourse`), re-export qua `services/index.ts`. Hỗ trợ envelope `{ data, meta }` trong `api-client.ts`.
+  - **BE — Modules**: Xây dựng `modules/public` (`GET /public/stats` kèm cache 60s), `modules/courses` (`GET /courses`, `GET /courses/:id` bảo mật `fileUrl` và `optionalAuthenticate`), `modules/enrollments` (`POST /courses/:courseId/enroll`).
+  - **BE — Database & Seed**: Cập nhật `prisma/seed.ts` với 6 khóa học `PUBLISHED` + 1 `DRAFT`, đầy đủ module, bài học, bài kiểm tra và dữ liệu ghi danh mẫu.
+- **Tiếp theo**: Bàn giao Tech Lead chạy migrate, seed và kiểm thử Bước 3.
 
 ### 2026-11-19 · Cleanup · Agent — Dọn dẹp codebase chuyển sang quy trình Solo Dev
 - **Tác vụ**: Xoá toàn bộ hạ tầng Mock, gộp thư mục middleware, dọn test sample, sửa typecheck errors.
