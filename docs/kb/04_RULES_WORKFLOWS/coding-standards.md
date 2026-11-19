@@ -26,7 +26,7 @@ updated: 2026-11-15
 | T9 | Chỉ dùng **`npm`** (commit `package-lock.json`); không `pnpm`/`yarn`; `backend/src/types/` chỉ import `zod` và chính nó |
 
 ## Định dạng & chất lượng
-- Prettier + ESLint (`--max-warnings 0`). Chưa dùng commit hook (husky/lint-staged); **tự chạy** bộ lệnh ở [[definition-of-done]] trước khi commit.
+- Prettier + ESLint (`--max-warnings 0`). Không dùng commit hook. **Tech Lead tự chạy** lint/typecheck; **Agent không chạy** ([[agent-rules]]).
 - File ≤ **300 dòng** code (tách module/hook/component khi vượt). Hàm ≤ ~40 dòng; một trách nhiệm.
 - Tên: xem [[architecture-repo-structure]]. Comment giải thích **vì sao**, không lặp lại **cái gì**.
 - Không `console.log` (dùng logger ở BE; xóa ở FE). Không code chết/comment-out.
@@ -46,5 +46,5 @@ Chỉ Tailwind + token ở `tailwind.config.ts`; không inline `style`, không h
 ## Phụ thuộc
 Thêm thư viện mới cần: (1) lý do trong PR, (2) kiểm giấy phép + bảo trì, (3) nếu thay đổi kiến trúc ⇒ ADR mới ở `03_DECISIONS`. Ghim phiên bản: `package-lock.json` (commit) cho Node; `requirements.txt` ghim phiên bản cho Python. Prisma ghim `@6` (xem [[database-prisma-schema]]).
 
-## Kiểm tra bắt buộc trước khi "xong"
-`cd backend && npm run lint && npm run typecheck && npm run test`; `cd frontend && npm run lint && npm run typecheck && npm run test`; `./sync-types.sh --check`; (RAG) `cd rag-service && ruff check . && mypy . && pytest` — xem [[definition-of-done]].
+## Kiểm tra
+**Tech Lead (User) tự chạy** `cd backend && npm run lint && npm run typecheck`, `cd frontend && npm run lint && npm run typecheck`, `./sync-types.sh --check`. **Agent không chạy và không cần quan tâm** — xem [[agent-rules]], [[definition-of-done]], [[testing-strategy]].

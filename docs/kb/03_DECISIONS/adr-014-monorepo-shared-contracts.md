@@ -17,10 +17,10 @@ superseded_by: adr-016-manual-type-sync
 
 
 ## Quyết định
-pnpm workspaces: `apps/web`, `apps/api`, `packages/contracts`, (RAG Python tách riêng, giao tiếp qua HTTP). `contracts` chứa **zod schema + kiểu suy ra + labels + hằng số + `computeScore/isPassed` + seed-ids**. FE (mock lẫn http) và BE cùng import.
+pnpm workspaces: `apps/web`, `apps/api`, `packages/contracts`, (RAG Python tách riêng, giao tiếp qua HTTP). `contracts` chứa **zod schema + kiểu suy ra + labels + hằng số + `computeScore/isPassed` + seed-ids**. FE và BE cùng import.
 
 ## Lý do
-Đồ án nêu "kiểm tra kiểu dữ liệu giúp giảm lỗi khi trao đổi qua REST". Một schema ⇒ mock không thể lệch hợp đồng thật; Agent không phải đoán JSON.
+Đồ án nêu "kiểm tra kiểu dữ liệu giúp giảm lỗi khi trao đổi qua REST". Một schema ⇒ FE không thể lệch hợp đồng thật; Agent không phải đoán JSON.
 
 ## Hệ quả
 - (+) Bắt lỗi lệch hợp đồng ở compile time; tái dùng validate ở FE.

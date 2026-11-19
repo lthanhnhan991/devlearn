@@ -4,7 +4,7 @@ title: FILE_MAPPING — Tính năng → UI → API → Backend (CLIENT + hạ t�
 type: log
 status: living
 tags: [mapping, traceability, client]
-related: [FILE_MAPPING_ADMIN, PROGRESS, agent-rules, ui-screens-client, api-contracts, plan-00-overview, adr-016-manual-type-sync]
+related: [workflow-solo-dev, FILE_MAPPING_ADMIN, PROGRESS, agent-rules, ui-screens-client, api-contracts, plan-00-overview, adr-016-manual-type-sync]
 source: "Tổng hợp từ ui-screens-client + api-*"
 updated: 2026-11-15
 ---
@@ -12,7 +12,7 @@ updated: 2026-11-15
 
 Phần ADMIN: [[FILE_MAPPING_ADMIN]]. **Agent cập nhật cột Trạng thái khi xong từng giai đoạn** ([[agent-rules]]).
 
-**Trạng thái**: `⬜ TODO` → `🎨 UI+Mock` → `👀 Reviewed` → `🔌 Wired` → `🛠 BE done` → `✅ Tested` ([[workflow-ui-mock-wire-backend]]).
+**Trạng thái** ([[workflow-solo-dev]]): `⬜ TODO` → `🎨 UI+Wire` → `🛠 BE done` → `✅ Đã test`. (`🚧` = làm dở)
 
 ## Quy ước đường dẫn (cấu trúc 3 dự án — [[architecture-repo-structure]])
 | Tiền tố | Nghĩa | Đường dẫn thật |
@@ -24,12 +24,12 @@ Phần ADMIN: [[FILE_MAPPING_ADMIN]]. **Agent cập nhật cột Trạng thái k
 
 **Luật `C:`** ([[adr-016-manual-type-sync]]): chỉ sửa ở `backend/src/types/`, rồi `./sync-types.sh`, commit cả hai thư mục cùng lúc. Không sửa `frontend/src/types/`.
 
-Mỗi tính năng `x` có: service `W:services/x.service.ts` + `W:services/http/x.http.ts` + `W:services/mock/x.mock.ts`; fixtures `W:mocks/fixtures/x.ts`; hook `W:features/x/`; DTO nguồn `backend/src/types/dto/x.ts` (+ bản copy `frontend/src/types/dto/x.ts`).
+Mỗi tính năng `x` có: gọi API ở `W:services/http/x.http.ts` (`W:services/index.ts` chỉ re-export từ `http/`); hook `W:features/x/`; DTO nguồn `backend/src/types/dto/x.ts` (+ bản copy `frontend/src/types/dto/x.ts`). **Không có mock, không fixtures.**
 
 ## Mẫu hàng (sao chép khi thêm tính năng)
 | ID | Tính năng (UC) | Màn | File page (UI) | Component chính | Service FE | API | Module BE | Prisma | Phase | Trạng thái |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CL-00 | *tên tính năng (UCxx)* | *Cxx* | `W:app/…/page.tsx` | `…` | `W:services/x.service.ts` | `METHOD /path` | `A:modules/x/` | `Model` | Pxx | ⬜ TODO |
+| CL-00 | *tên tính năng (UCxx)* | *Cxx* | `W:app/…/page.tsx` | `…` | `W:services/http/x.http.ts` | `METHOD /path` | `A:modules/x/` | `Model` | Pxx | ⬜ TODO |
 
 ## CLIENT (sinh viên)
 | ID | Tính năng (UC) | Màn | File page (UI) | Component chính | Service FE | API | Module BE | Prisma | Phase | Trạng thái |
@@ -54,9 +54,8 @@ Mỗi tính năng `x` có: service `W:services/x.service.ts` + `W:services/http/
 | IN-02 | Kiểu dùng chung (schema, labels, seed-ids, computeScore) + script đồng bộ | `C:*` (`backend/src/types/*` → `frontend/src/types/*`), `sync-types.sh` | P00 | ⬜ TODO |
 | IN-03 | Prisma schema + migration + seed | `backend/prisma/*` | P00 | ⬜ TODO |
 | IN-04 | Design tokens + `ui/` nguyên tử + shells | `W:components/ui`, `tailwind.config.ts` | P00 | ⬜ TODO |
-| IN-05 | `apiClient`, `AuthContext`, guards, services factory | `W:lib/*`, `W:services/index.ts` | P00–P01 | ✅ Tested |
+| IN-05 | `apiClient`, `AuthContext`, guards; `services/index.ts` (barrel, **chỉ trỏ vào `http/`**) | `W:lib/*`, `W:services/index.ts` | P00–P01 | ✅ Đã test |
 | IN-06 | Express skeleton: env, error handler, validate, authenticate | `A:middlewares/*`, `A:config/env.ts` | P00 | ⬜ TODO |
 | IN-07 | RAG service: ingest / query / delete / health | `R:*` | P07 | ⬜ TODO |
 | IN-08 | `rag-client`, callback `/internal`, job quét treo | `A:lib/rag-client.ts`, `A:modules/internal/`, `A:jobs/*` | P08 | ⬜ TODO |
 | IN-09 | Cloudinary upload/destroy + multer | `A:lib/cloudinary.ts`, `A:middlewares/upload.ts` | P04 | ⬜ TODO |
-| IN-10 | E2E Playwright (CI là tùy chọn) | `frontend/e2e/*` | P10 | ⬜ TODO |

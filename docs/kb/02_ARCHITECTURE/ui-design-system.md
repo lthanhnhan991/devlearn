@@ -28,7 +28,7 @@ Hai "giao diện" khác nhau nhưng dùng chung kiểu chữ: **CLIENT** (xanh l
 | `status.warning` | nền vàng nhạt / chữ nâu | Bản nháp, Chưa đạt, Đang xử lý, Khóa, Chưa trả lời |
 | `status.danger` | nền `#FEE2E2` / chữ đỏ | Sai, nút Xóa (viền đỏ) |
 
-> Màu trạng thái vàng/ xanh nhạt phía CLIENT là xấp xỉ theo ảnh; chốt giá trị cuối ở Review gate Phase 00.
+> Màu trạng thái vàng/ xanh nhạt phía CLIENT là xấp xỉ theo ảnh; Tech Lead chốt giá trị cuối khi dùng thử.
 
 ## Chữ & hình khối
 - Font: **Inter** (`next/font/google`). Tiêu đề lớn dùng `font-light`; nhãn/nút `font-semibold`.

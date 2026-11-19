@@ -4,7 +4,7 @@ title: ADR-016 — Đơn giản hóa: npm + 3 thư mục độc lập + đồng 
 type: decision
 status: accepted
 tags: [adr, simplification, npm, types, sync]
-related: [adr-014-monorepo-shared-contracts, architecture-repo-structure, architecture-deployment-env, agent-rules, plan-phase-00-foundation, workflow-ui-mock-wire-backend]
+related: [adr-014-monorepo-shared-contracts, architecture-repo-structure, architecture-deployment-env, agent-rules, plan-phase-00-foundation, workflow-solo-dev]
 source: "Quyết định của chủ dự án sau khi thử Phase 00"
 updated: 2026-11-15
 supersedes: adr-014-monorepo-shared-contracts
@@ -51,4 +51,4 @@ Chủ dự án là sinh viên, đã thử dựng Phase 00 theo [[adr-014-monorep
 Nếu trong một phase mà lệch types gây lỗi ≥ 3 lần, hoặc có thêm người cùng làm ⇒ cân nhắc npm workspaces hoặc codegen từ OpenAPI và viết ADR mới thay thế ADR này.
 
 ## Ảnh hưởng tới tài liệu
-Cấu trúc repo ([[architecture-repo-structure]]), môi trường ([[architecture-deployment-env]]), luật Agent ([[agent-rules]]), quy trình ([[workflow-ui-mock-wire-backend]]), kiểm thử ([[testing-strategy]]), Git ([[git-workflow]]), Phase 00 ([[plan-phase-00-foundation]]), ánh xạ file ([[FILE_MAPPING]]).
+Cấu trúc repo ([[architecture-repo-structure]]), môi trường ([[architecture-deployment-env]]), luật Agent ([[agent-rules]]), quy trình ([[workflow-solo-dev]]), kiểm thử ([[testing-strategy]]), Git ([[git-workflow]]), Phase 00 ([[plan-phase-00-foundation]]), ánh xạ file ([[FILE_MAPPING]]).

@@ -51,4 +51,4 @@ export const computeScore = (correct: number, total: number): number =>
   total === 0 ? 0 : Math.round((correct / total) * 1000) / 100;
 export const isPassed = (score: number, passScore: number): boolean => score >= passScore;
 ```
-Cả FE (mock, qua bản copy `frontend/src/types/scoring.ts`) và BE (thật) **phải dùng cùng hàm này** để mock và thật không lệch.
+Backend là nơi **tính điểm thật**; hàm `computeScore/isPassed` nằm ở `backend/src/types/scoring.ts` (frontend có bản copy nếu cần hiển thị) — chỉ có **một** công thức.

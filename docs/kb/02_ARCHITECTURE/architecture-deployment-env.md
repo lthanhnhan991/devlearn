@@ -28,7 +28,15 @@ updated: 2026-11-15
 | rag-service | `http://127.0.0.1:8000` | `cd rag-service && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000` |
 | PostgreSQL | `localhost:5432` | dịch vụ nền của máy |
 
-ChromaDB **nhúng** trong rag-service, dữ liệu ở `rag-service/data/chroma/` (không commit). Phase đầu có thể **chưa bật rag-service** (frontend dùng mock).
+ChromaDB **nhúng** trong rag-service, dữ liệu ở `rag-service/data/chroma/` (không commit). Chưa cần bật rag-service cho tới Phase 07–08.
+
+## ⚠️ Khi cần test: bật đủ 2 terminal (BE + FE) + PostgreSQL
+Không còn mock, frontend **luôn gọi API thật** nên Tech Lead phải bật:
+1. **PostgreSQL** đang chạy.
+2. **Terminal 1 — Backend**: `cd backend && npm run dev` (cổng 4000).
+3. **Terminal 2 — Frontend**: `cd frontend && npm run dev` (cổng 3000).
+4. *(Từ Phase 07–08)* **Terminal 3 — RAG**: `cd rag-service && uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`.
+Tắt backend ⇒ trang hiện trạng thái lỗi (bình thường). Sau khi Agent sửa `schema.prisma`: chạy lệnh `▶️` Agent nhắc (`npm run prisma:migrate …`, `npm run db:seed`) rồi **khởi động lại** Terminal 1.
 
 ## Cách có PostgreSQL (chọn 1)
 1. **Cài trên máy** (trình cài đặt chính thức): nhớ mật khẩu user `postgres`. Tạo 2 database `devlearn` và `devlearn_test` (pgAdmin hoặc `psql -U postgres -c "CREATE DATABASE devlearn;"`).
@@ -39,7 +47,7 @@ Prisma chỉ cần `DATABASE_URL`, hai cách dùng như nhau. Ghi lựa chọn v
 Chép `.env.example` thành file thật; **không commit** file thật (`.gitignore` đã chặn).
 | Dự án | File thật | Mẫu (commit) |
 |---|---|---|
-| backend | `backend/.env` (+ `backend/.env.test` cho test) | `backend/.env.example` |
+| backend | `backend/.env` (+ `backend/.env.test` — tùy chọn, chỉ khi chạy test API tự động) | `backend/.env.example` |
 | frontend | `frontend/.env.local` (cách Next.js đọc biến cục bộ) | `frontend/.env.example` |
 | rag-service | `rag-service/.env` | `rag-service/.env.example` |
 
@@ -65,7 +73,6 @@ Chép `.env.example` thành file thật; **không commit** file thật (`.gitign
 | Biến | Ví dụ | Mô tả |
 |---|---|---|
 | `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:4000/api/v1` | dùng cả ở trình duyệt lẫn Server Components |
-| `NEXT_PUBLIC_MOCK_FEATURES` | `auth,catalog,learning,exam` | tính năng còn dùng mock; rỗng = tất cả thật |
 
 ### `rag-service/.env`
 | Biến | Mặc định |

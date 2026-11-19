@@ -4,36 +4,40 @@ title: Phase 02 — Danh mục khóa học & ghi danh (UC03)
 type: plan
 status: living
 tags: [plan, catalog, enroll, f2]
-related: [plan-00-overview, concept-course-structure, concept-enrollment-progress, api-catalog, ui-screens-client]
+related: [plan-00-overview, workflow-solo-dev, concept-course-structure, concept-enrollment-progress, api-catalog, ui-screens-client, database-erd, database-seed-data]
 source: "UC03; UI C02, C03, C04"
 updated: 2026-11-15
 ---
 # Phase 02 — Catalog & Enroll
 
 **Phạm vi**: C02 trang chủ, C03 danh mục + lọc, C04 chi tiết (2 trạng thái), đăng ký học. **Phụ thuộc**: P01. **FILE_MAPPING**: CL-03…CL-06. **Cỡ**: M.
+Quy trình: [[workflow-solo-dev]] — làm trọn một lượt, không mock.
 
-## A — UI + Mock
-- [ ] P02-A1 Types (`backend/src/types/dto/…` rồi `./sync-types.sh`): `CourseCardDto`, `CourseDetailDto`, `PublicStatsDto`, query schema list
-- [ ] P02-A2 Fixtures 6 khóa + modules/bài/bài kiểm tra; `catalog.mock.ts` (lọc `topic/level/q`, phân trang, `sort=popular`, nhánh empty/error, ghi danh giả)
-- [ ] P02-A3 Components: `CourseCard` (màu theo chủ đề, badge cấp độ), `TopicTile`, `StatStrip`, `CourseFilterSidebar`, `Pagination`
-- [ ] P02-A4 C02 (Server Component): hero, StatStrip, Chủ đề, Khóa học phổ biến, footer
-- [ ] P02-A5 C03: lọc đồng bộ URL, đổi lọc ⇒ `page=1`, empty state, skeleton
-- [ ] P02-A6 C04: `CourseInfoCard`, `ModuleAccordion` (+ hàng bài kiểm tra G-08), `EnrollPanel` 2 trạng thái, tab Tổng quan (G-09)
-- [ ] P02-A7 Khách bấm Đăng ký học ⇒ `/login?next=`
-## B — Review
-- [ ] P02-B1 Khớp C02/C03/C04a/C04b · [ ] lọc/URL đúng · [ ] G-08, G-09 duyệt
-## C — Wire
-- [ ] P02-C1 `catalog.http.ts`; Server Components dùng `NEXT_PUBLIC_API_BASE_URL`; trang chi tiết lấy `enrollment` ở client khi có phiên
-## D — Backend
-- [ ] P02-D1 `public`: `GET /public/stats` (cache 60 s)
-- [ ] P02-D2 `courses`: `GET /courses` (lọc nhiều giá trị, `q`, sort, count dẫn xuất qua `groupBy`/`_count`, phân trang)
-- [ ] P02-D3 `GET /courses/:id` (chỉ `PUBLISHED`, bài đã xuất bản, `enrollment` khi SV, ẩn `fileUrl`, bài kiểm tra `OPEN|CLOSED`)
-- [ ] P02-D4 `enrollments`: `POST /courses/:id/enroll` (`ALREADY_ENROLLED`)
-- [ ] P02-D5 Chỉ mục: `courses(status)`, `enrollments(course_id)` đã có ở migration — kiểm `EXPLAIN` danh sách
-## E — Test
-- [ ] P02-E1 API: chỉ khóa PUBLISHED; lọc kết hợp; popular đúng thứ tự; detail ẩn bài chưa xuất bản; enroll 201/409/401/403
-- [ ] P02-E2 Gỡ `catalog` khỏi mock; e2e: duyệt → lọc → xem chi tiết → đăng ký → trạng thái "Đã đăng ký"
-- [ ] P02-E3 DoD + log
+## Việc cần làm
+### DTO
+- [ ] P02-1 `backend/src/types/dto/catalog.ts`: `CourseCardDto`, `CourseDetailDto`, `PublicStatsDto`, schema query danh sách ([[api-catalog]]) → `./sync-types.sh`
+### UI
+- [ ] P02-2 Component: `CourseCard` (màu theo chủ đề, badge cấp độ), `TopicTile`, `StatStrip`, `CourseFilterSidebar`, `Pagination`
+- [ ] P02-3 C02 (Server Component): hero, StatStrip, Chủ đề, Khóa học phổ biến, footer
+- [ ] P02-4 C03: lọc đồng bộ URL, đổi lọc ⇒ `page=1`, `EmptyState`, skeleton
+- [ ] P02-5 C04: `CourseInfoCard`, `ModuleAccordion` (+ hàng bài kiểm tra — G-08), `EnrollPanel` 2 trạng thái, tab Tổng quan (G-09); khách bấm Đăng ký ⇒ `/login?next=`
+### Gọi API (http)
+- [ ] P02-6 `services/http/catalog.http.ts`: `getPublicStats`, `listCourses`, `getCourseDetail`, `enrollCourse`; Server Components gọi bằng `NEXT_PUBLIC_API_BASE_URL`; `enrollment` của trang chi tiết lấy ở client khi có phiên
+### Backend
+- [ ] P02-7 `modules/public`: `GET /public/stats` (cache 60 s)
+- [ ] P02-8 `modules/courses`: `GET /courses` (lọc nhiều giá trị, `q`, sort, count dẫn xuất bằng `_count`/`groupBy`, phân trang)
+- [ ] P02-9 `GET /courses/:id` (chỉ `PUBLISHED`, bài đã xuất bản, `enrollment` khi là SV, **ẩn `fileUrl`**, bài kiểm tra `OPEN|CLOSED`)
+- [ ] P02-10 `modules/enrollments`: `POST /courses/:id/enroll` (`ALREADY_ENROLLED`)
+### Cập nhật DB
+- [ ] P02-11 `schema.prisma`: thêm enum `CourseStatus`, `ContentType`, `ExamStatus` và model `Course`, `Module`, `Lesson`, `Enrollment`, `Exam`, `Question`, `Option` ([[database-prisma-schema]], [[database-prisma-schema-exam-ai]]); thêm `User.coursesTaught`, `User.enrollments`; **bỏ** các trường quan hệ tới model chưa có (bảng ở [[database-erd]])
+- [ ] P02-12 Migration SQL: CHECK + `options_one_correct_per_question` ([[database-erd]])
+- [ ] P02-13 `prisma/seed.ts`: 2 giảng viên, 6 khóa + module/bài/bài kiểm tra, ghi danh cho SV mẫu ([[database-seed-data]])
+- [ ] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p02_catalog` rồi `npm run db:seed`
+
+## Checklist test tay (Tech Lead — bước 3)
+- [ ] Trang chủ hiện số liệu + 4 khóa phổ biến; Danh mục lọc chủ đề/cấp độ/tìm kiếm đúng, URL giữ bộ lọc
+- [ ] Chi tiết khóa: tên module/bài hiện, **không lộ link file**; khóa `DRAFT` không xem được
+- [ ] Đăng ký học ⇒ chuyển sang "Đã đăng ký"; bấm lần nữa không lỗi; khách bị chuyển về đăng nhập
 
 ## Rủi ro
-Đếm `lessonCount/duration` gây N+1 ⇒ dùng truy vấn tổng hợp một lần; cân nhắc cột tính sẵn nếu chậm.
+Đếm `lessonCount`/thời lượng gây N+1 ⇒ dùng truy vấn tổng hợp một lần.

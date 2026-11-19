@@ -1,19 +1,19 @@
 ---
 id: database-seed-data
-title: Dữ liệu seed & ID cố định (dùng chung cho mock và DB thật)
+title: Dữ liệu seed & ID cố định (nguồn dữ liệu mẫu duy nhất)
 type: database
 status: stable
-tags: [seed, fixtures, mock, test-data]
-related: [adr-015-ui-first-mock-adapters, workflow-ui-mock-wire-backend, database-erd, plan-phase-00-foundation]
+tags: [seed, sample-data]
+related: [workflow-solo-dev, adr-017-solo-dev-workflow, database-erd, plan-phase-00-foundation]
 source: "Thiết kế của Tech Lead; tên khóa học lấy từ file UI"
 updated: 2026-11-15
 ---
 # Dữ liệu seed
 
-**Mục tiêu**: cùng một bộ dữ liệu cho (a) mock fixtures của FE và (b) `prisma db seed`, để khi đổi mock → API thật, màn hình trông **giống hệt** và URL không đổi.
+**Mục tiêu**: không còn mock ⇒ **seed là nguồn dữ liệu mẫu duy nhất** để Tech Lead dùng thử UI/API. Seed **mở rộng dần theo phase** (P01: tài khoản; P02: khóa học…; xem cuối file).
 
 ## ID cố định
-`backend/src/types/seed-ids.ts` xuất hằng UUID cố định (ví dụ `COURSE_PYTHON_ID`, `EXAM_PY_M1_ID`, `USER_STUDENT_NA_ID`). Cả `backend/prisma/seed.ts` và `frontend/src/mocks/fixtures/*` (qua bản copy `frontend/src/types/seed-ids.ts`) import từ đây. Quy ước tạo: UUID dạng `00000000-0000-4000-8000-0000000000NN` tăng dần theo thực thể, ghi chú tên ở comment.
+`backend/src/types/seed-ids.ts` xuất hằng UUID cố định (ví dụ `COURSE_PYTHON_ID`, `USER_STUDENT_NA_ID`) để `backend/prisma/seed.ts` tạo dữ liệu **lặp lại được** và URL test không đổi sau mỗi lần `db:reset`. Frontend không dùng file này.
 
 ## Tài khoản (chỉ môi trường dev/demo)
 | Email | Vai trò | Mật khẩu | Ghi chú |
@@ -65,3 +65,15 @@ updated: 2026-11-15
 
 ## Lệnh
 `cd backend && npm run db:reset` (xóa, migrate lại & seed) — **chỉ dev**. Seed **không** chạy ở production (`NODE_ENV` guard).
+
+## Seed theo phase
+| Phase | Dữ liệu thêm vào `seed.ts` |
+|---|---|
+| P01 ✅ | tài khoản: admin, teacher, teacher2, SV `na` + các SV mẫu, 1 tài khoản `LOCKED` |
+| P02 | 6 khóa + module/bài/bài kiểm tra; ghi danh cho `na` |
+| P03 | tiến độ bài học (Python 35%, SQL 70%, Next.js 0%) |
+| P05 | lượt làm bài của `na` |
+| P06 | lượt làm của ~10 SV (có câu bỏ trống) cho thống kê |
+| P08 | tài liệu AI (READY / PROCESSING / FAILED) + lịch sử hỏi AI |
+| P09 | thêm người dùng mẫu |
+Lệnh chạy do Tech Lead: `cd backend && npm run db:seed` / `npm run db:reset` ([[architecture-deployment-env]]).

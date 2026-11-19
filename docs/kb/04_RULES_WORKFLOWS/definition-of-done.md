@@ -1,51 +1,46 @@
 ---
 id: definition-of-done
-title: Definition of Done (DoD)
+title: Definition of Done (Solo Dev)
 type: rule
 status: stable
-tags: [dod, quality, checklist, npm]
-related: [agent-rules, workflow-ui-mock-wire-backend, testing-strategy, coding-standards, git-workflow, adr-016-manual-type-sync]
-source: "Thiết kế của Tech Lead; cập nhật theo ADR-016"
+tags: [dod, quality, checklist, solo-dev]
+related: [agent-rules, workflow-solo-dev, testing-strategy, coding-standards, adr-016-manual-type-sync, adr-017-solo-dev-workflow]
+source: "Thiết kế Tech Lead; cập nhật theo ADR-017"
 updated: 2026-11-15
 ---
 # Definition of Done
 
-## Bộ lệnh kiểm tra chuẩn
-Chạy ở dự án bạn đã sửa (cả hai nếu đụng `src/types/`). Phải **xanh** trước khi tick `[x]`.
+> **Tech Lead (User) sẽ tự chạy các lệnh kiểm tra. Agent không cần quan tâm.** Agent chỉ phải hoàn thành phần *code + cập nhật log* dưới đây.
+
+## Phần của Agent — một tác vụ được coi là xong khi
+### Bước 1 — UI & Wire API
+- [ ] DTO ở `backend/src/types/dto/` đã tạo/sửa và đã chạy `./sync-types.sh` (hai thư mục `types/` khớp)
+- [ ] UI khớp thiết kế; đủ `loading / empty / error / forbidden`; responsive
+- [ ] Gọi API qua `frontend/src/services/http/<x>.http.ts`; không mock/fixture; không gọi `fetch` trong component
+- [ ] Không `any`, hex tự do, inline style
+- [ ] Hàng FILE_MAPPING → `🎨 UI+Wire`
+
+### Bước 2 — Backend (+ DB)
+- [ ] Khớp ví dụ JSON ở `api-*.md` và DTO trong `src/types/`
+- [ ] Phân lớp đúng (route → controller → service → repository → mapper); **chỉ repository dùng Prisma**
+- [ ] Validate zod ở route; kiểm quyền/ownership ở service; không lộ `passwordHash`, `isCorrect` (đề thi)
+- [ ] Nếu phase có model mới: `schema.prisma` + `seed.ts` đã sửa đúng lịch ở [[database-erd]]; đã nhắc `▶️` lệnh migrate/seed
+- [ ] `backend/src/types/` vẫn **tự đủ** (chỉ `zod` + chính nó)
+- [ ] Hàng FILE_MAPPING → `🛠 BE done`
+
+### Log
+- [ ] Tick `[x]` trong `plan-phase-XX`; thêm mục ngắn vào [[PROGRESS]]
+- [ ] Báo cáo cuối chỉ gồm các dòng `✅ …` ([[agent-rules]] mục 2)
+
+## Phần của Tech Lead — Bước 3 (Agent bỏ qua)
+Bật PostgreSQL + 2 terminal: `cd backend && npm run dev` và `cd frontend && npm run dev` ([[architecture-deployment-env]]), rồi:
 ```
-cd backend  && npm run lint && npm run typecheck && npm run test
-cd frontend && npm run lint && npm run typecheck && npm run test
-./sync-types.sh --check            # từ thư mục gốc devlearn/ (lỗi ⇒ chạy ./sync-types.sh rồi commit cả hai types/)
-cd rag-service && ruff check . && mypy . && pytest      # chỉ khi sửa rag-service
+cd backend  && npm run lint && npm run typecheck && npm run test    # test: chỉ khi có
+cd frontend && npm run lint && npm run typecheck && npm run test    # test: chỉ khi có
+./sync-types.sh --check                                             # từ thư mục gốc devlearn/
 ```
+- [ ] Dùng thử theo checklist của phase ở `06_EXECUTION_PLAN/` ([[testing-strategy]])
+- [ ] Đặt hàng FILE_MAPPING → `✅ Đã test`
 
-## Cho một giai đoạn UI+Mock (A)
-- [ ] Khớp thiết kế; đủ `loading/empty/error/forbidden`; responsive
-- [ ] DTO/kiểu từ `src/types/` (FE: `@/types`); fixtures parse được bằng zod
-- [ ] Nếu sửa `backend/src/types/`: đã chạy `./sync-types.sh`, **cả hai** thư mục `types/` cùng một commit
-- [ ] `cd frontend && npm run lint && npm run typecheck && npm run test` xanh; không `any`/hex/inline style
-- [ ] Ảnh chụp trạng thái đính kèm PR; ghi PROGRESS; hàng FILE_MAPPING → `🎨 UI+Mock`
-
-## Cho giai đoạn Wire (C)
-- [ ] `services/http/` cùng chữ ký `services/mock/`; lỗi ánh xạ đúng [[error-handling-conventions]]
-- [ ] Không còn import `mocks/` trong component; `cd frontend && npm run typecheck && npm run test` xanh
-- [ ] FILE_MAPPING → `🔌 Wired`
-
-## Cho giai đoạn Backend (D)
-- [ ] Mỗi endpoint khớp ví dụ JSON ở `api-*.md` (đã kiểm bằng test parse zod)
-- [ ] Phân lớp đúng; chỉ repository dùng Prisma; validate zod; kiểm quyền ở service
-- [ ] Test: thành công + 401 + 403 + 400 + nhánh nghiệp vụ; ca bắt buộc liên quan ở [[testing-strategy]]
-- [ ] `cd backend && npm run db:reset` chạy sạch từ DB trống (migrate + seed)
-- [ ] `cd backend && npm run lint && npm run typecheck && npm run test` xanh
-- [ ] `backend/src/types/` vẫn **tự đủ** (chỉ import `zod` + chính nó) và `./sync-types.sh --check` ✅
-- [ ] FILE_MAPPING → `🛠 BE done`
-
-## Cho giai đoạn Test & đóng (E)
-- [ ] Gỡ mock khỏi `NEXT_PUBLIC_MOCK_FEATURES`, chạy tay luồng liên quan với backend thật (`cd backend && npm run dev` + `cd frontend && npm run dev`)
-- [ ] Không còn `TODO` không có ticket; không `console.log`
-- [ ] Checklist `plan-phase-XX` đã tick; FILE_MAPPING → `✅ Tested`
-- [ ] [[PROGRESS]] có mục mới; `python docs/kb/tools/kb_lint.py` xanh (nếu đụng KB)
-
-## Cho tài liệu KB
-- [ ] Frontmatter đủ; `id` = tên file; link `[[…]]` không gãy; ≤ 300 dòng; được liệt kê trong [[00_INDEX]] (`python docs/kb/tools/build_index.py`)
-- [ ] Không nhắc `pnpm`, monorepo, `packages/`, Docker bắt buộc ([[adr-016-manual-type-sync]])
+## Tài liệu KB (khi có sửa KB)
+- [ ] Frontmatter đủ; `id` = tên file; link `[[…]]` không gãy; ≤ 300 dòng; có trong [[00_INDEX]] — Tech Lead chạy `python docs/kb/tools/build_index.py && python docs/kb/tools/kb_lint.py`

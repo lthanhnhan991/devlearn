@@ -53,4 +53,4 @@ Lỗi: `401 UNAUTHENTICATED`. FE gọi khi khởi động để dựng `AuthCont
 ## Ghi chú triển khai
 - Email lowercase + trim trước khi lưu/so khớp.
 - Phản hồi lỗi đăng nhập **không** phân biệt "email không tồn tại" và "sai mật khẩu".
-- Mock FE: dùng tài khoản trong [[database-seed-data]]; mock phải trả đúng `403 WRONG_PORTAL` khi dùng sai cổng.
+- Tài khoản mẫu để test tay: xem [[database-seed-data]]; thử cả hai cổng (`WRONG_PORTAL`).

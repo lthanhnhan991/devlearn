@@ -4,14 +4,14 @@ title: Kế hoạch thực thi — Tổng quan, phụ thuộc, làn song song
 type: plan
 status: living
 tags: [plan, roadmap, phases, dependencies]
-related: [PROGRESS, workflow-ui-mock-wire-backend, agent-rules, plan-phase-00-foundation, plan-phase-10-hardening-release]
+related: [PROGRESS, workflow-solo-dev, adr-017-solo-dev-workflow, agent-rules, plan-phase-00-foundation, plan-phase-10-hardening-release]
 source: "Phân tích khối lượng: 19 màn UI, 60 endpoint công khai, 1 dịch vụ RAG"
 updated: 2026-11-15
 ---
 # Kế hoạch thực thi
 
 ## Cách chia
-Dự án chia theo **lát cắt dọc nghiệp vụ** (mỗi phase = một nhóm màn + API + BE), không chia theo tầng. Mỗi phase chạy 5 giai đoạn **A→E** của [[workflow-ui-mock-wire-backend]]. RAG (Python) là làn riêng, độc lập UI.
+Dự án chia theo **lát cắt dọc nghiệp vụ** (mỗi phase = một nhóm màn + API + BE), không chia theo tầng. Mỗi phase chạy 3 bước của [[workflow-solo-dev]]: **1. Code UI & Wire API → 2. Code Backend (+DB) → 3. Tech Lead tự test**. RAG (Python) là làn riêng, độc lập UI.
 
 | Phase | Tên | Màn | Endpoint (số) | Cỡ |
 |---|---|---|---|---|
@@ -25,7 +25,7 @@ Dự án chia theo **lát cắt dọc nghiệp vụ** (mỗi phase = một nhóm
 | [[plan-phase-07-rag-service]] | Dịch vụ RAG (Python) | — | 5 nội bộ | L |
 | [[plan-phase-08-ai-chat-and-docs]] | Tài liệu AI + Chat AI | A05, C07 | 7 + callback | L |
 | [[plan-phase-09-admin-dashboard-users]] | Dashboard & Người dùng | A01, A06 | 4 | S |
-| [[plan-phase-10-hardening-release]] | E2E, bảo mật, demo | — | — | M |
+| [[plan-phase-10-hardening-release]] | Hoàn thiện, bảo mật, demo | — | — | M |
 
 Cỡ: S ≈ 1–2 ngày · M ≈ 3–5 ngày · L ≈ 5–8 ngày (một dev, tham khảo, hiệu chỉnh sau Phase 01).
 
@@ -46,13 +46,7 @@ flowchart LR
   P09 --> P10
 ```
 
-## Làn song song (nếu có ≥ 2 người/Agent)
-| Làn | Chuỗi |
-|---|---|
-| **FE** | P00 → P01-A → P02-A → P03-A → P04-A → P05-A → P06-A → P08-A → P09-A |
-| **BE** | P00 → P01-D → P02-D → P03-D → P04-D → P05-D → P06-D → P08-D → P09-D |
-| **RAG** | P00 → P07 (độc lập) → ghép P08 |
-Điều kiện: FE chạy mock nên **không chờ BE**; BE bám hợp đồng nên **không chờ UI**. Hai bên gặp nhau ở giai đoạn C/E.
+P07 (RAG) không có UI nên có thể làm xen kẽ khi cần.
 
 ## Cột mốc demo
 | M | Sau phase | Có thể trình diễn |
@@ -63,10 +57,10 @@ flowchart LR
 | M4 | P10 | Toàn hệ thống + demo script |
 
 ## Quy ước ID tác vụ
-`P<phase>-<giai đoạn><số>` ví dụ `P02-A3` (phase 2, giai đoạn A, việc 3). Dùng ID này trong commit/PROGRESS. Riêng Phase 00 dùng `P00-BE<n>` / `P00-FE<n>` (Nhóm A Backend / Nhóm B Frontend).
+`P<phase>-<số>` (ví dụ `P02-5`) theo thứ tự làm trong từng file plan.
 
 ## Quy tắc chung mọi phase
-1. Trước khi vào giai đoạn D của tính năng, **Review gate (B) đã Approved**.
+1. Agent chỉ code + cập nhật log; **Tech Lead tự test** (bước 3) và đặt ✅ Đã test ([[agent-rules]], [[testing-strategy]]).
 2. Hợp đồng đổi ⇒ cập nhật tài liệu + `backend/src/types/` + chạy `./sync-types.sh` **trước** ([[adr-016-manual-type-sync]]).
 3. Hết phase: cập nhật [[PROGRESS]], FILE_MAPPING ([[FILE_MAPPING]], [[FILE_MAPPING_ADMIN]]).
 4. Rủi ro/nợ kỹ thuật ghi ở PROGRESS; câu hỏi ghi [[OPEN_QUESTIONS]].

@@ -16,11 +16,11 @@ export const AUTH_COOKIE_NAME = env.COOKIE_NAME;
  * Ký JWT với payload { sub: userId, role } (concept-auth).
  */
 export function signAuthToken(payload: { sub: string; role: Role }): string {
-  const options: SignOptions = {
-    expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
+  const expiresIn = (env.JWT_EXPIRES_IN || '7d') as NonNullable<SignOptions['expiresIn']>;
+  return jwt.sign(payload, env.JWT_SECRET, {
     algorithm: 'HS256',
-  };
-  return jwt.sign(payload, env.JWT_SECRET, options);
+    expiresIn,
+  });
 }
 
 export const signToken = signAuthToken;

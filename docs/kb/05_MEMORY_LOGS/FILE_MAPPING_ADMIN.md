@@ -10,7 +10,7 @@ updated: 2026-11-15
 ---
 # FILE_MAPPING — ADMIN
 
-Quy ước trạng thái: xem [[FILE_MAPPING]]. Tất cả page ở `W:app/admin/(panel)/…` trừ đăng nhập.
+Quy ước trạng thái: `⬜ TODO` → `🎨 UI+Wire` → `🛠 BE done` → `✅ Đã test` (chi tiết ở [[FILE_MAPPING]]). Tất cả page ở `W:app/admin/(panel)/…` trừ đăng nhập.
 
 | Tiền tố | Đường dẫn thật |
 |---|---|

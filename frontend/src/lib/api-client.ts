@@ -55,14 +55,19 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
   }
 
+  const { body: _ignoredBody, ...restOptions } = options;
+  const fetchInit: RequestInit = {
+    ...restOptions,
+    headers,
+    credentials: 'include',
+  };
+  if (body !== undefined) {
+    fetchInit.body = body;
+  }
+
   let res: Response;
   try {
-    res = await fetch(url, {
-      ...options,
-      headers,
-      body,
-      credentials: 'include',
-    });
+    res = await fetch(url, fetchInit);
   } catch (cause) {
     throw new ApiError(
       0,

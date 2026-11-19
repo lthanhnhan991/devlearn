@@ -4,7 +4,7 @@ title: Thuật ngữ (Glossary)
 type: index
 status: stable
 tags: [glossary, terms]
-related: [00_INDEX, concept-project-overview, concept-rag-overview, workflow-ui-mock-wire-backend]
+related: [00_INDEX, concept-project-overview, concept-rag-overview, workflow-solo-dev]
 source: "Đồ án + KB"
 updated: 2026-11-15
 ---
@@ -30,10 +30,9 @@ updated: 2026-11-15
 | **Contract-first** | Sửa tài liệu API → `backend/src/types/` → `./sync-types.sh` → code ([[api-contracts]]) |
 | **Shared types** | `backend/src/types/` (nguồn: Zod schema, kiểu DTO, nhãn, `computeScore`, `seed-ids`) + bản copy `frontend/src/types/` ([[adr-016-manual-type-sync]]) |
 | **sync-types.sh** | Script `cp` chép types backend → frontend; `--check` kiểm lệch |
-| **Mock adapter** | Cài đặt giả của service FE cùng interface với bản HTTP ([[adr-015-ui-first-mock-adapters]]) |
-| **Review gate** | Cổng duyệt UI do người quyết định, trước khi đấu API ([[workflow-ui-mock-wire-backend]]) |
-| **Wire (đấu dây)** | Thay mock bằng service HTTP thật |
+| **Solo Dev 3 bước** | UI & Wire API → Backend → Tech Lead tự test ([[workflow-solo-dev]], [[adr-017-solo-dev-workflow]]) |
+| **Wire** | Gắn UI vào API thật qua `services/http/` (không mock) |
 | **Atomic note** | Ghi chú một chủ đề, ≤ 300 dòng, liên kết chéo ([[agent-rules]]) |
 | **ADR** | Architecture Decision Record — thư mục `03_DECISIONS` |
 | **DoD** | Definition of Done ([[definition-of-done]]) |
-| **Seed-ids** | UUID cố định dùng chung cho mock & seed DB ([[database-seed-data]]) |
+| **Seed-ids** | UUID cố định dùng cho seed DB ([[database-seed-data]]) |

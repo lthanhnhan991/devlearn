@@ -23,13 +23,13 @@ updated: 2026-11-15
 ## 2. Đọc theo nhiệm vụ
 | Bạn đang… | Đọc theo thứ tự |
 |---|---|
-| Dựng **UI một màn** | `plan-phase-XX` → [[ui-screens-client]] / [[ui-screens-admin]] → [[ui-design-system]] → [[architecture-frontend]] → [[coding-standards-frontend]] → [[workflow-ui-mock-wire-backend]] |
-| Đấu API (**Wire**) | `api-*` của tính năng → [[api-contracts]] → [[error-handling-conventions]] → [[FILE_MAPPING]] |
+| Dựng **UI một màn** | `plan-phase-XX` → [[ui-screens-client]] / [[ui-screens-admin]] → [[ui-design-system]] → [[architecture-frontend]] → [[coding-standards-frontend]] → [[workflow-solo-dev]] |
+| Gọi API từ UI (`services/http`) | `api-*` của tính năng → [[api-contracts]] → [[error-handling-conventions]] → [[FILE_MAPPING]] |
 | Viết **Backend** | `concept-*` → `api-*` → [[architecture-backend-layers]] → [[database-erd]] → [[coding-standards-backend]] → [[testing-strategy]] |
 | Viết **RAG (Python)** | [[concept-rag-overview]] → [[concept-rag-ingestion]] → [[concept-rag-query]] → [[api-internal-rag]] → [[architecture-rag-service]] → [[coding-standards-rag-python]] |
 | Sửa **DB** | [[database-erd]] → [[database-prisma-schema]] → [[database-prisma-schema-exam-ai]] → [[delta-vs-thesis]] (mục D) |
 | Hiểu **quyền** | [[concept-roles-permissions]] → [[concept-auth]] → [[adr-013-exam-stats-owner-only]] |
-| Hiểu **vì sao** | thư mục `03_DECISIONS` (ADR-001…016) |
+| Hiểu **vì sao** | thư mục `03_DECISIONS` (ADR-001…017) |
 | Kiểm **xong chưa** | [[definition-of-done]] → [[FILE_MAPPING]] / [[FILE_MAPPING_ADMIN]] |
 
 ## 3. Sự thật nhanh (đừng đoán — đã chốt)
@@ -42,7 +42,7 @@ updated: 2026-11-15
 | Upload | video ≤ 100 MB, PDF ≤ 10 MB (Cloudinary) ([[concept-file-storage]]) |
 | AI | chỉ trả lời từ PDF của khóa; kèm nguồn; ≤ 5 s ([[concept-rag-overview]]) |
 | Thống kê bài kiểm tra | **owner-only** ([[adr-013-exam-stats-owner-only]]) |
-| Quy trình | UI+Mock → Review → Wire → Backend → Test ([[workflow-ui-mock-wire-backend]]) |
+| Quy trình | UI & Wire API → Backend → Tech Lead tự test; **không mock**; Agent không chạy lint/typecheck/test, không in code ra chat ([[workflow-solo-dev]], [[agent-rules]]) |
 | Cấu trúc repo | `backend/` · `frontend/` · `rag-service/` · `docs/` — **chỉ npm, không monorepo, không Docker** ([[adr-016-manual-type-sync]], [[architecture-repo-structure]]) |
 | Kiểu dùng chung | nguồn `backend/src/types/` → `./sync-types.sh` → bản copy `frontend/src/types/` (không sửa tay) ([[agent-rules]] §2b) |
 | Cấm | `any`, `@ts-ignore`, hex tự do, Prisma ngoài repository ([[coding-standards]]) |
@@ -90,7 +90,7 @@ updated: 2026-11-15
 - [[database-erd]] — Database — ERD, ràng buộc, chỉ mục
 - [[database-prisma-schema-exam-ai]] — Prisma schema (2/2) — kiểm tra, lượt làm, tài liệu AI, lịch sử AI
 - [[database-prisma-schema]] — Prisma schema (1/2) — enum, người dùng, khóa học, tiến độ
-- [[database-seed-data]] — Dữ liệu seed & ID cố định (dùng chung cho mock và DB thật)
+- [[database-seed-data]] — Dữ liệu seed & ID cố định (nguồn dữ liệu mẫu duy nhất)
 - [[system-overview]] — Kiến trúc tổng thể — luồng đi của 3 dịch vụ
 - [[ui-design-system]] — Design system — màu, kiểu chữ, component (rút từ file thiết kế)
 - [[ui-screens-admin]] — Đặc tả màn hình ADMIN (A00–A08)
@@ -111,20 +111,20 @@ updated: 2026-11-15
 - [[adr-012-rag-async-ingest-callback]] — ADR-012 — Nạp tài liệu bất đồng bộ + callback
 - [[adr-013-exam-stats-owner-only]] — ADR-013 — Thống kê bài kiểm tra chỉ dành cho chủ khóa
 - [[adr-014-monorepo-shared-contracts]] — ADR-014 — Monorepo pnpm + package contracts dùng chung (ĐÃ BỊ THAY THẾ bởi ADR-016)
-- [[adr-015-ui-first-mock-adapters]] — ADR-015 — UI trước bằng mock adapters, rồi đấu API
 - [[adr-016-manual-type-sync]] — ADR-016 — Đơn giản hóa: npm + 3 thư mục độc lập + đồng bộ types thủ công
+- [[adr-017-solo-dev-workflow]] — ADR-017 — Solo Dev: bỏ mock, bỏ Review, Agent không tự test
 
 ### `04_RULES_WORKFLOWS/` — Luật & quy trình
-- [[agent-rules]] — Luật làm việc cho AI Agent & Dev
+- [[agent-rules]] — Luật làm việc cho AI Agent (Solo Dev)
 - [[coding-standards-backend]] — Luật code Backend (Express, Prisma, zod)
-- [[coding-standards-frontend]] — Luật code Frontend (Next.js, Tailwind, services/mock)
+- [[coding-standards-frontend]] — Luật code Frontend (Next.js, Tailwind, services/http)
 - [[coding-standards-rag-python]] — Luật code RAG service (Python/FastAPI)
 - [[coding-standards]] — Luật code chung (TypeScript strict, không any, Tailwind…)
-- [[definition-of-done]] — Definition of Done (DoD)
+- [[definition-of-done]] — Definition of Done (Solo Dev)
 - [[error-handling-conventions]] — Quy ước xử lý lỗi (BE ↔ FE)
-- [[git-workflow]] — Quy trình Git & Commit
-- [[testing-strategy]] — Chiến lược kiểm thử
-- [[workflow-ui-mock-wire-backend]] — Quy trình: UI + Mock → Review → Wire → Backend → Test
+- [[git-workflow]] — Quy trình Git & Commit (Solo Dev)
+- [[testing-strategy]] — Chiến lược kiểm thử (Tech Lead tự test)
+- [[workflow-solo-dev]] — Quy trình Solo Dev — 3 bước (UI & Wire → Backend → Tech Lead test)
 
 ### `05_MEMORY_LOGS/` — Bộ nhớ làm việc
 - [[FILE_MAPPING]] — FILE_MAPPING — Tính năng → UI → API → Backend (CLIENT + hạ tầng)
@@ -133,9 +133,9 @@ updated: 2026-11-15
 - [[PROGRESS]] — PROGRESS — Nhật ký làm việc & bảng tiến độ phase
 
 ### `06_EXECUTION_PLAN/` — Kế hoạch thực thi
-- [[plan-00-overview]] — Kế hoạch thực thi — Tổng quan, phụ thuộc, làn song song
-- [[plan-phase-00-foundation]] — Phase 00 — Nền móng (npm, 3 dự án độc lập) & spike rủi ro
-- [[plan-phase-01-auth]] — Phase 01 — Xác thực & phân quyền (UC01, UC02)
+- [[plan-00-overview]] — Kế hoạch thực thi — Tổng quan (quy trình 3 bước, Solo Dev)
+- [[plan-phase-00-foundation]] — Phase 00 — Nền móng (ĐÃ HOÀN THÀNH — đã gộp vào kế hoạch chung)
+- [[plan-phase-01-auth]] — Phase 01 — Xác thực & phân quyền (UC01, UC02) — ĐÃ HOÀN THÀNH
 - [[plan-phase-02-course-catalog]] — Phase 02 — Danh mục khóa học & ghi danh (UC03)
 - [[plan-phase-03-learning-progress]] — Phase 03 — Học tập & theo dõi tiến độ (UC04)
 - [[plan-phase-04-admin-content]] — Phase 04 — Admin: quản lý khóa học & soạn bài + upload (UC08, UC09)
@@ -144,7 +144,7 @@ updated: 2026-11-15
 - [[plan-phase-07-rag-service]] — Phase 07 — Dịch vụ RAG (Python/FastAPI) (UC15)
 - [[plan-phase-08-ai-chat-and-docs]] — Phase 08 — Tài liệu AI (Admin) + Chat AI (SV) (UC07, UC11)
 - [[plan-phase-09-admin-dashboard-users]] — Phase 09 — Dashboard & Quản lý người dùng (UC13, UC14)
-- [[plan-phase-10-hardening-release]] — Phase 10 — Hardening, E2E & chuẩn bị demo
+- [[plan-phase-10-hardening-release]] — Phase 10 — Hoàn thiện, bảo mật & chuẩn bị demo
 <!-- AUTO:END -->
 
 ## 5. Nguồn gốc

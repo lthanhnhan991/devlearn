@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env';
-import { errorHandler, notFoundHandler } from './middleware/error-handler';
+import { errorHandler, notFoundHandler } from './middlewares/error-handler';
 import { authRouter } from './modules/auth/auth.routes';
 
 export function createApp() {

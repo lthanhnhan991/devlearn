@@ -4,36 +4,37 @@ title: Phase 05 — Làm bài kiểm tra & Kết quả (SV) (UC05, UC06, UC16)
 type: plan
 status: living
 tags: [plan, exam, attempts, scoring]
-related: [plan-00-overview, concept-exam-lifecycle, concept-exam-scoring-attempts, api-exam-student, ui-screens-client, adr-011-exam-retake-best-score]
+related: [plan-00-overview, workflow-solo-dev, concept-exam-lifecycle, concept-exam-scoring-attempts, api-exam-student, ui-screens-client, adr-011-exam-retake-best-score, database-erd]
 source: "UC05, UC06, UC16; UI C06, C09"
 updated: 2026-11-15
 ---
 # Phase 05 — Exam (SV)
 
-**Phạm vi**: C06 làm bài, C09 kết quả + xem lại (G-07). **Phụ thuộc**: P03, P04 (đề tạm lấy từ seed — GV tạo đề ở P06). **FILE_MAPPING**: CL-10, CL-11. **Cỡ**: M.
+**Phạm vi**: C06 làm bài, C09 kết quả + xem lại (G-07). **Phụ thuộc**: P03, P04 (đề lấy từ seed — GV tạo đề ở P06). **FILE_MAPPING**: CL-10, CL-11. **Cỡ**: M.
 
-## A — UI + Mock
-- [ ] P05-A1 Types (`backend/src/types/dto/…` rồi `./sync-types.sh`): `ExamInfoDto`, `ExamQuestionsDto` (không `isCorrect`), `SubmitAttemptReq/ResultDto`, `ExamResultRowDto`, `AttemptReviewDto`
-- [ ] P05-A2 `exam.mock.ts`: chấm bằng `computeScore/isPassed` từ `@/types/scoring`; làm lại tăng `attemptNo`; `EXAM_NOT_OPEN`, `NOT_ENROLLED`
-- [ ] P05-A3 `useExamTimer` (mốc `Date.now()`, tự nộp khi hết, cảnh báo 1 phút) + test
-- [ ] P05-A4 C06: `ExamHeader`, `QuestionNavigator` (đánh dấu đã trả lời), `OptionRadio` A–D, Câu trước/sau, **Nộp bài** có xác nhận khi còn câu trống, `beforeunload`
-- [ ] P05-A5 Thẻ **Kết quả sau khi nộp** (8/10, đúng 8 câu, Đạt/Chưa đạt, Xem lại đáp án, Làm lại)
-- [ ] P05-A6 C09: `ResultsTable`; trang xem lại `/my-results/[attemptId]` (`AttemptReview`, G-07)
-## B — Review
-- [ ] P05-B1 Khớp C06/C09 · [ ] đồng hồ chính xác khi tab ngủ · [ ] lỗi nộp giữ đáp án ([[error-handling-conventions]]) · [ ] màu Đúng/Sai
-## C — Wire
-- [ ] P05-C1 `exam.http.ts`; nộp lỗi mạng ⇒ giữ bài, cho nộp lại
-## D — Backend
-- [ ] P05-D1 `exams` (SV): `GET /exams/:id`, `GET /exams/:id/questions` (select **không** `isCorrect`; hàm repo riêng `findQuestionsForTaking`)
-- [ ] P05-D2 `attempts`: `POST /exams/:id/attempts` theo thuật toán transaction ở [[concept-exam-scoring-attempts]] (validate payload, retry khi đụng unique)
-- [ ] P05-D3 `GET /me/exam-results` (groupBy best/last/count), `GET /me/attempts/:id` (chỉ của mình)
-- [ ] P05-D4 `learning-summary.averageExamScore` nối với dữ liệu thật
-## E — Test
-- [ ] P05-E1 **Không lộ đáp án** trong response đề (test tự động quét key `isCorrect`)
-- [ ] P05-E2 Chấm: 0, toàn đúng, bỏ trống, đáp án sai thuộc câu khác ⇒ 400; 2 nộp song song ⇒ `attempt_no` 1 và 2
-- [ ] P05-E3 `CLOSED`/`DRAFT`/chưa ghi danh ⇒ chặn đúng mã; xem lại lượt người khác ⇒ 404
-- [ ] P05-E4 Gỡ mock; e2e: thi → nộp → xem lại → làm lại → My results hiển thị điểm cao nhất
-- [ ] P05-E5 DoD + log
+## Việc cần làm
+### DTO
+- [ ] P05-1 `backend/src/types/dto/exam.ts`: `ExamInfoDto`, `ExamQuestionsDto` (**không** `isCorrect`), `SubmitAttemptReq/ResultDto`, `ExamResultRowDto`, `AttemptReviewDto` ([[api-exam-student]]) → `./sync-types.sh`
+### UI
+- [ ] P05-2 `useExamTimer` (mốc `Date.now()`, tự nộp khi hết giờ, cảnh báo 1 phút)
+- [ ] P05-3 C06: `ExamHeader`, `QuestionNavigator` (đánh dấu đã trả lời), `OptionRadio` A–D, Câu trước/sau, **Nộp bài** có xác nhận khi còn câu trống, `beforeunload`; thẻ **Kết quả sau khi nộp** (điểm, Đạt/Chưa đạt, Xem lại đáp án, Làm lại)
+- [ ] P05-4 C09 `ResultsTable`; trang xem lại `/my-results/[attemptId]` (`AttemptReview`, G-07)
+### Gọi API (http)
+- [ ] P05-5 `services/http/exam.http.ts`: `getExam`, `getExamQuestions`, `submitAttempt`, `getMyExamResults`, `getMyAttempt`; lỗi nộp ⇒ **giữ đáp án trên màn hình**, cho nộp lại
+### Backend
+- [ ] P05-6 `modules/exams` (SV): `GET /exams/:id`, `GET /exams/:id/questions` (hàm repo riêng **không select `isCorrect`**)
+- [ ] P05-7 `modules/attempts`: `POST /exams/:id/attempts` theo thuật toán transaction ở [[concept-exam-scoring-attempts]] (validate payload; thử lại khi đụng unique `attempt_no`); dùng `computeScore`/`isPassed` từ `types/scoring.ts`
+- [ ] P05-8 `GET /me/exam-results` (best/last/count), `GET /me/attempts/:id` (chỉ lượt của mình); nối `averageExamScore` của learning-summary
+### Cập nhật DB
+- [ ] P05-9 `schema.prisma`: thêm `Attempt`, `Answer` + `User.attempts`, `Exam.attempts`, `Question.answers`, `Option.answers`; migration SQL CHECK cho `attempts` ([[database-erd]])
+- [ ] P05-10 `seed.ts`: lượt làm mẫu (6/10 → 8/10; 4/10; 7/10)
+- [ ] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p05_attempts` rồi `npm run db:seed`
+
+## Checklist test tay (Tech Lead)
+- [ ] Network tab: response đề **không có `isCorrect`**
+- [ ] Nộp bỏ trống ⇒ 0/10; đúng hết ⇒ 10/10; làm lại ⇒ "Lần làm" tăng; My results hiển thị điểm **cao nhất**
+- [ ] Đề `DRAFT` không thấy; đề `CLOSED` không làm được; chưa ghi danh ⇒ bị chặn; xem lại lượt của người khác ⇒ 404
+- [ ] Hết giờ tự nộp; thoát giữa chừng có cảnh báo
 
 ## Rủi ro
-Lệch công thức mock/thật ⇒ cùng import `computeScore`. Làm tròn: test với 1/3, 2/3.
+Làm tròn điểm (1/3, 2/3) ⇒ chỉ dùng `computeScore`. Nộp song song ⇒ unique `(exam, student, attempt_no)` + thử lại.

@@ -1,10 +1,10 @@
 ---
 id: coding-standards-frontend
-title: Luật code Frontend (Next.js, Tailwind, services/mock)
+title: Luật code Frontend (Next.js, Tailwind, services/http)
 type: rule
 status: stable
 tags: [rules, frontend, tailwind, nextjs]
-related: [coding-standards, architecture-frontend, ui-design-system, workflow-ui-mock-wire-backend, error-handling-conventions]
+related: [coding-standards, architecture-frontend, ui-design-system, workflow-solo-dev, error-handling-conventions]
 source: "Đồ án §2.2.5.1"
 updated: 2026-11-15
 ---
@@ -14,7 +14,7 @@ updated: 2026-11-15
 - Function component + hooks; **export có tên** (trừ `page.tsx`/`layout.tsx`/`error.tsx` của Next). Props có kiểu `interface XProps`.
 - Mặc định **Server Component**; thêm `'use client'` chỉ khi cần state/effect/event/browser API. Đẩy `'use client'` xuống lá cây component.
 - Một component ≤ 300 dòng; tách phần logic ra `features/<x>/use-<x>.ts`.
-- **Không gọi `fetch`/`apiClient` trong component**; chỉ gọi hàm ở `services/` (qua hook). Không import trực tiếp từ `mocks/` trong component.
+- **Không gọi `fetch`/`apiClient` trong component**; chỉ gọi hàm ở `services/` (qua hook).
 
 ## Tailwind
 - **Chỉ Tailwind**; cấm `style={{}}` (trừ giá trị động không biểu diễn được, vd `width: ${percent}%` ⇒ dùng CSS variable), cấm CSS Modules/styled-components. `globals.css` chỉ chứa `@tailwind` + biến.
@@ -36,13 +36,13 @@ updated: 2026-11-15
 ## Văn bản & nhãn
 Chuỗi UI tiếng Việt viết trong component; **nhãn enum** (Đạt, Bản nháp, Đang xử lý…) chỉ lấy từ `labels.ts` qua `StatusLabel`. Định dạng ngày `dd/MM/yyyy HH:mm` (múi giờ `Asia/Ho_Chi_Minh`) bằng helper `formatDateTime`.
 
-## Services/mock (xem [[workflow-ui-mock-wire-backend]])
-- Interface ở `services/<x>.service.ts`; `http/` và `mock/` **cùng chữ ký**.
-- Mock: độ trễ 300–600 ms; dữ liệu từ `mocks/fixtures` dùng `seed-ids`; hỗ trợ **công tắc lỗi** (`?mock=error|empty|forbidden` ở dev) để Review đủ trạng thái.
-- Mock dùng `computeScore/isPassed` từ `@/types/scoring`; không viết lại công thức.
+## Services (gọi API — không mock) — xem [[workflow-solo-dev]]
+- Mọi lời gọi API nằm ở `services/http/<x>.http.ts`; `services/index.ts` chỉ `export * from './http/...'`. Component/hook import từ `@/services`.
+- **Cấm** tạo `services/mock/`, `mocks/fixtures/`, công tắc `?mock=`, độ trễ giả, biến `NEXT_PUBLIC_MOCK_FEATURES` ([[adr-017-solo-dev-workflow]]).
+- Dữ liệu mẫu chỉ đến từ seed DB; trang phải xử lý tốt khi API lỗi (`ErrorState`).
 
 ## Hiệu năng
 `next/image` cho ảnh tĩnh; lazy-load trình xem PDF/video; không tải toàn bộ danh sách (luôn phân trang); `key` ổn định trong danh sách.
 
-## Test (chi tiết [[testing-strategy]])
-Mỗi component có logic có test Vitest + Testing Library; luồng chính có Playwright.
+## Test
+Agent **không** viết file test và **không** chạy lint/typecheck/test; Tech Lead tự làm ([[testing-strategy]]).

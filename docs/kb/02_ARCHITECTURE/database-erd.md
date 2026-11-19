@@ -10,7 +10,7 @@ updated: 2026-11-15
 ---
 # Database
 
-PostgreSQL 16 + Prisma. Mã nguồn schema đầy đủ: [[database-prisma-schema]] (người dùng, khóa học, tiến độ) và [[database-prisma-schema-exam-ai]] (kiểm tra, AI). **Ghép hai file theo thứ tự thành một `backend/prisma/schema.prisma`.**
+PostgreSQL 16 + Prisma. Mã nguồn schema đầy đủ: [[database-prisma-schema]] (người dùng, khóa học, tiến độ) và [[database-prisma-schema-exam-ai]] (kiểm tra, AI). Đây là **thiết kế đích đầy đủ**; `backend/prisma/schema.prisma` được **tạo dần theo từng phase** (xem bảng ngay bên dưới).
 
 ```mermaid
 erDiagram
@@ -36,6 +36,21 @@ erDiagram
   USERS ||--o{ AI_MESSAGES : dat
   COURSES ||--o{ AI_MESSAGES : ve
 ```
+
+## Trạng thái áp dụng thực tế & lịch migrate theo phase
+Hiện **chỉ bảng `users` đã được migrate** (Phase 01). Mỗi phase khi cần model mới thì thêm vào `schema.prisma` và chạy **một migration** (`npm run prisma:migrate -- --name pXX_<slug>`, do Tech Lead chạy). Không sửa migration đã áp dụng.
+
+| Phase | Enum / model thêm vào `schema.prisma` | Trường quan hệ ngược thêm vào model **đã có** | Trạng thái |
+|---|---|---|---|
+| P01 | enum `Role`, `UserStatus`; model `User` (chỉ cột scalar) | — | ✅ Đã áp dụng |
+| P02 | enum `CourseStatus`, `ContentType`, `ExamStatus`; `Course`, `Module`, `Lesson`, `Enrollment`, `Exam`, `Question`, `Option` | `User.coursesTaught`, `User.enrollments` | ⬜ |
+| P03 | `LessonProgress` | `User.lessonProgress`, `Lesson.progress` | ⬜ |
+| P04 | enum `DocStatus`; `AiDocument` | `User.aiDocuments`, `Course.aiDocuments`, `Lesson.aiDocument` | ⬜ |
+| P05 | `Attempt`, `Answer` | `User.attempts`, `Exam.attempts`, `Question.answers`, `Option.answers` | ⬜ |
+| P08 | `AiMessage` | `User.aiMessages`, `Course.aiMessages` | ⬜ |
+
+**Cách thêm model theo phase**: chép model từ [[database-prisma-schema]] / [[database-prisma-schema-exam-ai]]; **bỏ** mọi trường quan hệ trỏ tới model chưa tồn tại (ví dụ ở P02, `Lesson` chưa có `progress`/`aiDocument`; `Course` chưa có `aiDocuments`/`aiMessages`); ở phase sau thêm lại đúng các trường theo bảng. Trường quan hệ dạng list không tạo cột mới nhưng vẫn cần khai báo để Prisma Client truy vấn được.
+> Nếu schema `User` thực tế khác KB (tên cột, phiên bản Prisma), Tech Lead sửa tài liệu cho khớp và ghi vào [[OPEN_QUESTIONS]] Q-15.
 
 ## 14 bảng
 | Bảng | Khóa chính | Ghi chú |

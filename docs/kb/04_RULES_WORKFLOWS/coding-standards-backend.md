@@ -50,4 +50,4 @@ updated: 2026-11-15
 `/auth/*` (đăng nhập 10/15 phút/IP, đăng ký 5/giờ/IP); `/ai/…/ask` 10/phút/người dùng. Lưu trong bộ nhớ (đủ phạm vi); ghi chú nếu chạy nhiều instance.
 
 ## Test
-Service: unit (repo mock). API: Supertest + DB test thật (PostgreSQL local, database riêng `devlearn_test`). Mỗi endpoint kiểm: thành công, `401`, `403`, `400`, nhánh nghiệp vụ chính ([[testing-strategy]]).
+Agent không viết test và không chạy test; Tech Lead tự kiểm tra bằng checklist test tay ở [[testing-strategy]] (Postman/`curl` + giao diện). Chỉ viết test khi logic cực kỳ phức tạp và được Tech Lead đồng ý.

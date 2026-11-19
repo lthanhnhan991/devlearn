@@ -4,7 +4,7 @@ title: Frontend — Next.js App Router, state, guard, services
 type: architecture
 status: stable
 tags: [frontend, nextjs, tailwind, state, guard]
-related: [adr-001-nextjs-app-router, adr-015-ui-first-mock-adapters, coding-standards-frontend, ui-design-system, ui-screens-client, ui-screens-admin, workflow-ui-mock-wire-backend]
+related: [adr-001-nextjs-app-router, adr-017-solo-dev-workflow, coding-standards-frontend, ui-design-system, ui-screens-client, ui-screens-admin, workflow-solo-dev]
 source: "Đồ án §2.2.5.1"
 updated: 2026-11-15
 ---
@@ -27,16 +27,15 @@ updated: 2026-11-15
 
 Chọn ngữ cảnh khóa ở admin bằng query: `?courseId=…` (và `&examId=…`). Chi tiết từng màn: [[ui-screens-client]], [[ui-screens-admin]].
 
-## Lớp services (đệm giữa UI và API)
+## Lớp services (gọi API — không mock)
 ```
-components/pages ─► features/*/hooks ─► services/<x>.service.ts (interface từ `@/types`)
-                                          ├─ http/<x>.http.ts   (gọi apiClient thật)
-                                          └─ mock/<x>.mock.ts   (đọc mocks/fixtures)
-services/index.ts chọn http|mock theo NEXT_PUBLIC_MOCK_FEATURES  (ví dụ "catalog,learning")
+components/pages ─► features/*/hooks ─► services/index.ts ─► services/http/<x>.http.ts ─► apiClient ─► backend /api/v1
 ```
-- Mọi hàm service trả `Promise<T>` với `T` là kiểu suy ra từ zod ở `@/types` (bản copy của `backend/src/types/`); **mock và http cùng chữ ký** ⇒ đổi nguồn không sửa UI ([[adr-015-ui-first-mock-adapters]]).
-- `apiClient`: `fetch` + `credentials: 'include'`, base `NEXT_PUBLIC_API_BASE_URL`, parse envelope, ném `ApiError { status, code, message, details }`. Tùy chọn `parse` response bằng zod ở môi trường dev để bắt lệch hợp đồng.
-- Mock phải **mô phỏng độ trễ** (`await delay(300–600ms)`) và **các nhánh lỗi** (empty, 403, 500) — xem [[workflow-ui-mock-wire-backend]].
+- **`services/index.ts` chỉ re-export từ `./http/*`** (ví dụ `export * from './http/catalog.http'`). Không chọn nguồn dữ liệu, không biến môi trường bật/tắt mock.
+- Mỗi hàm trong `services/http/<x>.http.ts` trả `Promise<T>` với `T` suy ra từ zod ở `@/types` (bản copy của `backend/src/types/`); ném `ApiError` khi lỗi.
+- `apiClient` (`lib/api-client.ts`): `fetch` + `credentials: 'include'`, base `NEXT_PUBLIC_API_BASE_URL`, parse envelope `{data,meta}` / `{error}`. Ở dev có thể `parse` response bằng zod để bắt lệch hợp đồng.
+- **Không có** `services/mock/`, `mocks/fixtures/`, `NEXT_PUBLIC_MOCK_FEATURES`, độ trễ giả hay công tắc `?mock=`. Dữ liệu mẫu duy nhất là **seed của DB** ([[database-seed-data]]).
+- Quy trình viết một tính năng: DTO → UI → thêm hàm `http` → backend ([[workflow-solo-dev]]). Backend chưa xong thì trang hiện trạng thái lỗi — bình thường.
 
 ## Kiểu dùng chung (`src/types/`)
 `frontend/src/types/` là **bản copy** của `backend/src/types/` ([[adr-016-manual-type-sync]]): **không sửa tay**; cần đổi ⇒ sửa ở backend rồi chạy `./sync-types.sh` (từ thư mục gốc). Import bằng `@/types/...`. Cần `zod` trong `frontend/package.json`.
@@ -51,7 +50,7 @@ services/index.ts chọn http|mock theo NEXT_PUBLIC_MOCK_FEATURES  (ví dụ "ca
 | Đồng hồ thi | `useExamTimer(durationMinutes, onExpire)` — tính từ mốc `Date.now()` lúc vào bài (không tin `setInterval` thuần) |
 
 ## Trạng thái giao diện bắt buộc cho mỗi trang dữ liệu
-`loading` (skeleton) · `empty` · `error` (kèm **Thử lại**) · `forbidden` (403 → thông báo + điều hướng). Thiếu một trạng thái = chưa xong Review gate.
+`loading` (skeleton) · `empty` · `error` (kèm **Thử lại**) · `forbidden` (403 → thông báo + điều hướng). Thiếu một trạng thái = chưa xong bước 1 của [[workflow-solo-dev]].
 
 ## Xử lý lỗi toàn cục
 `401` → xóa `AuthContext`, chuyển trang đăng nhập đúng cổng kèm `next`. `403 NOT_ENROLLED` → về trang chi tiết khóa. Còn lại hiển thị toast/inline theo [[error-handling-conventions]].

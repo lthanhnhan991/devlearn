@@ -31,8 +31,7 @@ devlearn/
 │       ├── app/                      # (client)/ (learn)/ (auth)/login/ admin/login/ admin/(panel)/
 │       ├── components/{ui,client,admin,shared}/
 │       ├── features/<feature>/       # hooks, view-model theo tính năng
-│       ├── services/                 # *.service.ts (interface) + http/ + mock/
-│       ├── mocks/fixtures/           # dữ liệu mẫu có kiểu
+│       ├── services/                 # http/*.http.ts + index.ts (barrel, chỉ trỏ vào http/) — KHÔNG mock
 │       ├── lib/                      # api-client, auth-context, cn(), format
 │       └── types/                    # ★ BẢN COPY từ backend/src/types — KHÔNG SỬA TAY
 ├── rag-service/                 # Python FastAPI (làm sau, Phase 07)
@@ -53,7 +52,7 @@ backend/src/types/
 ├─ labels.ts           # nhãn tiếng Việt cho enum (Đạt, Bản nháp…)
 ├─ errors.ts           # union mã lỗi (VALIDATION_ERROR, NOT_ENROLLED…)
 ├─ scoring.ts          # computeScore, isPassed
-└─ seed-ids.ts         # UUID cố định cho seed DB và mock FE
+└─ seed-ids.ts         # UUID cố định cho seed DB (chỉ backend dùng)
 ```
 **Luật** (chi tiết [[adr-016-manual-type-sync]]): (1) chỉ sửa ở backend; (2) sửa xong chạy `./sync-types.sh` và commit cả hai thư mục; (3) `types/` chỉ import `zod` + chính nó; (4) FE không bao giờ sửa `frontend/src/types/`.
 
@@ -73,12 +72,11 @@ backend/src/types/
 | frontend | `dev` / `build` / `start` | do `create-next-app` tạo | cổng 3000 |
 | frontend | `lint` | giữ script sinh sẵn | |
 | frontend | `typecheck` | `tsc --noEmit` | |
-| frontend | `test` | `vitest run` | component + contract-fixture test |
-| frontend | `e2e` | `playwright test` | Phase 10; cần backend + (RAG giả) đang chạy |
+| frontend | `test` | `vitest run` | test tự động (chỉ khi dự án đã có) |
 | rag-service | — (Python) | `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000` | chạy dev |
 | rag-service | — | `ruff check . && mypy . && pytest` | kiểm tra |
 
-Gọi bằng `cd backend && npm run <script>`; riêng `test` viết `npm run test`.
+Gọi bằng `cd backend && npm run <script>`; riêng `test` viết `npm run test`. **`lint`, `typecheck`, `test` do Tech Lead tự chạy; Agent không chạy** ([[agent-rules]], [[testing-strategy]]).
 
 ## Quy ước đặt tên
 | Đối tượng | Quy ước | Ví dụ |

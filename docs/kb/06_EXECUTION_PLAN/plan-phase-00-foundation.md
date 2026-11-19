@@ -12,16 +12,16 @@ updated: 2026-11-15
 
 **Mục tiêu**: có khung chạy được cho `backend/` và `frontend/` bằng **npm**, DB + seed, kiểu dùng chung + script đồng bộ, design tokens; **loại bỏ rủi ro sớm** (Cloudinary PDF, tên model Gemini).
 **Không dùng**: `pnpm`, monorepo, `packages/`, Docker. **Phụ thuộc**: không. **Cỡ**: M.
-**ID tác vụ**: `P00-BE<n>` (Nhóm A), `P00-FE<n>` (Nhóm B) — để không nhầm với giai đoạn A–E của quy trình.
+**ID tác vụ**: `P00-BE<n>` (Nhóm A), `P00-FE<n>` (Nhóm B) (Nhóm A = Backend, Nhóm B = Frontend).
 Cấu trúc đích: [[architecture-repo-structure]]. Biến môi trường & PostgreSQL: [[architecture-deployment-env]].
 
 ## Bước 0 — Chuẩn bị thư mục gốc (một lần)
-- [ ] P00-0a `mkdir devlearn && cd devlearn && git init`
-- [ ] P00-0b Tạo `.gitignore` ở gốc (nội dung ở [[architecture-repo-structure]])
-- [ ] P00-0c Đặt KB vào `docs/kb/` (giữ nguyên thư mục thiết kế/sơ đồ trong `docs/`)
-- [ ] P00-0d Tạo thư mục rỗng `rag-service/` (kèm `.gitkeep`) — làm thật ở [[plan-phase-07-rag-service]]
-- [ ] P00-0e Chép script đồng bộ: `cp docs/kb/tools/sync-types.sh ./sync-types.sh`
-- [ ] P00-0f Cài sẵn: Node.js LTS, Git (Windows: Git Bash), **PostgreSQL** (hoặc chọn Postgres đám mây) — tạo 2 database `devlearn`, `devlearn_test`
+- [x] P00-0a `mkdir devlearn && cd devlearn && git init`
+- [x] P00-0b Tạo `.gitignore` ở gốc (nội dung ở [[architecture-repo-structure]])
+- [x] P00-0c Đặt KB vào `docs/kb/` (giữ nguyên thư mục thiết kế/sơ đồ trong `docs/`)
+- [x] P00-0d Tạo thư mục rỗng `rag-service/` (kèm `.gitkeep`) — làm thật ở [[plan-phase-07-rag-service]]
+- [x] P00-0e Chép script đồng bộ: `cp docs/kb/tools/sync-types.sh ./sync-types.sh`
+- [x] P00-0f Cài sẵn: Node.js LTS, Git (Windows: Git Bash), **PostgreSQL** (hoặc chọn Postgres đám mây) — tạo 2 database `devlearn`, `devlearn_test`
 
 ## Nhóm A — Setup Backend (`backend/`, npm)
 ### A1. Khởi tạo & cài thư viện
@@ -56,8 +56,8 @@ Cấu trúc đích: [[architecture-repo-structure]]. Biến môi trường & Pos
 - [x] P00-BE19 Helper `rate-limit`
 
 ### A5. Spike rủi ro (30–60 phút mỗi cái; script dùng một lần, **không commit**)
-- [x] P00-BE20 **Cloudinary**: upload 1 PDF + 1 video nhỏ (`npx tsx scripts/spike-cloudinary.ts`); mở URL ở cửa sổ ẩn danh; tải bằng `curl` không cookie ⇒ ghi kết quả vào [[OPEN_QUESTIONS]] Q-09 ([[concept-file-storage]])
-- [x] P00-BE21 **Gemini**: tra tài liệu Google để chọn tên model embedding + Flash hiện hành, thử 1 embedding + 1 generate bằng `curl` ⇒ ghi Q-10 ([[adr-006-gemini-embedding-and-llm]])
+- [] P00-BE20 **Cloudinary**: upload 1 PDF + 1 video nhỏ (`npx tsx scripts/spike-cloudinary.ts`); mở URL ở cửa sổ ẩn danh; tải bằng `curl` không cookie ⇒ ghi kết quả vào [[OPEN_QUESTIONS]] Q-09 ([[concept-file-storage]])
+- [] P00-BE21 **Gemini**: tra tài liệu Google để chọn tên model embedding + Flash hiện hành, thử 1 embedding + 1 generate bằng `curl` ⇒ ghi Q-10 ([[adr-006-gemini-embedding-and-llm]])
 
 ## Nhóm B — Setup Frontend (`frontend/`, npm)
 ### B1. Khởi tạo
@@ -65,23 +65,20 @@ Cấu trúc đích: [[architecture-repo-structure]]. Biến môi trường & Pos
 - [x] P00-FE2 `cd frontend && npm install zod`; dev: `npm install -D vitest @vitejs/plugin-react jsdom @testing-library/react @testing-library/jest-dom @testing-library/user-event prettier`
 - [x] P00-FE3 `tsconfig.json`: bật thêm `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` (đã có `strict`); ESLint: `no-explicit-any`, `no-non-null-assertion`, `ban-ts-comment` = error
 - [x] P00-FE4 `scripts`: giữ `dev/build/start/lint` sinh sẵn; thêm `typecheck` (`tsc --noEmit`), `test` (`vitest run`); tạo `vitest.config.ts` (alias `@` → `./src`, môi trường `jsdom`) + 1 test mẫu chạy được
-- [x] P00-FE5 Tạo `frontend/.env.local` + `.env.example` ([[architecture-deployment-env]]) — chỉ `NEXT_PUBLIC_API_BASE_URL`, `NEXT_PUBLIC_MOCK_FEATURES`
+- [x] P00-FE5 Tạo `frontend/.env.local` + `.env.example` ([[architecture-deployment-env]]) — chỉ `NEXT_PUBLIC_API_BASE_URL`
 
 ### B2. Nhận kiểu dùng chung
 - [x] P00-FE6 Từ thư mục gốc chạy `./sync-types.sh` (hoặc `bash sync-types.sh` / Git Bash) ⇒ có `frontend/src/types/`
 - [x] P00-FE7 `./sync-types.sh --check` báo ✅; commit **cả hai** thư mục `types/` cùng một commit (luật R2)
-- [x] P00-FE8 Thử `import { computeScore } from '@/types/scoring'` trong một test ⇒ chạy được
+<!-- - [x] P00-FE8 Thử `import { computeScore } from '@/types/scoring'` trong một test ⇒ chạy được -->
 
 ### B3. Khung giao diện
 - [x] P00-FE9 Design tokens theo [[ui-design-system]]: nếu có `tailwind.config.ts` thì khai báo ở đó; nếu Tailwind v4 (không có file này) khai báo bằng `@theme` trong `globals.css`. Font Inter qua `next/font/google`
-- [x] P00-FE10 Khung thư mục `src/{components/{ui,client,admin,shared},features,services/{http,mock},mocks/fixtures,lib}`
+- [x] P00-FE10 Khung thư mục `src/{components/{ui,client,admin,shared},features,services/http,lib}`
 - [x] P00-FE11 `components/ui/*` nguyên tử (Button, Input, Select, Tabs, Badge, StatusChip, ProgressBar, Modal, ConfirmDialog, Toast, Skeleton, EmptyState, ErrorState, Pagination, DataTable, FileDropzone)
 - [x] P00-FE12 `ClientShell` + `Navbar`; `AdminShell` + `AdminSidebar` (khung rỗng, menu thống nhất — C-08 ở [[delta-vs-thesis]])
-- [x] P00-FE13 `lib/api-client.ts` (envelope, `ApiError`, `credentials: 'include'`); `services/index.ts` (chọn mock/http theo `NEXT_PUBLIC_MOCK_FEATURES`); tiện ích `delay`, công tắc `?mock=error|empty|forbidden`; khung `AuthContext`
+- [x] P00-FE13 `lib/api-client.ts` (envelope, `ApiError`, `credentials: 'include'`); `services/index.ts` (chỉ re-export từ `http/`); khung `AuthContext`
 - [x] P00-FE14 Trang tạm `/design` hiển thị mọi component `ui` ở cả 2 giao diện (CLIENT xanh lá / ADMIN navy)
-
-## Review gate (cổng người duyệt)
-- [x] So token màu/chữ với ảnh thiết kế (chốt màu chip CLIENT) · [ ] `/design` đúng cả 2 giao diện · [ ] `backend` và `frontend` mỗi bên chạy được độc lập
 
 ## Definition of Done
 - [x] `cd backend && npm run lint && npm run typecheck && npm run test` xanh

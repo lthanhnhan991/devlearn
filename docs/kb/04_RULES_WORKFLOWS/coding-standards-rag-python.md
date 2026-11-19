@@ -20,5 +20,5 @@ updated: 2026-11-15
 - Gemini: retry có backoff (429/5xx), giới hạn kích thước lô; model name từ env; prompt đặt ở `prompts.py` (không rải trong code).
 - Log JSON; **không** log nội dung tài liệu/câu hỏi ở INFO; log `documentId`, `courseId`, thời gian, số chunk.
 - Tải file: chỉ `https`, giới hạn 12 MB, timeout 30 s, chặn địa chỉ nội bộ (SSRF: từ chối `localhost`, dải riêng) vì URL do backend cung cấp nhưng vẫn phòng thủ.
-- Test: pytest; Gemini và embedding **giả (fake)**; Chroma `EphemeralClient`; test cho `NO_TEXT_LAYER`, idempotent ingest, filter `course_id`, `found=false`.
+- Test: Tech Lead test tay bằng `curl` ([[plan-phase-07-rag-service]]); Agent không viết pytest trừ khi logic cực kỳ phức tạp và được đồng ý ([[testing-strategy]]).
 - Chạy: `python -m venv .venv`, `pip install -r requirements.txt`, `uvicorn app.main:app --host 127.0.0.1 --port 8000` — **một worker** (không dùng `--workers`) ([[adr-005-chromadb-embedded]]). `.venv/` và `data/` không commit.

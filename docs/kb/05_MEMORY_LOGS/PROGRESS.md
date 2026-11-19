@@ -10,35 +10,58 @@ updated: 2026-11-15
 ---
 # PROGRESS
 
-> Agent/Dev: thêm mục **trên cùng** của "Nhật ký" sau mỗi tác vụ ([[agent-rules]] §3). Không xóa mục cũ.
+> Agent: thêm **một mục ngắn** lên đầu "Nhật ký" sau mỗi tác vụ ([[agent-rules]] §6). Không xóa mục cũ (các mục cũ nhắc mock/Review là lịch sử).
 
 ## Bảng tiến độ theo phase
-| Phase | Nội dung | A UI+Mock | B Review | C Wire | D Backend | E Test | Ghi chú |
-|---|---|---|---|---|---|---|---|
-| P00 | [[plan-phase-00-foundation]] | — | — | — | — | ✅ | làm lại theo ADR-016 |
-| P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
-| P02 | [[plan-phase-02-course-catalog]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P06 | [[plan-phase-06-exam-admin-stats]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P07 | [[plan-phase-07-rag-service]] | — | — | — | ⬜ | ⬜ | không có UI |
-| P08 | [[plan-phase-08-ai-chat-and-docs]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P09 | [[plan-phase-09-admin-dashboard-users]] | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | |
-| P10 | [[plan-phase-10-hardening-release]] | — | — | — | — | ⬜ | |
+Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API · **Bước 2** Backend (+DB) · **Bước 3** Tech Lead tự test.
+| Phase | Nội dung | Bước 1 UI & Wire | Bước 2 Backend (+DB) | Bước 3 Test (Tech Lead) | Ghi chú |
+|---|---|---|---|---|---|
+| P00 | [[plan-phase-00-foundation]] | — | — | ✅ | Hoàn thành thực tế; spike Cloudinary/Gemini hoãn (Q-09/Q-10) |
+| P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
+| P02 | [[plan-phase-02-course-catalog]] | ⬜ | ⬜ | ⬜ | |
+| P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | |
+| P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
+| P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
+| P06 | [[plan-phase-06-exam-admin-stats]] | ⬜ | ⬜ | ⬜ | |
+| P07 | [[plan-phase-07-rag-service]] | — | ⬜ | ⬜ | không có UI; spike Gemini trước |
+| P08 | [[plan-phase-08-ai-chat-and-docs]] | ⬜ | ⬜ | ⬜ | |
+| P09 | [[plan-phase-09-admin-dashboard-users]] | ⬜ | ⬜ | ⬜ | |
+| P10 | [[plan-phase-10-hardening-release]] | — | — | ⬜ | |
 
-Ký hiệu: ⬜ chưa · 🟡 đang làm · ✅ xong · ⛔ bị chặn (ghi lý do ở cột Ghi chú).
+Ký hiệu: ⬜ chưa · 🟡 đang làm · ✅ xong · ⛔ bị chặn (ghi lý do ở Ghi chú).
 
 ## Quyết định/nợ kỹ thuật đang mở
 Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô tả> — <ảnh hưởng> — <đề xuất>`.
 
+- TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
+
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-19 · Cleanup · Agent — Dọn dẹp codebase chuyển sang quy trình Solo Dev
+- **Tác vụ**: Xoá toàn bộ hạ tầng Mock, gộp thư mục middleware, dọn test sample, sửa typecheck errors.
+- **Đã làm**:
+  - **FE — Xoá Mock**: Xóa `frontend/src/services/mock/`, `frontend/src/mocks/fixtures/auth.ts`, `frontend/src/lib/mock.ts`.
+  - **FE — services/index.ts**: Viết lại — chỉ export từ `./http/auth.http`; `authService = authHttp` trực tiếp, không còn phụ thuộc mock.
+  - **FE — env**: Xóa dòng `NEXT_PUBLIC_MOCK_FEATURES` khỏi `frontend/.env.local` và `frontend/.env.example`.
+  - **FE — Typecheck fix**: Sửa `src/lib/api-client.ts` — tách `body` khỏi spread để thoả `exactOptionalPropertyTypes`.
+  - **BE — Middleware gộp**: Di chuyển `backend/src/middleware/error-handler.ts` vào `backend/src/middlewares/`; xóa thư mục `backend/src/middleware/` (số ít); cập nhật import trong `app.ts`.
+  - **BE — Typecheck fix**: Sửa `backend/src/lib/jwt.ts` — tránh cast `expiresIn` thành `undefined` với `exactOptionalPropertyTypes`.
+  - **FE — Test sample**: Xóa `frontend/src/__tests__/sample.test.tsx`.
+  - **Kiểm tra**: `typecheck` frontend ✅ · `typecheck` backend ✅.
+- **Lệch/Quyết định**: TD-01 đã xử lý xong, đóng nợ kỹ thuật.
+- **Tiếp theo**: Phase 02 — Course Catalog.
+
+### 2026-11-19 · KB · Tech Lead — Chuyển sang quy trình Solo Dev (ADR-017)
+- **Tác vụ**: Bỏ Mock/Review; quy trình 3 bước (UI & Wire API → Backend → Tech Lead test). Agent không chạy lint/typecheck/test, không in code ra chat.
+- **Đã làm**: cập nhật KB ([[workflow-solo-dev]], [[adr-017-solo-dev-workflow]]) và các file log/plan.
+- **Lệch/Quyết định**: còn nợ TD-01 (dọn mock trong code).
+- **Tiếp theo**: Phase 02.
 
 ### 2026-11-17 · P01 · Tech Lead — Đóng Phase 01 Auth (test DB thực tế thành công)
 - **Tác vụ**: Đóng toàn bộ Phase 01 (A→B→C→D→E).
 - **Đã làm**: Test thực tế với PostgreSQL: đăng ký, đăng nhập (CLIENT & ADMIN), đăng xuất, GET /auth/me; xác nhận đủ nhánh lỗi INVALID_CREDENTIALS, ACCOUNT_LOCKED, WRONG_PORTAL, EMAIL_TAKEN, STUDENT_CODE_TAKEN; cookie httpOnly devlearn_token đặt/xóa đúng; rate limit hoạt động.
 - **Lệch/Quyết định**: Không.
-- **Tiếp theo**: Phase 02 — Course Catalog (UI + Mock → Wire → Backend).
+- **Tiếp theo**: Phase 02 — Course Catalog (DTO → UI → gọi API → Backend → DB; Tech Lead test).
 
 ### 2026-11-17 · P01 · Giai đoạn A hoàn thành (UI + Mock Auth)
 - **Tác vụ**: Sửa lỗi hiển thị Tailwind CSS, hoàn thiện ClientShell, Navbar, AdminShell, StaffGuard layout cho admin/(panel).
@@ -84,6 +107,13 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - **Kiểm tra**: npm install ✅ (0 vuln runtime, 10 vuln dev)
 - **Lệch/Quyết định**: không
 - **Tiếp theo**: A2 Prisma (npx prisma init) — cần xin phép chạy lệnh
+
+### 2026-11-15 · KB · SA — CHUYỂN SANG QUY TRÌNH SOLO DEV (ADR-017)
+- **Tác vụ**: Viết lại KB theo hướng tinh gọn cho Solo Dev sau khi Tech Lead hoàn thành Phase 01 (UI → Backend → DB thật).
+- **Đã làm**: bỏ mock (xóa `adr-015`, mọi tài liệu mock); `workflow-ui-mock-wire-backend` → `workflow-solo-dev` (3 bước); thêm ADR-017; viết lại `agent-rules` (mục "Quy tắc giao tiếp", cấm Agent chạy lint/typecheck/test, không viết file test), `definition-of-done`, `testing-strategy`, `git-workflow`, `plan-00-overview`, phase 00–10; cập nhật `architecture-frontend`, `architecture-deployment-env`, tài liệu DB (migrate dần theo phase), FILE_MAPPING ×2, PROGRESS.
+- **Trạng thái**: P00 + P01 ghi ✅ theo báo cáo của Tech Lead (**SA chưa đối chiếu mã nguồn**). DB thực tế mới có `User` (+ enum `Role`, `UserStatus`); các bảng còn lại thêm theo phase ([[database-erd]]).
+- **Việc dọn**: xóa `frontend/src/services/mock/`, `frontend/src/mocks/`, biến `NEXT_PUBLIC_MOCK_FEATURES` ([[plan-00-overview]]).
+- **Tiếp theo**: Phase 02 — Danh mục & ghi danh ([[plan-phase-02-course-catalog]]).
 
 ### 2026-11-15 · KB · Agent: Claude (System Architect) — ĐƠN GIẢN HÓA CÔNG CỤ (ADR-016)
 - **Tác vụ**: Viết lại KB theo cấu trúc mới sau khi chủ dự án thử Phase 00: chỉ `npm`, 3 thư mục độc lập `backend/` `frontend/` `rag-service/` + `docs/`; bỏ pnpm, monorepo, `packages/contracts`, Docker.

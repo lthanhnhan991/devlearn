@@ -10,7 +10,14 @@ updated: 2026-11-15
 ---
 # Prisma schema — phần 2/2
 
-> Nối tiếp [[database-prisma-schema]] (cùng một file `schema.prisma`).
+> Nối tiếp [[database-prisma-schema]] (cùng một file `schema.prisma`, **thêm dần theo phase** — lịch ở [[database-erd]]).
+
+| Model trong file này | Phase | Trạng thái |
+|---|---|---|
+| `Exam`, `Question`, `Option` | P02 | ⬜ |
+| `AiDocument` | P04 | ⬜ |
+| `Attempt`, `Answer` | P05 | ⬜ |
+| `AiMessage` | P08 | ⬜ |
 
 ```prisma
 // ───────────── Exams ─────────────

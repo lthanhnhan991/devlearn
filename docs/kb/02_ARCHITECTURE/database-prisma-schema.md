@@ -10,7 +10,14 @@ updated: 2026-11-15
 ---
 # Prisma schema — phần 1/2
 
-> Ghép với [[database-prisma-schema-exam-ai]] thành `backend/prisma/schema.prisma`.
+> **Thiết kế đích đầy đủ** — ghép dần với [[database-prisma-schema-exam-ai]] thành `backend/prisma/schema.prisma` theo phase. Lịch migrate và quy tắc "bỏ quan hệ tới model chưa có": [[database-erd]].
+
+| Model / enum trong file này | Phase | Trạng thái |
+|---|---|---|
+| enum `Role`, `UserStatus`; model `User` | P01 | ✅ Đã áp dụng (chỉ cột scalar; thêm trường quan hệ ngược ở các phase sau) |
+| enum `CourseStatus`, `ContentType`; `Course`, `Module`, `Lesson`, `Enrollment` | P02 | ⬜ |
+| `LessonProgress` | P03 | ⬜ |
+| enum `ExamStatus`, `DocStatus` | P02 / P04 | ⬜ |
 
 ```prisma
 generator client {

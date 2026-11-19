@@ -57,7 +57,7 @@ updated: 2026-11-15
 | U-16 | Câu hỏi: đúng 4 lựa chọn, đúng 1 đáp án đúng (UC10) |
 
 ## 4. Khoảng trống thiết kế UI (G)
-Dev dựng theo mô tả dưới, bám [[ui-design-system]]; chốt ở Review gate của phase tương ứng.
+Dev dựng theo mô tả dưới, bám [[ui-design-system]]; Tech Lead chốt khi dùng thử ở phase tương ứng.
 | ID | Màn | Thiếu | Đề xuất |
 |---|---|---|---|
 | G-01 | C01 | Form **Đăng ký** | Họ tên, MSSV, Email, Mật khẩu, Nhập lại mật khẩu; cùng thẻ, tab *Đăng ký* |

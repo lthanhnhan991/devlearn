@@ -38,8 +38,8 @@ flowchart LR
 1. **Backend là cổng duy nhất** xác thực JWT, kiểm quyền, và đọc/ghi PostgreSQL & Cloudinary. FE **không** gọi RAG/Cloudinary-admin trực tiếp.
 2. **RAG service** chỉ làm AI: không biết người dùng, không đọc Postgres. Backend phải kiểm quyền **trước** khi gọi.
 3. **Hợp đồng REST nhỏ gọn** giữa Backend và RAG ([[api-internal-rag]]).
-4. **Contract-first**: schema zod ở `backend/src/types/` là nguồn sự thật cho FE/BE/mock; FE dùng bản copy qua `sync-types.sh` ([[adr-016-manual-type-sync]]).
-5. **UI-first**: FE dựng bằng mock adapters trước, đấu API sau ([[adr-015-ui-first-mock-adapters]]).
+4. **Contract-first**: schema zod ở `backend/src/types/` là nguồn sự thật cho FE/BE; FE dùng bản copy qua `sync-types.sh` ([[adr-016-manual-type-sync]]).
+5. **Solo Dev, 3 bước**: UI & Wire API → Backend → Tech Lead tự test; không mock ([[adr-017-solo-dev-workflow]]).
 
 ## Quyền sở hữu dữ liệu
 | Dữ liệu | Chủ sở hữu | Nơi lưu |
@@ -66,6 +66,6 @@ flowchart LR
 | File | Cloudinary |
 | Auth | JWT (cookie httpOnly) · bcrypt |
 | Hạ tầng dev | npm; chạy trực tiếp 3 tiến trình + PostgreSQL cài trên máy ([[architecture-deployment-env]]); Docker tùy chọn ở Phase 10 |
-| Kiểm thử | Vitest · Supertest · Playwright · pytest |
+| Kiểm thử | Tech Lead tự test tay + lint/typecheck ([[testing-strategy]]) |
 
-Vì sao chọn từng thứ: xem thư mục `03_DECISIONS` ([[adr-001-nextjs-app-router]] … [[adr-015-ui-first-mock-adapters]]).
+Vì sao chọn từng thứ: xem thư mục `03_DECISIONS` ([[adr-001-nextjs-app-router]] … [[adr-017-solo-dev-workflow]]).

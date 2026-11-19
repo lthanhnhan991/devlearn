@@ -25,7 +25,7 @@ Mỗi câu có **mặc định đang áp dụng** — Agent cứ làm theo mặc
 | Q-09 | Tài khoản Cloudinary có cho phát hành PDF công khai không? | Chưa rõ — **spike P00** | luồng RAG tải PDF | [[concept-file-storage]] | 🟡 mở |
 | Q-10 | Tên model Gemini (embedding + Flash) tại thời điểm triển khai & quota | điền env sau khi kiểm tra tài liệu Google | cấu hình RAG | [[adr-006-gemini-embedding-and-llm]] | 🟡 mở |
 | Q-11 | Có thêm cấp độ "Nâng cao" (UI chỉ có Nhập môn/Trung cấp)? | Có mã `ADVANCED` nhưng UI lọc ẩn nếu chưa có khóa | filter C03 | [[concept-course-structure]] | 🟡 mở |
-| Q-12 | Các khoảng trống thiết kế G-01…G-16 — ai thiết kế bổ sung? | Dev dựng theo mô tả ở [[delta-vs-thesis]] §4, bám design system | Review gate mỗi phase | [[delta-vs-thesis]] | 🟡 mở |
+| Q-12 | Các khoảng trống thiết kế G-01…G-16 — ai thiết kế bổ sung? | Dev dựng theo mô tả ở [[delta-vs-thesis]] §4, bám design system | Tech Lead chốt khi dùng thử | [[delta-vs-thesis]] | 🟡 mở |
 | Q-13 | Phạm vi "không triển khai thực tế" trong Đồ án §1.3.1 vs mục tiêu code hiện tại | KB giả định **triển khai đầy đủ** | phạm vi báo cáo | [[delta-vs-thesis]] C-06 | 🟡 mở |
-| Q-14 | PostgreSQL chạy bằng cách nào (cài trên máy hay Postgres đám mây)? | Chưa chọn — chọn khi làm Phase 00 và ghi lại ở đây | `DATABASE_URL`, test DB | [[architecture-deployment-env]] | 🟡 mở |
-| Q-15 | `npx prisma init` (bản mới nhất) có sinh cấu trúc khác schema trong KB không (ví dụ `prisma.config.ts`)? | Giữ cú pháp KB (classic), xóa prisma.config.ts, generator prisma-client-js | Schema, scripts | [[database-prisma-schema]], [[adr-016-manual-type-sync]] | ✅ đã giải quyết 2026-11-16 (Phương án B) |
+| Q-14 | PostgreSQL chạy bằng cách nào (cài trên máy hay Postgres đám mây)? | Đã dùng Postgres local cài trên máy | `DATABASE_URL`, test DB | [[architecture-deployment-env]] | ✅ đóng |
+| Q-15 | `npx prisma init` (bản mới nhất) có sinh cấu trúc khác schema trong KB không (ví dụ `prisma.config.ts`)? | Đã xóa `prisma.config.ts`, dùng Prisma 6 classic (generator `prisma-client-js`) | Schema, scripts | [[database-prisma-schema]], [[adr-016-manual-type-sync]] | ✅ đóng |
