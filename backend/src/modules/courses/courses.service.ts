@@ -31,14 +31,24 @@ export class CoursesService {
         ? [query.level]
         : undefined;
 
-    const { total, courses } = await this.repo.listCourses({
-      q: query.q,
-      topics,
-      levels,
-      sort: query.sort,
+    const params: {
+      q?: string | undefined;
+      topics?: string[] | undefined;
+      levels?: string[] | undefined;
+      sort?: ('newest' | 'popular') | undefined;
+      skip: number;
+      take: number;
+    } = {
       skip,
       take: pageSize,
-    });
+    };
+
+    if (query.q !== undefined) params.q = query.q;
+    if (topics !== undefined) params.topics = topics;
+    if (levels !== undefined) params.levels = levels;
+    if (query.sort !== undefined) params.sort = query.sort;
+
+    const { total, courses } = await this.repo.listCourses(params);
 
     const data: CourseCardDto[] = courses.map((course) => {
       let lessonCount = 0;
@@ -78,7 +88,7 @@ export class CoursesService {
     };
   }
 
-  async getCourseDetail(courseId: string, userId?: string): Promise<CourseDetailDto> {
+  async getCourseDetail(courseId: string, userId?: string | undefined): Promise<CourseDetailDto> {
     const course = await this.repo.findPublishedCourseById(courseId);
     if (!course) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');

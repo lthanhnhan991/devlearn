@@ -1,13 +1,13 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CourseInfoCard } from '@/components/client/CourseInfoCard';
 import { EnrollPanel } from '@/components/client/EnrollPanel';
 import { CourseDetailTabs } from '@/components/client/CourseDetailTabs';
+import { CourseDetailSkeleton } from '@/components/client/CourseSkeletons';
 import { getCourseDetail } from '@/services';
 import { LABELS } from '@/types';
 import type { CourseDetailDto } from '@/types';
-
-export const dynamic = 'force-dynamic';
 
 interface PageProps {
   params: Promise<{
@@ -15,8 +15,12 @@ interface PageProps {
   }>;
 }
 
-export default async function CourseDetailPage(props: PageProps) {
-  const { courseId } = await props.params;
+async function CourseDetailContent({
+  paramsPromise,
+}: {
+  paramsPromise: PageProps['params'];
+}) {
+  const { courseId } = await paramsPromise;
 
   let course: CourseDetailDto | null = null;
   try {
@@ -86,5 +90,13 @@ export default async function CourseDetailPage(props: PageProps) {
         </aside>
       </div>
     </div>
+  );
+}
+
+export default function CourseDetailPage(props: PageProps) {
+  return (
+    <Suspense fallback={<CourseDetailSkeleton />}>
+      <CourseDetailContent paramsPromise={props.params} />
+    </Suspense>
   );
 }

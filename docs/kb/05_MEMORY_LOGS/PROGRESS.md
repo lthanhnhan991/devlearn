@@ -18,7 +18,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 |---|---|---|---|---|---|
 | P00 | [[plan-phase-00-foundation]] | — | — | ✅ | Hoàn thành thực tế; spike Cloudinary/Gemini hoãn (Q-09/Q-10) |
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
-| P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | 🟡 | Chờ Tech Lead migrate, seed & test |
+| P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất — Tech Lead test thực tế thành công |
 | P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
@@ -36,6 +36,32 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-19 · Hoàn tất Phase 02 · Agent — Fix `usePathname()` Suspense & Đóng Phase 02 (Catalog & Enroll)
+- **Tác vụ**: Xử lý cảnh báo `blocking-prerender-client-hook` (`usePathname()`) trong `Navbar` khi bật `cacheComponents` và chính thức hoàn tất Phase 02 sau khi Tech Lead test tay thành công.
+- **Đã làm**:
+  - **FE — Navbar & ClientShell**: Tách `NavLinks` (chứa `usePathname()`) ra khỏi root của `Navbar`, bọc trong `<Suspense fallback={<NavLinksFallback />}>`. Đồng thời bọc `<Navbar />` trong `<Suspense fallback={<NavbarShellFallback />}>` tại `ClientShell.tsx` để bảo vệ toàn bộ nhánh client routes.
+  - **Rà soát hooks**: Đảm bảo toàn bộ các hook router/searchParams/pathname trong Phase 02 đều nằm an toàn bên trong `<Suspense>`.
+  - **Tài liệu**: Đánh dấu hoàn thành toàn bộ checklist test tay trong `plan-phase-02-course-catalog.md`. Cập nhật `FILE_MAPPING.md` (CL-03..CL-06 chuyển sang `✅ Tested`). Đóng Phase 02, sẵn sàng bước sang Phase 03.
+- **Tiếp theo**: Chờ lệnh của Tech Lead để bắt đầu Phase 03 (Màn học & Tiến độ - UC04).
+
+### 2026-11-19 · Next.js 16 PPR Fix · Agent — Xử lý lỗi `blocking-prerender-dynamic` cho các trang Phase 02
+- **Tác vụ**: Đóng gói các lệnh fetch dữ liệu động và `searchParams` vào bên trong các ranh giới `<Suspense fallback={...}>` theo đúng cơ chế Partial Prerendering (PPR / `cacheComponents: true`) của Next.js 16.
+- **Đã làm**:
+  - **FE — CourseSkeletons.tsx**: Tạo các component fallback chuẩn design system: `StatStripSkeleton`, `CourseCardSkeleton`, `CourseGridSkeleton`, `CourseCatalogGridSkeleton`, `CourseCatalogSkeleton`, `CourseDetailSkeleton`.
+  - **FE — app/(client)/page.tsx (C02)**: Tách `StatStripData` và `PopularCoursesData` thành các async component độc lập, bọc trong `<Suspense>`, giúp shell trang chủ tĩnh được prerender trước và dữ liệu động stream vào.
+  - **FE — app/(client)/courses/page.tsx (C03)**: Giữ layout và sidebar tĩnh; bọc toàn bộ phần tiêu thụ `searchParamsPromise` và `listCourses` trong `CoursesResults` với `<Suspense fallback={<CourseCatalogSkeleton />}>`.
+  - **FE — app/(client)/courses/[courseId]/page.tsx (C04)**: Tách `CourseDetailContent` và bọc trong `<Suspense fallback={<CourseDetailSkeleton />}>`, giải quyết triệt để lỗi dynamic fetch chặn prerender.
+- **Tiếp theo**: Tech Lead kiểm tra lại trên trình duyệt và `npm run dev`.
+
+### 2026-11-19 · Phase 02 Fixes · Agent — Khắc phục lỗi Typecheck & Next.js cacheComponents
+- **Tác vụ**: Sửa lỗi TS2379 tại backend và xung đột `force-dynamic` tại frontend theo phản hồi từ Tech Lead sau khi chạy migrate/seed DB.
+- **Đã làm**:
+  - **BE — courses.service.ts & courses.repository.ts**: Cập nhật `ListCoursesParams` và khai báo đối tượng tham số khớp `exactOptionalPropertyTypes: true`, chỉ gán thuộc tính khi khác `undefined`. Làm rõ kiểu `userId?: string | undefined` trong `getCourseDetail`. Rà soát các module `courses/`, `enrollments/`, `public/`.
+  - **FE — App Routes (C02, C03, C04)**: Gỡ bỏ `export const dynamic = 'force-dynamic';` tại `(client)/page.tsx`, `(client)/courses/page.tsx`, `(client)/courses/[courseId]/page.tsx` để tương thích cấu hình `cacheComponents: true` (Next.js 16).
+  - **FE — CourseFilterSidebar**: Bọc `<CourseFilterSidebar />` trong `<Suspense>` để đảm bảo Next.js client-side de-opt và streaming hoạt động trơn tru khi dùng `useSearchParams()`.
+  - **Tài liệu**: Cập nhật hoàn thành mục chạy migrate/seed trong `plan-phase-02-course-catalog.md`.
+- **Tiếp theo**: Tech Lead chạy lại typecheck và khởi động backend/frontend để kiểm thử chức năng.
 
 ### 2026-11-19 · Phase 02 · Agent — Danh mục khóa học & Ghi danh (UC03, UC04)
 - **Tác vụ**: Hoàn thành Bước 1 (DTO + UI + Wire) và Bước 2 (Backend + DB) theo quy trình Solo Dev (`workflow-solo-dev.md`).

@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/shared/Logo';
@@ -8,16 +9,51 @@ import { useAuth } from '@/features/auth/auth-context';
 import { cn } from '@/lib/cn';
 import { UserMenu } from './UserMenu';
 
-export function Navbar() {
-  const pathname = usePathname();
-  const { status, user } = useAuth();
+const NAV_LINKS = [
+  { href: '/', label: 'Khám phá' },
+  { href: '/courses', label: 'Danh mục' },
+  { href: '/my-courses', label: 'Khóa học của tôi' },
+  { href: '/ai', label: 'Trợ lý AI' },
+] as const;
 
-  const navLinks = [
-    { href: '/', label: 'Khám phá' },
-    { href: '/courses', label: 'Danh mục' },
-    { href: '/my-courses', label: 'Khóa học của tôi' },
-    { href: '/ai', label: 'Trợ lý AI' },
-  ];
+function NavLinks() {
+  const pathname = usePathname();
+
+  return (
+    <nav className="hidden items-center gap-6 md:flex" aria-label="Điều hướng chính">
+      {NAV_LINKS.map((link) => {
+        const active = pathname === link.href;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+              'text-sm font-medium transition-colors hover:text-client-primary',
+              active ? 'font-semibold text-client-primary' : 'text-slate-700',
+            )}
+          >
+            {link.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function NavLinksFallback() {
+  return (
+    <nav className="hidden items-center gap-6 md:flex" aria-label="Điều hướng chính">
+      {NAV_LINKS.map((link) => (
+        <span key={link.href} className="text-sm font-medium text-slate-700">
+          {link.label}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+export function Navbar() {
+  const { status, user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white">
@@ -31,23 +67,9 @@ export function Navbar() {
           >
             <Logo tone="client" />
           </Link>
-          <nav className="hidden items-center gap-6 md:flex" aria-label="Điều hướng chính">
-            {navLinks.map((link) => {
-              const active = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    'text-sm font-medium transition-colors hover:text-client-primary',
-                    active ? 'font-semibold text-client-primary' : 'text-slate-700',
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
+          <Suspense fallback={<NavLinksFallback />}>
+            <NavLinks />
+          </Suspense>
         </div>
 
         {/* Right: Search box + Auth */}

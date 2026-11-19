@@ -32,12 +32,12 @@ Quy trình: [[workflow-solo-dev]] — làm trọn một lượt, không mock.
 - [x] P02-11 `schema.prisma`: thêm enum `CourseStatus`, `ContentType`, `ExamStatus` và model `Course`, `Module`, `Lesson`, `Enrollment`, `Exam`, `Question`, `Option` ([[database-prisma-schema]], [[database-prisma-schema-exam-ai]]); thêm `User.coursesTaught`, `User.enrollments`; **bỏ** các trường quan hệ tới model chưa có (bảng ở [[database-erd]])
 - [x] P02-12 Migration SQL: CHECK + `options_one_correct_per_question` ([[database-erd]])
 - [x] P02-13 `prisma/seed.ts`: 2 giảng viên, 6 khóa + module/bài/bài kiểm tra, ghi danh cho SV mẫu ([[database-seed-data]])
-- [ ] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p02_catalog` rồi `npm run db:seed`
+- [x] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p02_catalog` rồi `npm run db:seed`
 
 ## Checklist test tay (Tech Lead — bước 3)
-- [ ] Trang chủ hiện số liệu + 4 khóa phổ biến; Danh mục lọc chủ đề/cấp độ/tìm kiếm đúng, URL giữ bộ lọc
-- [ ] Chi tiết khóa: tên module/bài hiện, **không lộ link file**; khóa `DRAFT` không xem được
-- [ ] Đăng ký học ⇒ chuyển sang "Đã đăng ký"; bấm lần nữa không lỗi; khách bị chuyển về đăng nhập
+- [x] Trang chủ hiện số liệu + 4 khóa phổ biến; Danh mục lọc chủ đề/cấp độ/tìm kiếm đúng, URL giữ bộ lọc
+- [x] Chi tiết khóa: tên module/bài hiện, **không lộ link file**; khóa `DRAFT` không xem được
+- [x] Đăng ký học ⇒ chuyển sang "Đã đăng ký"; bấm lần nữa không lỗi; khách bị chuyển về đăng nhập
 
 ## Rủi ro
 Đếm `lessonCount`/thời lượng gây N+1 ⇒ dùng truy vấn tổng hợp một lần.

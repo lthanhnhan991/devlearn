@@ -1,12 +1,15 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { buttonStyles } from '@/components/ui/Button';
 import { StatStrip } from '@/components/client/StatStrip';
 import { TopicTile } from '@/components/client/TopicTile';
 import { CourseCard } from '@/components/client/CourseCard';
+import {
+  StatStripSkeleton,
+  CourseGridSkeleton,
+} from '@/components/client/CourseSkeletons';
 import { getPublicStats, listCourses } from '@/services';
 import type { CourseCardDto, CourseTopic, PublicStatsDto } from '@/types';
-
-export const dynamic = 'force-dynamic';
 
 const FEATURED_TOPICS: { topic: CourseTopic; description: string }[] = [
   { topic: 'PROGRAMMING', description: 'Python, Java, thuật toán và cấu trúc dữ liệu' },
@@ -15,23 +18,43 @@ const FEATURED_TOPICS: { topic: CourseTopic; description: string }[] = [
   { topic: 'SOFTWARE_ENGINEERING', description: 'Kiểm thử, Git, quy trình phát triển phần mềm' },
 ];
 
-export default async function HomePage() {
+async function StatStripData() {
   let stats: PublicStatsDto | null = null;
-  let popularCourses: CourseCardDto[] = [];
-
   try {
     stats = await getPublicStats();
   } catch {
-    // Bỏ qua lỗi kết nối khi SSR
+    // Bỏ qua lỗi kết nối
   }
+  return <StatStrip stats={stats} />;
+}
 
+async function PopularCoursesData() {
+  let popularCourses: CourseCardDto[] = [];
   try {
     const res = await listCourses({ sort: 'popular', pageSize: 4 });
     popularCourses = res.data ?? [];
   } catch {
-    // Bỏ qua lỗi kết nối khi SSR
+    // Bỏ qua lỗi kết nối
   }
 
+  if (popularCourses.length === 0) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-slate-500">
+        <p>Chưa có khóa học nào được xuất bản.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {popularCourses.map((course) => (
+        <CourseCard key={course.id} course={course} />
+      ))}
+    </div>
+  );
+}
+
+export default function HomePage() {
   return (
     <div className="flex flex-col gap-16 pb-16">
       {/* Hero Section */}
@@ -66,7 +89,7 @@ export default async function HomePage() {
           </div>
 
           <div className="lg:col-span-5 flex justify-center">
-            {/* Visual card placeholder */}
+            {/* Visual card */}
             <div className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
               <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                 <div className="size-3 rounded-full bg-rose-400" />
@@ -95,7 +118,9 @@ export default async function HomePage() {
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-6">
         {/* StatStrip */}
         <section aria-label="Thống kê hệ thống">
-          <StatStrip stats={stats} />
+          <Suspense fallback={<StatStripSkeleton />}>
+            <StatStripData />
+          </Suspense>
         </section>
 
         {/* Chủ đề nổi bật */}
@@ -143,21 +168,13 @@ export default async function HomePage() {
               href="/courses?sort=popular"
               className="text-sm font-semibold text-client-primary hover:underline"
             >
-              Xem tất cả ({popularCourses.length}) →
+              Xem tất cả →
             </Link>
           </div>
 
-          {popularCourses.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {popularCourses.map((course) => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-slate-200 bg-white p-12 text-center text-slate-500">
-              <p>Chưa có khóa học nào được xuất bản.</p>
-            </div>
-          )}
+          <Suspense fallback={<CourseGridSkeleton count={4} />}>
+            <PopularCoursesData />
+          </Suspense>
 
           <div className="flex justify-center pt-4">
             <Link

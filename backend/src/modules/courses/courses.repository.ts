@@ -2,10 +2,10 @@ import { prisma } from '../../lib/prisma';
 import type { Prisma } from '@prisma/client';
 
 export interface ListCoursesParams {
-  q?: string;
-  topics?: string[];
-  levels?: string[];
-  sort?: 'newest' | 'popular';
+  q?: string | undefined;
+  topics?: string[] | undefined;
+  levels?: string[] | undefined;
+  sort?: ('newest' | 'popular') | undefined;
   skip: number;
   take: number;
 }
