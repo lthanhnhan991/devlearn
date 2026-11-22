@@ -4,9 +4,9 @@ title: API Contracts — Quy ước chung, mã lỗi, DTO dùng chung, chỉ m�
 type: api
 status: stable
 tags: [api, contract, rest, dto, errors]
-related: [api-auth, api-catalog, api-learning, api-exam-student, api-ai-chat, api-admin-courses, api-admin-content, api-admin-exams, api-admin-exam-stats, api-admin-ai-docs, api-admin-users-dashboard, api-internal-rag, error-handling-conventions, adr-016-manual-type-sync]
+related: [adr-018-dynamic-topics, concept-topics, api-admin-topics, api-auth, api-catalog, api-learning, api-exam-student, api-ai-chat, api-admin-courses, api-admin-content, api-admin-exams, api-admin-exam-stats, api-admin-ai-docs, api-admin-users-dashboard, api-internal-rag, error-handling-conventions, adr-016-manual-type-sync]
 source: "Thiết kế của Tech Lead; nghiệp vụ từ Đồ án §2.3, §3.2"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # API Contracts (hub)
 
@@ -44,6 +44,7 @@ updated: 2026-11-15
 | 409 | `ALREADY_ENROLLED` | đã ghi danh |
 | 409 | `COURSE_NOT_READY` | xuất bản thiếu nội dung |
 | 409 | `COURSE_HAS_ENROLLMENTS` | không xóa được khóa |
+| 409 | `TOPIC_NAME_TAKEN`, `TOPIC_SLUG_TAKEN`, `TOPIC_IN_USE`, `TOPIC_INACTIVE` | ràng buộc chủ đề (trùng tên/slug; đang có khóa dùng; chủ đề đang ẩn) — [[api-admin-topics]] |
 | 409 | `EXAM_EMPTY`, `EXAM_NOT_EDITABLE`, `EXAM_HAS_ATTEMPTS`, `EXAM_DUPLICATE` | ràng buộc bài kiểm tra |
 | 409 | `NO_READY_DOCUMENTS` | khóa chưa có tài liệu AI sẵn sàng |
 | 409 | `DOCUMENT_BUSY` | tài liệu AI đang xử lý, chưa nạp lại được (xóa vẫn được phép) |
@@ -58,7 +59,6 @@ updated: 2026-11-15
 ## 3. DTO dùng chung (nguồn: `backend/src/types/dto/*.ts`, viết bằng zod; FE dùng bản copy `frontend/src/types/dto/*.ts`)
 ```ts
 type Role = 'STUDENT' | 'TEACHER' | 'ADMIN';
-type TopicCode = 'PROGRAMMING' | 'DATABASE' | 'WEB' | 'SOFTWARE_ENGINEERING';
 type LevelCode = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 type ContentType = 'VIDEO' | 'PDF';
 type ISODate = string;
@@ -67,8 +67,12 @@ interface UserDto        { id: string; fullName: string; email: string; role: Ro
 interface PersonRefDto   { id: string; fullName: string }
 interface PageMeta       { page: number; pageSize: number; total: number; totalPages: number }
 
+// Chủ đề động (bảng `topics`) — ADR-018
+interface TopicRefDto    { id: string; name: string; slug: string; color: string | null; icon: string | null }
+interface TopicDto       extends TopicRefDto { description: string; courseCount: number }   // công khai; courseCount = khóa PUBLISHED
+
 interface CourseCardDto {
-  id: string; title: string; topic: TopicCode; level: LevelCode;
+  id: string; title: string; topic: TopicRefDto; level: LevelCode;
   teacher: PersonRefDto; lessonCount: number; totalDurationMinutes: number; enrollmentCount: number;
 }
 interface ExamOutlineDto { id: string; title: string; status: 'OPEN' | 'CLOSED'; durationMinutes: number; passScore: number; questionCount: number }
@@ -94,23 +98,25 @@ Nhãn tiếng Việt của enum: `backend/src/types/labels.ts` ([[ui-design-syst
 | 4 | `POST /auth/logout` | 🔒 | [[api-auth]] |
 | 5 | `GET /auth/me` | 🔒 | [[api-auth]] |
 | 6 | `GET /public/stats` | 🔓 | [[api-catalog]] |
-| 7 | `GET /courses` | 🔓 | [[api-catalog]] |
-| 8 | `GET /courses/:courseId` | 🔓? | [[api-catalog]] |
-| 9 | `POST /courses/:courseId/enroll` | 🎓 | [[api-catalog]] |
-| 10 | `GET /me/courses` | 🎓 | [[api-learning]] |
-| 11 | `GET /me/learning-summary` | 🎓 | [[api-learning]] |
-| 12 | `GET /courses/:courseId/learn` | 🎓 | [[api-learning]] |
-| 13 | `GET /lessons/:lessonId` | 🎓 | [[api-learning]] |
-| 14 | `POST /lessons/:lessonId/complete` | 🎓 | [[api-learning]] |
-| 15 | `GET /exams/:examId` | 🎓 | [[api-exam-student]] |
-| 16 | `GET /exams/:examId/questions` | 🎓 | [[api-exam-student]] |
-| 17 | `POST /exams/:examId/attempts` | 🎓 | [[api-exam-student]] |
-| 18 | `GET /me/exam-results` | 🎓 | [[api-exam-student]] |
-| 19 | `GET /me/attempts/:attemptId` | 🎓 | [[api-exam-student]] |
-| 20 | `GET /ai/courses` | 🎓 | [[api-ai-chat]] |
-| 21 | `GET /ai/courses/:courseId/messages` | 🎓 | [[api-ai-chat]] |
-| 22 | `POST /ai/courses/:courseId/ask` | 🎓 | [[api-ai-chat]] |
+| 7 | `GET /topics` | 🔓 | [[api-catalog]] |
+| 8 | `GET /courses` | 🔓 | [[api-catalog]] |
+| 9 | `GET /courses/:courseId` | 🔓? | [[api-catalog]] |
+| 10 | `POST /courses/:courseId/enroll` | 🎓 | [[api-catalog]] |
+| 11 | `GET /me/courses` | 🎓 | [[api-learning]] |
+| 12 | `GET /me/learning-summary` | 🎓 | [[api-learning]] |
+| 13 | `GET /courses/:courseId/learn` | 🎓 | [[api-learning]] |
+| 14 | `GET /lessons/:lessonId` | 🎓 | [[api-learning]] |
+| 15 | `POST /lessons/:lessonId/complete` | 🎓 | [[api-learning]] |
+| 16 | `GET /exams/:examId` | 🎓 | [[api-exam-student]] |
+| 17 | `GET /exams/:examId/questions` | 🎓 | [[api-exam-student]] |
+| 18 | `POST /exams/:examId/attempts` | 🎓 | [[api-exam-student]] |
+| 19 | `GET /me/exam-results` | 🎓 | [[api-exam-student]] |
+| 20 | `GET /me/attempts/:attemptId` | 🎓 | [[api-exam-student]] |
+| 21 | `GET /ai/courses` | 🎓 | [[api-ai-chat]] |
+| 22 | `GET /ai/courses/:courseId/messages` | 🎓 | [[api-ai-chat]] |
+| 23 | `POST /ai/courses/:courseId/ask` | 🎓 | [[api-ai-chat]] |
 | 6 endpoint | `/admin/courses` (list, create, get, patch, status, delete) | 🧑‍🏫 | [[api-admin-courses]] |
+| 5 endpoint | `/admin/topics` (list, create, patch, order, delete) | 🧑‍🏫 (xóa: 👑) | [[api-admin-topics]] |
 | 11 endpoint | `/admin/courses/:id/structure`, modules, lessons, upload, order | 🧑‍🏫 | [[api-admin-content]] |
 | 10 endpoint | `/admin/courses/:id/exams`, exams, questions, status | 🧑‍🏫 | [[api-admin-exams]] |
 | 3 endpoint | `/admin/exam-stats/…` | 🧑‍🏫 (owner) | [[api-admin-exam-stats]] |

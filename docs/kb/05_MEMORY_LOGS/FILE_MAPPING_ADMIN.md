@@ -33,6 +33,7 @@ Quy ước trạng thái: `⬜ TODO` → `🎨 UI+Wire` → `🛠 BE done` → `
 | AD-10 | Tài liệu AI (UC11, UC15) | A05 | `…/ai-documents/page.tsx` | `AiDocumentTable`, `FileDropzone`, `CourseSelect` | `admin-ai-docs.service.ts` | `GET/POST /admin/ai-documents`, `POST …/reingest`, `DELETE …` | `A:modules/ai-documents/` | AiDocument | P08 | ⬜ TODO |
 | AD-11 | Người dùng & phân quyền (UC13) | A06 | `…/users/page.tsx` | `UserTable`, `UserFormModal` | `admin-user.service.ts` | `GET/POST /admin/users`, `PATCH /admin/users/:id` | `A:modules/users/` | User | P09 | ⬜ TODO |
 | AD-12 | AdminShell + sidebar + guards | A01–A08 | `…/(panel)/layout.tsx` | `AdminShell`, `AdminSidebar`, `AdminTopbar`, `InfoBanner` | — | `GET /auth/me` | — | — | P01 | ✅ Tested |
+| AD-13 | Quản lý chủ đề (thêm/sửa/sắp xếp/bật-tắt; [[adr-018-dynamic-topics]]) | A09 *(chưa có thiết kế — G-17)* | `…/(panel)/topics/page.tsx` | `TopicTable`, `TopicFormModal`, `ConfirmDialog` | `admin-topic.service.ts` | `GET/POST /admin/topics`, `PATCH /admin/topics/:id`, `PUT /admin/topics/order`, `DELETE /admin/topics/:id` | `A:modules/topics/` | Topic | P04 | ⬜ TODO |
 
 ## Ghi chú
 - Thống kê (AD-08/09) **owner-only** — test 403 bắt buộc ([[adr-013-exam-stats-owner-only]]).

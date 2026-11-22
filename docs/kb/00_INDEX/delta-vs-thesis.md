@@ -4,9 +4,9 @@ title: Lệch so với Đồ án — mâu thuẫn, bổ sung schema, giả đị
 type: index
 status: living
 tags: [delta, conflicts, assumptions, ui-gaps]
-related: [00_INDEX, OPEN_QUESTIONS, database-erd, ui-screens-client, ui-screens-admin, adr-010-unify-documents-into-ai-documents, adr-011-exam-retake-best-score, adr-013-exam-stats-owner-only]
+related: [adr-018-dynamic-topics, concept-topics, 00_INDEX, OPEN_QUESTIONS, database-erd, ui-screens-client, ui-screens-admin, adr-010-unify-documents-into-ai-documents, adr-011-exam-retake-best-score, adr-013-exam-stats-owner-only]
 source: "Đối chiếu Đồ án (3 chương) × 19 màn UI × 10 sơ đồ drawio"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Lệch so với Đồ án
 
@@ -23,6 +23,7 @@ updated: 2026-11-15
 | C-06 | §1.3.1: "không bao gồm lập trình triển khai thực tế" ↔ mục tiêu hiện tại là code | KB giả định triển khai đầy đủ ([[OPEN_QUESTIONS]] Q-13) |
 | C-07 | UI A02 để "SQL cơ bản" là *Bản nháp* nhưng C08 SV đang học 70% khóa đó | Chỉ là dữ liệu minh họa; seed dùng PUBLISHED ([[database-seed-data]]) |
 | C-08 | Sidebar ADMIN khác nhau giữa các màn (một số có "Thống kê bài kiểm tra", một số không) | Một sidebar thống nhất ([[ui-screens-admin]]) |
+| C-09 | KB trước coi chủ đề là 4 mã cố định (`courses.topic`) ↔ Đồ án bản `_1` §3.1 có bảng `topics` + `courses.topic_id` | Theo Đồ án: **bảng `topics` động** ([[adr-018-dynamic-topics]]) |
 
 ## 2. Bổ sung schema so với Đồ án (D)
 | ID | Thay đổi | Lý do |
@@ -34,12 +35,14 @@ updated: 2026-11-15
 | D-05 | `ai_messages.sources` (jsonb) | Hiển thị lại "Nguồn: tài liệu, trang" khi tải lịch sử |
 | D-06 | CHECK + unique từng phần (`options_one_correct_per_question`) | Toàn vẹn dữ liệu đề thi |
 | D-07 | `users.student_code` unique | MSSV hiển thị ở thống kê, tránh trùng |
-| D-08 | `topic`/`level` lưu **mã** (VarChar) | Đồng bộ nhãn ở một nơi (`labels.ts`) |
+| D-08 | `level` lưu **mã** (VarChar) | Đồng bộ nhãn ở một nơi (`labels.ts`); **chủ đề không còn là mã** — xem D-09/D-10 |
+| D-09 | `topics.color`, `topics.icon` | Metadata hiển thị (màu thẻ/tile, icon); Đồ án chỉ có `name, slug, description, is_active, display_order` |
+| D-10 | `topics.name` unique; `slug` varchar(100) unique; CHECK `color` dạng `#RRGGBB`; FK `courses.topic_id` **Restrict** | Chống trùng và chống mất dữ liệu khi xóa chủ đề |
 
 ## 3. Giả định khi Đồ án không nêu (U)
 | ID | Giả định |
 |---|---|
-| U-01 | Chủ đề: 4 mã như UI; cấp độ: `BEGINNER/INTERMEDIATE/ADVANCED` |
+| U-01 | Cấp độ: mã `BEGINNER/INTERMEDIATE/ADVANCED`. Chủ đề **không còn mã cố định** (bảng `topics`, ADR-018); 4 chủ đề đầu là dữ liệu seed |
 | U-02 | Đăng ký SV yêu cầu `studentCode` |
 | U-03 | Tài khoản GV/Admin do Admin tạo (không đăng ký công khai) |
 | U-04 | Dashboard hiển thị cả cho GV, phạm vi khóa của mình |
@@ -55,13 +58,16 @@ updated: 2026-11-15
 | U-14 | Câu bỏ trống không có bản ghi `answers` |
 | U-15 | Mật khẩu ≥ 8 ký tự, có chữ + số; bcrypt cost 12 |
 | U-16 | Câu hỏi: đúng 4 lựa chọn, đúng 1 đáp án đúng (UC10) |
+| U-17 | Chủ đề `is_active=false`: chỉ ẩn khỏi tile/bộ lọc; **khóa thuộc chủ đề đó vẫn hiển thị** (Q-17) |
+| U-18 | Quản lý chủ đề: GV + Admin thêm/sửa/sắp xếp/bật-tắt; **xóa chỉ Admin** và chỉ khi không còn khóa nào dùng (Q-16) |
+| U-19 | `slug` chủ đề bất biến sau khi tạo; tile Trang chủ chỉ hiện chủ đề có khóa `PUBLISHED`, tối đa 8 |
 
 ## 4. Khoảng trống thiết kế UI (G)
 Dev dựng theo mô tả dưới, bám [[ui-design-system]]; Tech Lead chốt khi dùng thử ở phase tương ứng.
 | ID | Màn | Thiếu | Đề xuất |
 |---|---|---|---|
 | G-01 | C01 | Form **Đăng ký** | Họ tên, MSSV, Email, Mật khẩu, Nhập lại mật khẩu; cùng thẻ, tab *Đăng ký* |
-| G-02 | A02 | Form tạo/sửa khóa | Modal: Tên, Mô tả, Chủ đề (select), Cấp độ (select) |
+| G-02 | A02 | Form tạo/sửa khóa | Modal: Tên, Mô tả, Chủ đề (select từ `GET /admin/topics`), Cấp độ (select) |
 | G-03 | A03 | Quản lý **module** | Nút "+ Thêm module", đổi tên inline, xóa (xác nhận), kéo-thả thứ tự |
 | G-04 | A04 | Tạo bài kiểm tra + **trạng thái** | Nút "+ Tạo bài kiểm tra" (chọn module/cuối khóa); `ExamStatusControl` Nháp/Mở/Đóng |
 | G-05 | A03/A04/A05 | Chọn **khóa** làm ngữ cảnh | Select khóa ở đầu trang, đồng bộ `?courseId=` |
@@ -76,3 +82,4 @@ Dev dựng theo mô tả dưới, bám [[ui-design-system]]; Tech Lead chốt kh
 | G-14 | A02–A06 | Xác nhận xóa | `ConfirmDialog` |
 | G-15 | CLIENT | Menu avatar (đăng xuất, kết quả) | Dropdown từ avatar "NA" |
 | G-16 | C05 | Trình xem **PDF** | `<iframe>`/viewer; cảnh báo nếu không tải được |
+| G-17 | A09 (mới) | Màn **Quản lý chủ đề** chưa có thiết kế | Bảng + modal như mô tả ở [[ui-screens-admin]] A09; thêm mục "Chủ đề" ở sidebar |

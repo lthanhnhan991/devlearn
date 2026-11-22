@@ -4,9 +4,9 @@ title: Design system — màu, kiểu chữ, component (rút từ file thiết k
 type: ui
 status: stable
 tags: [ui, tailwind, tokens, components]
-related: [ui-screens-client, ui-screens-admin, coding-standards-frontend, architecture-frontend]
+related: [concept-topics, ui-screens-client, ui-screens-admin, coding-standards-frontend, architecture-frontend]
 source: "Design_ui_devlearn (19 màn hình); màu lấy mẫu từ ảnh"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Design system
 
@@ -16,9 +16,9 @@ Hai "giao diện" khác nhau nhưng dùng chung kiểu chữ: **CLIENT** (xanh l
 | Token Tailwind | Hex | Dùng cho |
 |---|---|---|
 | `client.primary` | `#2E7D32` | nút chính, logo, thanh tiến độ, tab active, avatar |
-| `client.blue` | `#1D5E8C` | thẻ khóa (Lập trình), khung "Thông tin khóa học" |
-| `client.slate` | `#37474F` | thẻ khóa (Cơ sở dữ liệu) |
-| `client.teal` | `#00796B` | thẻ khóa (Web) |
+| `client.blue` | `#1D5E8C` | khung "Thông tin khóa học"; màu **seed** của chủ đề Lập trình |
+| `client.slate` | `#37474F` | màu seed của chủ đề Cơ sở dữ liệu; **màu mặc định** của thẻ/tile khi `topics.color` là `null` |
+| `client.teal` | `#00796B` | màu seed của chủ đề Web |
 | `client.surface` | `#F5F5F5` | nền section xám |
 | `admin.navy` | `#0F1B2D` | sidebar, nền trang đăng nhập admin |
 | `admin.primary` | `#2563EB` | nút chính, mục sidebar active, cột biểu đồ |
@@ -42,7 +42,7 @@ Hai "giao diện" khác nhau nhưng dùng chung kiểu chữ: **CLIENT** (xanh l
 |---|---|
 | `ui/` (nguyên tử) | `Button`, `Input`, `Select`, `Checkbox`, `Radio`, `Tabs`, `Badge`, `StatusChip`, `ProgressBar`, `Modal`, `ConfirmDialog`, `Toast`, `Skeleton`, `EmptyState`, `ErrorState`, `Pagination`, `DataTable`, `FileDropzone` |
 | `client/` | `ClientShell`, `Navbar`, `CourseCard`, `CourseFilterSidebar`, `StatStrip`, `TopicTile`, `ModuleAccordion`, `EnrollPanel`, `CourseInfoCard`, `LessonSidebar`, `LessonViewer` (video/PDF), `LearnHeader`, `ExamHeader`+`ExamTimer`, `QuestionNavigator`, `OptionRadio`, `ChatPanel`, `MessageBubble`, `SourceLine`, `MyCourseRow`, `LearningSummaryCard`, `ResultsTable` |
-| `admin/` | `AdminShell`, `AdminSidebar`, `AdminTopbar`, `InfoBanner`, `StatCard`, `BarChart` (CSS/SVG thuần, không thêm thư viện), `ActivityTable`, `CourseTable`, `StructureTree`, `LessonForm`, `ExamList`, `QuestionEditor`, `ExamStatsHeader`, `StudentResultTable`, `AttemptReview`, `AiDocumentTable`, `UserTable` |
+| `admin/` | `AdminShell`, `AdminSidebar`, `AdminTopbar`, `InfoBanner`, `StatCard`, `BarChart` (CSS/SVG thuần, không thêm thư viện), `ActivityTable`, `CourseTable`, `StructureTree`, `LessonForm`, `ExamList`, `QuestionEditor`, `ExamStatsHeader`, `StudentResultTable`, `AttemptReview`, `AiDocumentTable`, `UserTable`, `TopicTable`, `TopicFormModal` |
 | `shared/` | `Logo`, `RoleGuard`, `StatusLabel` (map enum → nhãn+màu từ `@/types/labels`) |
 
 ## Nhãn trạng thái (một nguồn: `backend/src/types/labels.ts`, FE: `@/types/labels`)
@@ -54,7 +54,7 @@ Hai "giao diện" khác nhau nhưng dùng chung kiểu chữ: **CLIENT** (xanh l
 | `UserStatus` | ACTIVE "Hoạt động" · LOCKED "Khóa" |
 | Kết quả | passed "Đạt" · !passed "Chưa đạt" |
 | `Level` | BEGINNER "Nhập môn" · INTERMEDIATE "Trung cấp" · ADVANCED "Nâng cao" |
-| `Topic` | PROGRAMMING "Lập trình" · DATABASE "Cơ sở dữ liệu" · WEB "Web" · SOFTWARE_ENGINEERING "Công nghệ phần mềm" |
+| Chủ đề | **không có nhãn cố định** — tên/màu lấy từ bảng `topics` qua API ([[concept-topics]]) |
 
 ## Trợ năng & responsive
 Nhãn form liên kết `htmlFor`; tương phản chữ/nền ≥ 4.5:1; focus ring rõ; lưới thẻ khóa `grid-cols-1 sm:2 lg:3(4)`; sidebar admin thu gọn thành drawer dưới `lg`.

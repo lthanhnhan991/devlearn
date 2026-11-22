@@ -6,7 +6,7 @@ status: stable
 tags: [frontend, nextjs, tailwind, state, guard]
 related: [adr-001-nextjs-app-router, adr-017-solo-dev-workflow, coding-standards-frontend, ui-design-system, ui-screens-client, ui-screens-admin, workflow-solo-dev]
 source: "Đồ án §2.2.5.1"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Frontend
 
@@ -46,7 +46,7 @@ components/pages ─► features/*/hooks ─► services/index.ts ─► service
 | Người dùng/phiên | `AuthContext` + `useAuth()` |
 | Dữ liệu trang | hook `useAsync`/`useQuery`-style tự viết nhỏ (`{ data, error, status, refetch }`) |
 | Form | state cục bộ + zod `safeParse` dùng lại schema trong `@/types` |
-| Bộ lọc danh mục | đồng bộ vào URL (`?topic=&level=&q=&page=`) |
+| Bộ lọc danh mục | đồng bộ vào URL (`?topic=<slug>&level=&q=&page=`; danh sách chủ đề lấy từ `GET /topics`) |
 | Đồng hồ thi | `useExamTimer(durationMinutes, onExpire)` — tính từ mốc `Date.now()` lúc vào bài (không tin `setInterval` thuần) |
 
 ## Trạng thái giao diện bắt buộc cho mỗi trang dữ liệu

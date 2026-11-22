@@ -11,9 +11,9 @@ Bộ tài liệu "kim chỉ nam" cho Dev và AI Agent của dự án **DevLearn*
 ## Cấu trúc
 ```
 00_INDEX/            bản đồ, thuật ngữ, lệch-so-với-đồ-án
-01_CONCEPTS/         13 khái niệm nghiệp vụ (auth, course, exam, RAG…)
-02_ARCHITECTURE/     kiến trúc, DB (ERD + Prisma), API contracts (13 file), UI specs, design system
-03_DECISIONS/        16 ADR (ADR-014 superseded bởi ADR-016; ADR-015 đã xóa, thay bằng ADR-017)
+01_CONCEPTS/         14 khái niệm nghiệp vụ (auth, course, exam, RAG…)
+02_ARCHITECTURE/     kiến trúc, DB (ERD + Prisma), API contracts (14 file), UI specs, design system
+03_DECISIONS/        17 ADR (ADR-014 superseded bởi ADR-016; ADR-015 đã xóa, thay bằng ADR-017; ADR-018: chủ đề động)
 04_RULES_WORKFLOWS/  luật code, luật Agent (không in code, không tự test), workflow-solo-dev, testing, git, DoD
 05_MEMORY_LOGS/      PROGRESS, FILE_MAPPING (client/admin), OPEN_QUESTIONS
 06_EXECUTION_PLAN/   11 phase, checklist [ ]: DTO → UI → http → Backend → DB (+ test tay của Tech Lead)

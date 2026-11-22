@@ -6,7 +6,7 @@ status: stable
 tags: [glossary, terms]
 related: [00_INDEX, concept-project-overview, concept-rag-overview, workflow-solo-dev]
 source: "Đồ án + KB"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Thuật ngữ
 
@@ -32,6 +32,8 @@ updated: 2026-11-15
 | **sync-types.sh** | Script `cp` chép types backend → frontend; `--check` kiểm lệch |
 | **Solo Dev 3 bước** | UI & Wire API → Backend → Tech Lead tự test ([[workflow-solo-dev]], [[adr-017-solo-dev-workflow]]) |
 | **Wire** | Gắn UI vào API thật qua `services/http/` (không mock) |
+| **Topic (chủ đề)** | Danh mục phân loại khóa học, bảng `topics` (name, slug, color, icon, `is_active`, `display_order`); 1 chủ đề – nhiều khóa ([[concept-topics]], [[adr-018-dynamic-topics]]) |
+| **Slug** | Mã URL duy nhất, bất biến của chủ đề (`lap-trinh`), dùng để lọc `?topic=` |
 | **Atomic note** | Ghi chú một chủ đề, ≤ 300 dòng, liên kết chéo ([[agent-rules]]) |
 | **ADR** | Architecture Decision Record — thư mục `03_DECISIONS` |
 | **DoD** | Definition of Done ([[definition-of-done]]) |

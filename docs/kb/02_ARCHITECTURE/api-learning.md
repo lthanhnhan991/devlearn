@@ -6,14 +6,14 @@ status: stable
 tags: [api, learning, progress]
 related: [api-contracts, concept-enrollment-progress, plan-phase-03-learning-progress]
 source: "UC04; UI C05, C08"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # API — Learning
 
 ## `GET /me/courses` 🎓
 Query: `status=in-progress|completed` (mặc định `in-progress`).
 ```json
-{ "data": [ { "course": { "id": "c-1", "title": "Nhập môn Python", "topic": "PROGRAMMING", "teacher": { "id": "t-1", "fullName": "Nguyễn Văn A" } },
+{ "data": [ { "course": { "id": "c-1", "title": "Nhập môn Python", "topic": { "id": "tp-1", "name": "Lập trình", "slug": "lap-trinh", "color": "#1D5E8C", "icon": "code" }, "teacher": { "id": "t-1", "fullName": "Nguyễn Văn A" } },
               "progressPercent": 35, "enrolledAt": "2026-11-01T03:00:00.000Z", "completedAt": null, "resumeLessonId": "l-3" } ] }
 ```
 Sắp theo hoạt động gần nhất (tiến độ cập nhật cuối, rồi `enrolledAt`). FE: `progressPercent = 0` ⇒ nhãn nút **Bắt đầu học**.

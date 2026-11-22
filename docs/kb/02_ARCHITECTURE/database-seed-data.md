@@ -4,16 +4,16 @@ title: Dữ liệu seed & ID cố định (nguồn dữ liệu mẫu duy nhất)
 type: database
 status: stable
 tags: [seed, sample-data]
-related: [workflow-solo-dev, adr-017-solo-dev-workflow, database-erd, plan-phase-00-foundation]
+related: [adr-018-dynamic-topics, concept-topics, database-migration-topics, workflow-solo-dev, adr-017-solo-dev-workflow, database-erd, plan-phase-00-foundation]
 source: "Thiết kế của Tech Lead; tên khóa học lấy từ file UI"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Dữ liệu seed
 
 **Mục tiêu**: không còn mock ⇒ **seed là nguồn dữ liệu mẫu duy nhất** để Tech Lead dùng thử UI/API. Seed **mở rộng dần theo phase** (P01: tài khoản; P02: khóa học…; xem cuối file).
 
 ## ID cố định
-`backend/src/types/seed-ids.ts` xuất hằng UUID cố định (ví dụ `COURSE_PYTHON_ID`, `USER_STUDENT_NA_ID`) để `backend/prisma/seed.ts` tạo dữ liệu **lặp lại được** và URL test không đổi sau mỗi lần `db:reset`. Frontend không dùng file này.
+`backend/src/types/seed-ids.ts` xuất hằng UUID cố định (ví dụ `COURSE_PYTHON_ID`, `USER_STUDENT_NA_ID`, `TOPIC_PROGRAMMING_ID`) để `backend/prisma/seed.ts` tạo dữ liệu **lặp lại được** và URL test không đổi sau mỗi lần `db:reset`. Frontend không dùng file này.
 
 ## Tài khoản (chỉ môi trường dev/demo)
 | Email | Vai trò | Mật khẩu | Ghi chú |
@@ -25,15 +25,25 @@ updated: 2026-11-15
 | `sv02…sv12@stu.edu.vn` | STUDENT | `Passw0rd!` | 11 SV để thống kê có số liệu |
 | `locked@stu.edu.vn` | STUDENT, `LOCKED` | `Passw0rd!` | test `ACCOUNT_LOCKED` |
 
+## Chủ đề (`topics`, từ P02b — [[concept-topics]])
+| Tên | `slug` | `color` | `icon` | Thứ tự | `is_active` | Ghi chú |
+|---|---|---|---|---|---|---|
+| Lập trình | `lap-trinh` | `#1D5E8C` | `code` | 0 | ✅ | |
+| Cơ sở dữ liệu | `co-so-du-lieu` | `#37474F` | `database` | 1 | ✅ | |
+| Web | `web` | `#00796B` | `globe` | 2 | ✅ | |
+| Công nghệ phần mềm | `cong-nghe-phan-mem` | `#2E7D32` | `bug` | 3 | ✅ | |
+| Trí tuệ nhân tạo | `tri-tue-nhan-tao` | `#6A1B9A` | `cpu` | 4 | ❌ (ẩn) | chưa có khóa; dùng test "chủ đề ẩn không hiện ở Client", xóa được (không dùng) |
+`seed.ts` tạo bằng upsert theo `slug` với `id` = `TOPIC_*_ID`. Khóa học tham chiếu chủ đề bằng `topicId`.
+
 ## Khóa học (khớp màn UI)
-| Khóa | Chủ đề | Cấp độ | Trạng thái | GV |
+| Khóa | Chủ đề (`slug`) | Cấp độ | Trạng thái | GV |
 |---|---|---|---|---|
-| Nhập môn Python | PROGRAMMING | BEGINNER | PUBLISHED | teacher |
-| Java hướng đối tượng | PROGRAMMING | INTERMEDIATE | PUBLISHED | teacher2 |
-| SQL cơ bản | DATABASE | BEGINNER | **DRAFT** (khớp A02) → seed thêm bản PUBLISHED để SV `na` học; xem ghi chú | teacher |
-| Next.js thực chiến | WEB | INTERMEDIATE | PUBLISHED | teacher |
-| PostgreSQL nâng cao | DATABASE | INTERMEDIATE | PUBLISHED | teacher2 |
-| Kiểm thử phần mềm | SOFTWARE_ENGINEERING | BEGINNER | PUBLISHED | teacher2 |
+| Nhập môn Python | lap-trinh | BEGINNER | PUBLISHED | teacher |
+| Java hướng đối tượng | lap-trinh | INTERMEDIATE | PUBLISHED | teacher2 |
+| SQL cơ bản | co-so-du-lieu | BEGINNER | **DRAFT** (khớp A02) → seed thêm bản PUBLISHED để SV `na` học; xem ghi chú | teacher |
+| Next.js thực chiến | web | INTERMEDIATE | PUBLISHED | teacher |
+| PostgreSQL nâng cao | co-so-du-lieu | INTERMEDIATE | PUBLISHED | teacher2 |
+| Kiểm thử phần mềm | cong-nghe-phan-mem | BEGINNER | PUBLISHED | teacher2 |
 
 > Ghi chú: UI A02 minh họa "SQL cơ bản" là Bản nháp nhưng C08 cho SV đang học 70% khóa này. Seed dùng **SQL cơ bản = PUBLISHED**, và thêm khóa phụ "Git và GitHub cơ bản" = `DRAFT` để có ví dụ bản nháp.
 
@@ -71,6 +81,7 @@ updated: 2026-11-15
 |---|---|
 | P01 ✅ | tài khoản: admin, teacher, teacher2, SV `na` + các SV mẫu, 1 tài khoản `LOCKED` |
 | P02 | 6 khóa + module/bài/bài kiểm tra; ghi danh cho `na` |
+| P02b | 4 chủ đề hoạt động + 1 chủ đề ẩn mẫu; gán `topicId` cho các khóa |
 | P03 | tiến độ bài học (Python 35%, SQL 70%, Next.js 0%) |
 | P05 | lượt làm bài của `na` |
 | P06 | lượt làm của ~10 SV (có câu bỏ trống) cho thống kê |

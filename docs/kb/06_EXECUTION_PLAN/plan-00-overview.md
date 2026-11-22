@@ -4,9 +4,9 @@ title: Kế hoạch thực thi — Tổng quan, phụ thuộc, làn song song
 type: plan
 status: living
 tags: [plan, roadmap, phases, dependencies]
-related: [PROGRESS, workflow-solo-dev, adr-017-solo-dev-workflow, agent-rules, plan-phase-00-foundation, plan-phase-10-hardening-release]
+related: [adr-018-dynamic-topics, PROGRESS, workflow-solo-dev, adr-017-solo-dev-workflow, agent-rules, plan-phase-00-foundation, plan-phase-10-hardening-release]
 source: "Phân tích khối lượng: 19 màn UI, 60 endpoint công khai, 1 dịch vụ RAG"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Kế hoạch thực thi
 
@@ -17,15 +17,17 @@ Dự án chia theo **lát cắt dọc nghiệp vụ** (mỗi phase = một nhóm
 |---|---|---|---|---|
 | [[plan-phase-00-foundation]] | Nền móng & spike rủi ro | — | health | M |
 | [[plan-phase-01-auth]] | Xác thực & phân quyền | C01, A00 | 5 | S |
-| [[plan-phase-02-course-catalog]] | Danh mục & ghi danh | C02, C03, C04 | 4 | M |
+| [[plan-phase-02-course-catalog]] | Danh mục & ghi danh (+ P02b: chủ đề động) | C02, C03, C04 | 5 | M |
 | [[plan-phase-03-learning-progress]] | Học tập & tiến độ | C05, C08 | 5 | M |
-| [[plan-phase-04-admin-content]] | Admin: khóa học & soạn bài + upload | A02, A03 | 17 | L |
+| [[plan-phase-04-admin-content]] | Admin: khóa học, chủ đề & soạn bài + upload | A02, A03, A09 | 22 | L |
 | [[plan-phase-05-exam-student]] | Làm bài & kết quả (SV) | C06, C09 | 5 | M |
 | [[plan-phase-06-exam-admin-stats]] | Admin: bài kiểm tra & thống kê | A04, A07, A08 | 13 | L |
 | [[plan-phase-07-rag-service]] | Dịch vụ RAG (Python) | — | 5 nội bộ | L |
 | [[plan-phase-08-ai-chat-and-docs]] | Tài liệu AI + Chat AI | A05, C07 | 7 + callback | L |
 | [[plan-phase-09-admin-dashboard-users]] | Dashboard & Người dùng | A01, A06 | 4 | S |
 | [[plan-phase-10-hardening-release]] | Hoàn thiện, bảo mật, demo | — | — | M |
+
+**Chủ đề động ([[adr-018-dynamic-topics]], 2026-11-21)**: DB + `GET /topics` + chỉnh Client làm ở **P02b** (mục `P02-T`); CRUD chủ đề ở **P04** (màn A09). Tổng endpoint công khai: 60 → 66.
 
 Cỡ: S ≈ 1–2 ngày · M ≈ 3–5 ngày · L ≈ 5–8 ngày (một dev, tham khảo, hiệu chỉnh sau Phase 01).
 

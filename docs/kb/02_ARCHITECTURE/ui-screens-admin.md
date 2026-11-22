@@ -1,16 +1,16 @@
 ---
 id: ui-screens-admin
-title: Đặc tả màn hình ADMIN (A00–A08)
+title: Đặc tả màn hình ADMIN (A00–A09)
 type: ui
 status: stable
 tags: [ui, admin, teacher, screens]
-related: [ui-design-system, ui-screens-client, FILE_MAPPING_ADMIN, concept-roles-permissions, api-admin-courses, api-admin-content, api-admin-exams, api-admin-exam-stats, api-admin-ai-docs, api-admin-users-dashboard, delta-vs-thesis]
+related: [api-admin-topics, concept-topics, adr-018-dynamic-topics, ui-design-system, ui-screens-client, FILE_MAPPING_ADMIN, concept-roles-permissions, api-admin-courses, api-admin-content, api-admin-exams, api-admin-exam-stats, api-admin-ai-docs, api-admin-users-dashboard, delta-vs-thesis]
 source: "Design_ui_devlearn/ADMIN · 00…08"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Màn hình ADMIN
 
-**AdminShell** (A01–A08): sidebar navy rộng ~256 px — logo **DevLearn** + badge `ADMIN`; nhóm *TỔNG QUAN* (Dashboard), *NỘI DUNG* (Khóa học, Bài học, Bài kiểm tra, Thống kê bài kiểm tra), *TRỢ LÝ AI* (Tài liệu AI), *HỆ THỐNG* (Người dùng — **chỉ ADMIN**). Topbar: breadcrumb + "Vai trò: X · email". Hình thiết kế có sidebar lệch nhau giữa các màn ⇒ **dùng một sidebar thống nhất** như trên (G-12). Nhiều màn có **InfoBanner** "Quản lý nội dung hiển thị ở CLIENT · <màn tương ứng>".
+**AdminShell** (A01–A09): sidebar navy rộng ~256 px — logo **DevLearn** + badge `ADMIN`; nhóm *TỔNG QUAN* (Dashboard), *NỘI DUNG* (Khóa học, **Chủ đề**, Bài học, Bài kiểm tra, Thống kê bài kiểm tra), *TRỢ LÝ AI* (Tài liệu AI), *HỆ THỐNG* (Người dùng — **chỉ ADMIN**). Topbar: breadcrumb + "Vai trò: X · email". Hình thiết kế có sidebar lệch nhau giữa các màn ⇒ **dùng một sidebar thống nhất** như trên (G-12). Nhiều màn có **InfoBanner** "Quản lý nội dung hiển thị ở CLIENT · <màn tương ứng>".
 
 ## A00 · Đăng nhập quản trị — `ADMIN · 00 Đăng nhập quản trị.png`
 - `/admin/login`; nền navy; thẻ trắng: logo + badge ADMIN, "Đăng nhập quản trị", Email (`admin@edu.vn`), Mật khẩu, nút xanh **Đăng nhập quản trị**; chú thích "Chỉ tài khoản Teacher hoặc Admin được vào. Tài khoản Student sẽ bị từ chối."; link "← Về trang dành cho người học".
@@ -23,7 +23,7 @@ updated: 2026-11-15
 ## A02 · Quản lý khóa học — `ADMIN · 02 Quản lý khóa học.png`
 - `/admin/courses`. InfoBanner → CLIENT·Danh mục. Nút **+ Thêm khóa học**; ô tìm + select trạng thái; bảng: Tên khóa học · Chủ đề · Giảng viên · Module · Học viên · Trạng thái (chip) · **Sửa · Xóa**.
 - API `GET/POST/PATCH/DELETE /admin/courses…`.
-- **Gap G-02** form tạo/sửa (Tên, Mô tả, Chủ đề, Cấp độ); **G-13** công tắc Xuất bản/Bản nháp; **G-14** xác nhận xóa; G-11 phân trang.
+- Cột **Chủ đề** = `topic.name` (chủ đề đang ẩn hiển thị mờ kèm "(đã ẩn)"). **Gap G-02** form tạo/sửa (Tên, Mô tả, **Chủ đề — select từ `GET /admin/topics?isActive=true`**, Cấp độ); **G-13** công tắc Xuất bản/Bản nháp; **G-14** xác nhận xóa; G-11 phân trang.
 
 ## A03 · Soạn bài học — `ADMIN · 03 Soạn bài học.png`
 - `/admin/lessons?courseId=`. Breadcrumb *Quản trị › Khóa học › Nhập môn Python › Bài học*. Nút **Xem trước ở client**, **Lưu**.
@@ -53,3 +53,10 @@ updated: 2026-11-15
 - `/admin/exam-stats/[examId]/students/[studentId]?attemptId=`. Link "← Danh sách sinh viên". Header: họ tên, "MSSV · Kiểm tra Module 1 · Nộp lúc …", select **Lần làm** ("Lần 2 (điểm cao nhất)"), điểm `8/10`, chip Đạt, "Đúng 8/10 câu".
 - **AttemptReview**: mỗi câu — nhãn **Đúng/Sai/Chưa trả lời**; 4 đáp án: đúng nền xanh + "Đáp án đúng", SV chọn sai nền đỏ + "Sinh viên chọn", chọn đúng ghi "Đáp án đúng · Sinh viên chọn".
 - API `GET /admin/exam-stats/exams/:examId/students/:studentId/attempts`, `GET /admin/exam-stats/attempts/:attemptId`.
+
+## A09 · Quản lý chủ đề — *(chưa có thiết kế — G-17)*
+- `/admin/topics` (TEACHER + ADMIN). Sidebar *NỘI DUNG › Chủ đề*. InfoBanner "Quản lý nội dung hiển thị ở CLIENT · Danh mục khóa học (Chủ đề & bộ lọc)". Nút **+ Thêm chủ đề**; ô tìm + select (Tất cả / Hoạt động / Ẩn).
+- **TopicTable**: tay kéo ⋮ (hoặc nút ↑↓) để **sắp xếp** · Tên (chấm màu + icon) · Slug · Số khóa · Trạng thái (**công tắc** Hoạt động/Ẩn, có hiệu lực ngay) · **Sửa · Xóa**. **Xóa** chỉ hiện với ADMIN và vô hiệu khi `courseCount > 0` (chú thích "Đang có n khóa — hãy tắt thay vì xóa").
+- **TopicFormModal**: Tên*, Slug (tự sinh từ tên; sửa được **chỉ khi tạo**, khóa khi sửa), Mô tả, Màu (preset theo design system + nhập hex), Icon (select, tùy chọn), Hoạt động (công tắc).
+- API: `GET/POST /admin/topics`, `PATCH /admin/topics/:id`, `PUT /admin/topics/order`, `DELETE /admin/topics/:id` ([[api-admin-topics]]).
+- Trạng thái: `loading` / `empty` ("Chưa có chủ đề nào") / `error` / `forbidden`; lỗi `409 TOPIC_NAME_TAKEN`, `TOPIC_SLUG_TAKEN`, `TOPIC_IN_USE` hiển thị inline. Quy tắc: [[concept-topics]].

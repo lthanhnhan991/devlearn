@@ -4,9 +4,9 @@ title: Vai trò & Ma trận phân quyền (RBAC)
 type: concept
 status: stable
 tags: [rbac, authorization, ownership]
-related: [concept-auth, adr-009-separate-admin-login-portal, adr-013-exam-stats-owner-only, architecture-backend-layers]
+related: [concept-topics, concept-auth, adr-009-separate-admin-login-portal, adr-013-exam-stats-owner-only, architecture-backend-layers]
 source: "Đồ án §1.3.2, §2.2.5.2, §2.3.3; UI ADMIN 01/06/07"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Vai trò & Phân quyền
 
@@ -20,6 +20,8 @@ Ký hiệu: ✅ được · ❌ cấm · 👤 chỉ chủ sở hữu (`courses.t
 | Xem trang chủ, danh mục, chi tiết khóa (tên module/bài) | ✅ | ✅ | — | — |
 | Đăng ký học, học bài, làm kiểm tra, hỏi AI, xem kết quả của mình | ❌ | ✅ | ❌ | ❌ |
 | Tạo khóa học | ❌ | ❌ | ✅ | ✅ |
+| Quản lý chủ đề (xem cả chủ đề ẩn, thêm, sửa, sắp xếp, bật/tắt) — dữ liệu dùng chung, không có chủ sở hữu | ❌ | ❌ | ✅ | ✅ |
+| Xóa chủ đề chưa có khóa nào dùng | ❌ | ❌ | ❌ | ✅ |
 | Sửa/xóa/xuất bản khóa, module, bài học | ❌ | ❌ | 👤 | 🌐 |
 | Quản lý bài kiểm tra & câu hỏi | ❌ | ❌ | 👤 | 🌐 |
 | Quản lý tài liệu AI (tải, nạp lại, xóa) | ❌ | ❌ | 👤 | 🌐 |

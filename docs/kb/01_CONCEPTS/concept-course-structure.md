@@ -4,9 +4,9 @@ title: Cấu trúc khóa học (Course → Module → Lesson)
 type: concept
 status: stable
 tags: [course, module, lesson, f2]
-related: [concept-enrollment-progress, concept-file-storage, api-catalog, api-admin-courses, api-admin-content, database-prisma-schema]
+related: [concept-topics, adr-018-dynamic-topics, concept-enrollment-progress, concept-file-storage, api-catalog, api-admin-courses, api-admin-content, database-prisma-schema]
 source: "Đồ án §2.3.1.2, UC08, UC09; UI CLIENT 03/04, ADMIN 02/03"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Cấu trúc khóa học
 
@@ -23,18 +23,18 @@ Course (DRAFT|PUBLISHED, thuộc 1 teacher)
 |---|---|
 | `title` | 3–200 ký tự |
 | `description` | text, hiển thị ở tab **Tổng quan** |
-| `topic` | mã chủ đề: `PROGRAMMING`, `DATABASE`, `WEB`, `SOFTWARE_ENGINEERING` |
+| `topic_id` | FK **bắt buộc** tới bảng `topics` (chủ đề động — [[concept-topics]]); 1 khóa thuộc đúng 1 chủ đề |
 | `level` | `BEGINNER` (Nhập môn), `INTERMEDIATE` (Trung cấp), `ADVANCED` (Nâng cao) |
 | `status` | `DRAFT` (Bản nháp) / `PUBLISHED` (Đã xuất bản) |
 | `teacher_id` | người tạo = chủ sở hữu |
 
-Nhãn tiếng Việt của mã nằm ở `backend/src/types/labels.ts` (FE dùng bản copy `@/types/labels`) — **không hardcode trong component** ([[coding-standards-frontend]]).
+Nhãn tiếng Việt của các **mã** (`level`, `status`…) nằm ở `backend/src/types/labels.ts` (FE dùng bản copy `@/types/labels`) — **không hardcode trong component** ([[coding-standards-frontend]]). **Chủ đề không còn là mã**: tên/màu/thứ tự lấy từ dữ liệu `topics` qua API.
 
 ## Dữ liệu dẫn xuất hiển thị trên thẻ khóa học
 - `lessonCount` = số bài học **đã xuất bản**.
 - `totalDurationMinutes` = `ceil(sum(lessons.duration_seconds)/60)`; UI đổi sang giờ (`[n] giờ`).
 - `enrollmentCount` = số bản ghi `enrollments`.
-- UI không có ảnh bìa: màu thẻ lấy theo `topic` (xem [[ui-design-system]]).
+- UI không có ảnh bìa: màu thẻ lấy theo `topic.color` (không có ⇒ token mặc định; xem [[ui-design-system]]); nhãn chủ đề = `topic.name`.
 
 ## Quy tắc xuất bản
 1. Tạo mới → `DRAFT`. Chỉ `PUBLISHED` mới xuất hiện ở CLIENT.

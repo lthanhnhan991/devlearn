@@ -4,9 +4,9 @@ title: Prisma schema (1/2) — enum, người dùng, khóa học, tiến độ
 type: database
 status: stable
 tags: [prisma, schema, postgres]
-related: [database-erd, database-prisma-schema-exam-ai, delta-vs-thesis]
+related: [adr-018-dynamic-topics, database-migration-topics, database-erd, database-prisma-schema-exam-ai, delta-vs-thesis]
 source: "Đồ án §3.1.2 (mức luận lý + vật lý)"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Prisma schema — phần 1/2
 
@@ -15,9 +15,11 @@ updated: 2026-11-15
 | Model / enum trong file này | Phase | Trạng thái |
 |---|---|---|
 | enum `Role`, `UserStatus`; model `User` | P01 | ✅ Đã áp dụng (chỉ cột scalar; thêm trường quan hệ ngược ở các phase sau) |
-| enum `CourseStatus`, `ContentType`; `Course`, `Module`, `Lesson`, `Enrollment` | P02 | ⬜ |
+| enum `CourseStatus`, `ContentType`; `Course`, `Module`, `Lesson`, `Enrollment` | P02 | ✅ Đã áp dụng (`p02_catalog`; `Course.topic` cố định — thay ở P02b) |
+| model `Topic`; `Course.topicId` (thay `Course.topic`) | P02b | ⬜ chờ migration `p02b_topics` ([[database-migration-topics]]) |
 | `LessonProgress` | P03 | ⬜ |
-| enum `ExamStatus`, `DocStatus` | P02 / P04 | ⬜ |
+| enum `ExamStatus` | P02 | ✅ Đã áp dụng |
+| enum `DocStatus` | P04 | ⬜ |
 
 ```prisma
 generator client {
@@ -58,18 +60,37 @@ model User {
   @@map("users")
 }
 
+// ───────────── Topics (P02b — ADR-018) ─────────────
+model Topic {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @unique @db.VarChar(100)
+  slug         String   @unique @db.VarChar(100)                 // bất biến sau khi tạo
+  description  String   @default("") @db.Text
+  color        String?  @db.VarChar(7)                           // + #RRGGBB (CHECK ở migration)
+  icon         String?  @db.VarChar(50)                          // + khóa icon (TOPIC_ICON_KEYS)
+  isActive     Boolean  @default(true) @map("is_active")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  courses Course[]
+
+  @@index([isActive, displayOrder])
+  @@map("topics")
+}
+
 // ───────────── Courses ─────────────
 model Course {
   id          String       @id @default(uuid()) @db.Uuid
   title       String       @db.VarChar(200)
   description String       @default("") @db.Text
-  topic       String       @db.VarChar(100)                    // mã: PROGRAMMING | DATABASE | WEB | SOFTWARE_ENGINEERING
+  topicId     String       @map("topic_id") @db.Uuid           // thay cột `topic` (mã cố định) ở P02b
   level       String       @db.VarChar(20)                     // mã: BEGINNER | INTERMEDIATE | ADVANCED
   status      CourseStatus @default(DRAFT)
   teacherId   String       @map("teacher_id") @db.Uuid
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
 
   teacher     User         @relation("CourseTeacher", fields: [teacherId], references: [id])
+  topic       Topic        @relation(fields: [topicId], references: [id], onDelete: Restrict)
   modules     Module[]
   enrollments Enrollment[]
   exams       Exam[]
@@ -78,6 +99,7 @@ model Course {
 
   @@index([teacherId])
   @@index([status])
+  @@index([topicId])
   @@map("courses")
 }
 
@@ -145,6 +167,6 @@ model LessonProgress {
 
 ## Ghi chú
 - `Enrollment → Course` dùng `Restrict`: khóa có ghi danh không xóa được (khớp `409 COURSE_HAS_ENROLLMENTS`).
-- `topic`/`level` là `VarChar` (đúng Đồ án) nhưng **giá trị là mã** được kiểm bằng zod ở `backend/src/types/constants.ts` — thêm chủ đề mới không cần migration.
+- `level` là `VarChar` (đúng Đồ án) nhưng **giá trị là mã** được kiểm bằng zod ở `backend/src/types/constants.ts`. **Chủ đề không còn là mã**: là bảng `topics` + `courses.topic_id` ([[adr-018-dynamic-topics]], [[concept-topics]]); `Course → Topic` dùng `Restrict` để không xóa được chủ đề đang có khóa.
 - Trường đánh dấu `+` là bổ sung so với Đồ án — xem [[delta-vs-thesis]].
 - **Phiên bản Prisma**: schema viết theo cú pháp **Prisma 6** (`url = env("DATABASE_URL")` trong `datasource`, generator `prisma-client-js`). Cài `prisma@6` và `@prisma/client@6`; nếu `npx prisma init` sinh cấu trúc khác (ví dụ `prisma.config.ts`) thì dừng và hỏi ([[OPEN_QUESTIONS]] Q-15).

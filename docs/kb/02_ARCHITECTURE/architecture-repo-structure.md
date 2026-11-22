@@ -6,7 +6,7 @@ status: stable
 tags: [repo, structure, naming, npm, types]
 related: [adr-016-manual-type-sync, architecture-backend-layers, architecture-frontend, architecture-rag-service, architecture-deployment-env, coding-standards]
 source: "Thiết kế Tech Lead, cập nhật theo ADR-016"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Cấu trúc dự án
 
@@ -47,8 +47,8 @@ Mỗi module backend: `auth · users · public · courses · modules · lessons 
 ```
 backend/src/types/
 ├─ index.ts            # re-export
-├─ dto/*.ts            # Zod schema + kiểu suy ra (z.infer): common, auth, catalog, learning, exam, ai, admin-*, dashboard
-├─ constants.ts        # mã topic/level, giới hạn upload (100 MB / 10 MB)
+├─ dto/*.ts            # Zod schema + kiểu suy ra (z.infer): common, auth, catalog, topic, learning, exam, ai, admin-*, dashboard
+├─ constants.ts        # mã level, giới hạn upload (100 MB / 10 MB), regex màu + khóa icon chủ đề
 ├─ labels.ts           # nhãn tiếng Việt cho enum (Đạt, Bản nháp…)
 ├─ errors.ts           # union mã lỗi (VALIDATION_ERROR, NOT_ENROLLED…)
 ├─ scoring.ts          # computeScore, isPassed

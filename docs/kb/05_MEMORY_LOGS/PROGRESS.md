@@ -37,6 +37,13 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 
 ## Nhật ký (mới nhất trên cùng)
 
+### 2026-11-21 · KB · SA — Bổ sung chủ đề động (`topics`, ADR-018)
+- **Tác vụ**: Đồng bộ KB với thiết kế mới: bảng `topics` + `courses.topic_id` (Đồ án bản `_1` §3.1) thay cho chủ đề cố định.
+- **Đã làm**: thêm [[adr-018-dynamic-topics]], [[concept-topics]], [[api-admin-topics]], [[database-migration-topics]]; cập nhật ERD, Prisma schema, seed, hợp đồng API (66 endpoint công khai), UI (C02/C03/C08, màn A09), design system, ma trận quyền, [[delta-vs-thesis]], plan P02 (mục P02-T) và P04 (A09).
+- **Ảnh hưởng tiến độ**: Phase 02 vẫn ✅ theo thiết kế cũ; phần điều chỉnh topics là việc mới **P02-T1…T10** ⬜ ([[plan-phase-02-course-catalog]]). Bảng tiến độ ở trên **không đổi**.
+- **Lệch/Quyết định**: thêm Q-16 (quyền quản lý/xóa chủ đề), Q-17 (chủ đề ẩn: khóa có còn hiện không) ở [[OPEN_QUESTIONS]].
+- **Tiếp theo**: P02-T (DTO → UI → http → Backend → DB `p02b_topics`).
+
 ### 2026-11-19 · Hoàn tất Phase 02 · Agent — Fix `usePathname()` Suspense & Đóng Phase 02 (Catalog & Enroll)
 - **Tác vụ**: Xử lý cảnh báo `blocking-prerender-client-hook` (`usePathname()`) trong `Navbar` khi bật `cacheComponents` và chính thức hoàn tất Phase 02 sau khi Tech Lead test tay thành công.
 - **Đã làm**:

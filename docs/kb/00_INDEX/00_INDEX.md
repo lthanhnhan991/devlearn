@@ -6,7 +6,7 @@ status: living
 tags: [index, map, start-here]
 related: [agent-rules, delta-vs-thesis, glossary, plan-00-overview, concept-project-overview, system-overview, api-contracts]
 source: "KB DevLearn"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # 00_INDEX — DevLearn Knowledge Base
 
@@ -29,7 +29,7 @@ updated: 2026-11-15
 | Viết **RAG (Python)** | [[concept-rag-overview]] → [[concept-rag-ingestion]] → [[concept-rag-query]] → [[api-internal-rag]] → [[architecture-rag-service]] → [[coding-standards-rag-python]] |
 | Sửa **DB** | [[database-erd]] → [[database-prisma-schema]] → [[database-prisma-schema-exam-ai]] → [[delta-vs-thesis]] (mục D) |
 | Hiểu **quyền** | [[concept-roles-permissions]] → [[concept-auth]] → [[adr-013-exam-stats-owner-only]] |
-| Hiểu **vì sao** | thư mục `03_DECISIONS` (ADR-001…017) |
+| Hiểu **vì sao** | thư mục `03_DECISIONS` (ADR-001…018) |
 | Kiểm **xong chưa** | [[definition-of-done]] → [[FILE_MAPPING]] / [[FILE_MAPPING_ADMIN]] |
 
 ## 3. Sự thật nhanh (đừng đoán — đã chốt)
@@ -42,6 +42,7 @@ updated: 2026-11-15
 | Upload | video ≤ 100 MB, PDF ≤ 10 MB (Cloudinary) ([[concept-file-storage]]) |
 | AI | chỉ trả lời từ PDF của khóa; kèm nguồn; ≤ 5 s ([[concept-rag-overview]]) |
 | Thống kê bài kiểm tra | **owner-only** ([[adr-013-exam-stats-owner-only]]) |
+| Chủ đề khóa học | Bảng `topics` **động** (1 chủ đề – nhiều khóa); lọc bằng `slug`; ẩn = `is_active=false` nhưng khóa vẫn hiển thị ([[concept-topics]], [[adr-018-dynamic-topics]]) |
 | Quy trình | UI & Wire API → Backend → Tech Lead tự test; **không mock**; Agent không chạy lint/typecheck/test, không in code ra chat ([[workflow-solo-dev]], [[agent-rules]]) |
 | Cấu trúc repo | `backend/` · `frontend/` · `rag-service/` · `docs/` — **chỉ npm, không monorepo, không Docker** ([[adr-016-manual-type-sync]], [[architecture-repo-structure]]) |
 | Kiểu dùng chung | nguồn `backend/src/types/` → `./sync-types.sh` → bản copy `frontend/src/types/` (không sửa tay) ([[agent-rules]] §2b) |
@@ -67,6 +68,7 @@ updated: 2026-11-15
 - [[concept-rag-overview]] — Trợ lý AI (RAG) — Tổng quan
 - [[concept-rag-query]] — RAG — Hỏi đáp với Trợ lý AI (UC07)
 - [[concept-roles-permissions]] — Vai trò & Ma trận phân quyền (RBAC)
+- [[concept-topics]] — Chủ đề khóa học động (topics)
 
 ### `02_ARCHITECTURE/` — Kiến trúc · CSDL · API · UI
 - [[api-admin-ai-docs]] — API — Admin: Tài liệu cho Trợ lý AI
@@ -74,6 +76,7 @@ updated: 2026-11-15
 - [[api-admin-courses]] — API — Admin: Quản lý khóa học
 - [[api-admin-exam-stats]] — API — Admin: Thống kê bài kiểm tra (owner-only)
 - [[api-admin-exams]] — API — Admin: Bài kiểm tra & câu hỏi
+- [[api-admin-topics]] — API — Admin: Quản lý chủ đề (topics)
 - [[api-admin-users-dashboard]] — API — Admin: Người dùng & Dashboard
 - [[api-ai-chat]] — API — Trợ lý AI (phía SV)
 - [[api-auth]] — API — Auth (đăng ký, đăng nhập, phiên)
@@ -88,12 +91,13 @@ updated: 2026-11-15
 - [[architecture-rag-service]] — RAG service (Python/FastAPI) — cấu trúc & pipeline
 - [[architecture-repo-structure]] — Cấu trúc thư mục dự án (3 dự án độc lập) & quy ước
 - [[database-erd]] — Database — ERD, ràng buộc, chỉ mục
+- [[database-migration-topics]] — Migration `p02b_topics` — chuyển courses.topic (mã) sang topics + topic_id
 - [[database-prisma-schema-exam-ai]] — Prisma schema (2/2) — kiểm tra, lượt làm, tài liệu AI, lịch sử AI
 - [[database-prisma-schema]] — Prisma schema (1/2) — enum, người dùng, khóa học, tiến độ
 - [[database-seed-data]] — Dữ liệu seed & ID cố định (nguồn dữ liệu mẫu duy nhất)
 - [[system-overview]] — Kiến trúc tổng thể — luồng đi của 3 dịch vụ
 - [[ui-design-system]] — Design system — màu, kiểu chữ, component (rút từ file thiết kế)
-- [[ui-screens-admin]] — Đặc tả màn hình ADMIN (A00–A08)
+- [[ui-screens-admin]] — Đặc tả màn hình ADMIN (A00–A09)
 - [[ui-screens-client]] — Đặc tả màn hình CLIENT (C01–C09)
 
 ### `03_DECISIONS/` — Quyết định kỹ thuật (ADR)
@@ -113,6 +117,7 @@ updated: 2026-11-15
 - [[adr-014-monorepo-shared-contracts]] — ADR-014 — Monorepo pnpm + package contracts dùng chung (ĐÃ BỊ THAY THẾ bởi ADR-016)
 - [[adr-016-manual-type-sync]] — ADR-016 — Đơn giản hóa: npm + 3 thư mục độc lập + đồng bộ types thủ công
 - [[adr-017-solo-dev-workflow]] — ADR-017 — Solo Dev: bỏ mock, bỏ Review, Agent không tự test
+- [[adr-018-dynamic-topics]] — ADR-018 — Chủ đề động (bảng `topics`) thay cho chủ đề cố định
 
 ### `04_RULES_WORKFLOWS/` — Luật & quy trình
 - [[agent-rules]] — Luật làm việc cho AI Agent (Solo Dev)
@@ -133,12 +138,12 @@ updated: 2026-11-15
 - [[PROGRESS]] — PROGRESS — Nhật ký làm việc & bảng tiến độ phase
 
 ### `06_EXECUTION_PLAN/` — Kế hoạch thực thi
-- [[plan-00-overview]] — Kế hoạch thực thi — Tổng quan (quy trình 3 bước, Solo Dev)
-- [[plan-phase-00-foundation]] — Phase 00 — Nền móng (ĐÃ HOÀN THÀNH — đã gộp vào kế hoạch chung)
+- [[plan-00-overview]] — Kế hoạch thực thi — Tổng quan, phụ thuộc, làn song song
+- [[plan-phase-00-foundation]] — Phase 00 — Nền móng (npm, 3 dự án độc lập) & spike rủi ro
 - [[plan-phase-01-auth]] — Phase 01 — Xác thực & phân quyền (UC01, UC02) — ĐÃ HOÀN THÀNH
 - [[plan-phase-02-course-catalog]] — Phase 02 — Danh mục khóa học & ghi danh (UC03)
 - [[plan-phase-03-learning-progress]] — Phase 03 — Học tập & theo dõi tiến độ (UC04)
-- [[plan-phase-04-admin-content]] — Phase 04 — Admin: quản lý khóa học & soạn bài + upload (UC08, UC09)
+- [[plan-phase-04-admin-content]] — Phase 04 — Admin: quản lý khóa học, chủ đề & soạn bài + upload (UC08, UC09)
 - [[plan-phase-05-exam-student]] — Phase 05 — Làm bài kiểm tra & Kết quả (SV) (UC05, UC06, UC16)
 - [[plan-phase-06-exam-admin-stats]] — Phase 06 — Admin: bài kiểm tra, câu hỏi & thống kê (UC10, UC12)
 - [[plan-phase-07-rag-service]] — Phase 07 — Dịch vụ RAG (Python/FastAPI) (UC15)

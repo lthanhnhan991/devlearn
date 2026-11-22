@@ -4,9 +4,9 @@ title: Đặc tả màn hình CLIENT (C01–C09)
 type: ui
 status: stable
 tags: [ui, client, screens, student]
-related: [ui-design-system, ui-screens-admin, FILE_MAPPING, api-auth, api-catalog, api-learning, api-exam-student, api-ai-chat, delta-vs-thesis]
+related: [concept-topics, adr-018-dynamic-topics, ui-design-system, ui-screens-admin, FILE_MAPPING, api-auth, api-catalog, api-learning, api-exam-student, api-ai-chat, delta-vs-thesis]
 source: "Design_ui_devlearn/CLIENT · 01…09"
-updated: 2026-11-15
+updated: 2026-11-21
 ---
 # Màn hình CLIENT
 
@@ -21,14 +21,14 @@ Mỗi màn: **file thiết kế** → route → vùng UI → dữ liệu (API) �
 
 ## C02 · Trang chủ (chưa đăng nhập) — `CLIENT · 02 Trang chủ (chưa đăng nhập).png`
 - **Route** `/` (Server Component). Navbar: *Khám phá · Danh mục · Khóa học của tôi · Trợ lý AI*, ô **Tìm khóa học**, nút **Đăng nhập / Đăng ký** (khi đã đăng nhập: avatar chữ cái đầu).
-- **Vùng**: Hero ("Xây kỹ năng. Xây tương lai." + 2 nút + 2 khối màu); **StatStrip** (Khóa học · Sinh viên · Giảng viên · % Hoàn thành khóa học); **Chủ đề** (4 TopicTile → `/courses?topic=`); **Khóa học phổ biến** (4 CourseCard) + nút **Xem tất cả khóa học**; footer.
-- **API**: `GET /public/stats`, `GET /courses?sort=popular&pageSize=4`.
+- **Vùng**: Hero ("Xây kỹ năng. Xây tương lai." + 2 nút + 2 khối màu); **StatStrip** (Khóa học · Sinh viên · Giảng viên · % Hoàn thành khóa học); **Chủ đề** (`TopicTile` lấy từ `GET /topics` — chỉ chủ đề có khóa, tối đa 8, màu `topic.color` → `/courses?topic=<slug>`); **Khóa học phổ biến** (4 CourseCard) + nút **Xem tất cả khóa học**; footer.
+- **API**: `GET /public/stats`, `GET /topics`, `GET /courses?sort=popular&pageSize=4`.
 - **Ghi chú**: "Khóa học của tôi"/"Trợ lý AI" khi chưa đăng nhập → chuyển `/login?next=`.
 
 ## C03 · Danh mục khóa học — `CLIENT · 03 Danh mục khóa học.png`
-- **Route** `/courses` (`?q&topic&level&page`). Breadcrumb *Trang chủ › Danh mục khóa học*.
-- **Vùng**: cột trái **Chủ đề** (checkbox ×4) + **Cấp độ** (checkbox); lưới CourseCard 3 cột (badge cấp độ, chủ đề, tên, "GV: … · n bài học · n giờ").
-- **API**: `GET /courses` (lọc nhiều giá trị: `topic=A&topic=B`). **Trạng thái**: empty "Không có khóa học phù hợp", skeleton, error.
+- **Route** `/courses` (`?q&topic=<slug>&level&page`). Breadcrumb *Trang chủ › Danh mục khóa học*.
+- **Vùng**: cột trái **Chủ đề** (checkbox **động** từ `GET /topics`, kèm số khóa; chủ đề ẩn không hiện nhưng khóa thuộc chủ đề đó vẫn liệt kê) + **Cấp độ** (checkbox); lưới CourseCard 3 cột (badge cấp độ, chủ đề, tên, "GV: … · n bài học · n giờ").
+- **API**: `GET /topics`, `GET /courses` (lọc nhiều giá trị: `topic=<slug>&topic=<slug>`). **Trạng thái**: empty "Không có khóa học phù hợp", skeleton, error.
 - Bộ lọc đồng bộ URL; đổi lọc ⇒ về `page=1`.
 
 ## C04 · Chi tiết khóa học — `CLIENT · 04 … (chưa đăng ký).png` & `(đã đăng ký).png`
@@ -60,7 +60,7 @@ Mỗi màn: **file thiết kế** → route → vùng UI → dữ liệu (API) �
 - **Trạng thái**: đang trả lời (typing), `409 NO_READY_DOCUMENTS`, `429`, `502/504` (nút Thử lại), chưa có khóa nào ("Hãy đăng ký một khóa học").
 
 ## C08 · Khóa học của tôi — `CLIENT · 08 Khóa học của tôi (theo đăng ký).png`
-- **Route** `/my-courses`. Tab **Đang học | Đã hoàn thành**; mỗi hàng **MyCourseRow**: ô màu theo chủ đề, tên, "Chủ đề · GV: …", thanh tiến độ + "Tiến độ n%", nút **Tiếp tục học** (hoặc **Bắt đầu học** khi 0%).
+- **Route** `/my-courses`. Tab **Đang học | Đã hoàn thành**; mỗi hàng **MyCourseRow**: ô màu = `topic.color`, tên, "`topic.name` · GV: …", thanh tiến độ + "Tiến độ n%", nút **Tiếp tục học** (hoặc **Bắt đầu học** khi 0%).
 - Cột phải **Tổng quan học tập**: Khóa đang học · Khóa hoàn thành · Điểm kiểm tra trung bình.
 - **API**: `GET /me/courses?status=`, `GET /me/learning-summary`.
 
