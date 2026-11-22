@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Logo } from '@/components/shared/Logo';
 import { useAuth } from '@/features/auth/auth-context';
 import { cn } from '@/lib/cn';
@@ -31,6 +31,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     title: 'NỘI DUNG',
     items: [
       { href: '/admin/courses', label: 'Khóa học' },
+      { href: '/admin/topics', label: 'Chủ đề' },
       { href: '/admin/lessons', label: 'Bài học' },
       { href: '/admin/exams', label: 'Bài kiểm tra' },
       { href: '/admin/exam-stats', label: 'Thống kê bài kiểm tra' },
@@ -51,6 +52,11 @@ export function AdminShell({ children }: AdminShellProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function handleLogout() {
     if (loggingOut) return;
@@ -146,11 +152,15 @@ export function AdminShell({ children }: AdminShellProps) {
             <span className="font-semibold text-admin-navy">DevLearn Quản trị</span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-600">
-              Vai trò: <strong className="font-semibold text-admin-navy">{roleLabel}</strong>
-              {user?.email ? ` · ${user.email}` : ''}
-            </span>
+          <div className="flex items-center gap-4 text-sm" suppressHydrationWarning>
+            {mounted && user ? (
+              <span className="text-slate-600">
+                Vai trò: <strong className="font-semibold text-admin-navy">{roleLabel}</strong>
+                {user.email ? ` · ${user.email}` : ''}
+              </span>
+            ) : (
+              <span className="text-slate-400 text-xs">Đang nạp thông tin…</span>
+            )}
           </div>
         </header>
 

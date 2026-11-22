@@ -5,12 +5,6 @@ export const LABELS = {
     INTERMEDIATE: 'Trung cấp',
     ADVANCED: 'Nâng cao',
   },
-  topic: {
-    PROGRAMMING: 'Lập trình',
-    DATABASE: 'Cơ sở dữ liệu',
-    WEB: 'Web',
-    SOFTWARE_ENGINEERING: 'Công nghệ phần mềm',
-  },
   courseStatus: {
     DRAFT: 'Bản nháp',
     PUBLISHED: 'Đã xuất bản',

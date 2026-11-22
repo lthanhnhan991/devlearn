@@ -36,11 +36,11 @@ updated: 2026-11-21
 - [ ] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p04_ai_documents`
 
 ### Quản trị chủ đề (A09) — [[adr-018-dynamic-topics]]
-- [ ] P04-13 **UI** A09 `/admin/topics`: `TopicTable` (kéo-thả/↑↓ sắp xếp, công tắc `is_active`), `TopicFormModal` (slug chỉ khi tạo, màu preset + hex, icon), `ConfirmDialog` xóa (chỉ ADMIN; vô hiệu khi `courseCount > 0`) — G-17
-- [ ] P04-14 **Gọi API** `services/http/admin-topic.http.ts`: `listAdminTopics`, `createTopic`, `updateTopic`, `reorderTopics`, `deleteTopic`
-- [ ] P04-15 **Backend** `modules/topics` (admin): list/create/patch/order/delete; `slugify` (bỏ dấu, `đ→d`); kiểm trùng `name` (không phân biệt hoa thường) và `slug`; `reorder` trong transaction; delete **ADMIN-only** + `TOPIC_IN_USE` ([[api-admin-topics]])
-- [ ] P04-16 **Backend** `modules/courses` (admin): `topicId` thay `topic` khi tạo/sửa; chặn gán/đổi sang chủ đề ẩn (`TOPIC_INACTIVE`); mapper trả `topic` + `topicIsActive`
-- [ ] P04-17 **DB**: không đổi schema (bảng `topics` đã có từ P02b); không cần migration mới
+- [x] P04-13 **UI** A09 `/admin/topics`: `TopicTable` (kéo-thả/↑↓ sắp xếp, công tắc `is_active`), `TopicFormModal` (slug chỉ khi tạo, màu preset + hex, icon), `ConfirmDialog` xóa (chỉ ADMIN; vô hiệu khi `courseCount > 0`) — G-17
+- [x] P04-14 **Gọi API** `services/http/admin-topic.http.ts`: `listAdminTopics`, `createTopic`, `updateTopic`, `reorderTopics`, `deleteTopic`
+- [x] P04-15 **Backend** `modules/topics` (admin): list/create/patch/order/delete; `slugify` (bỏ dấu, `đ→d`); kiểm trùng `name` (không phân biệt hoa thường) và `slug`; `reorder` trong transaction; delete **ADMIN-only** + `TOPIC_IN_USE` ([[api-admin-topics]])
+- [x] P04-16 **Backend** `modules/courses` (admin): `topicId` thay `topic` khi tạo/sửa; chặn gán/đổi sang chủ đề ẩn (`TOPIC_INACTIVE`); mapper trả `topic` + `topicIsActive`
+- [x] P04-17 **DB**: không đổi schema (bảng `topics` đã có từ P02b); không cần migration mới
 
 ## Checklist test tay (Tech Lead)
 - [ ] GV tạo khóa → module → bài → upload video/PDF → xuất bản ⇒ SV thấy ở danh mục; xuất bản khóa không có bài đã xuất bản ⇒ 409

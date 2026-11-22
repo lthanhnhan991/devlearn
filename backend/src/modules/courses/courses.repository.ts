@@ -25,7 +25,9 @@ export class CoursesRepository {
 
     if (params.topics && params.topics.length > 0) {
       where.topic = {
-        in: params.topics,
+        slug: {
+          in: params.topics,
+        },
       };
     }
 
@@ -50,6 +52,9 @@ export class CoursesRepository {
         include: {
           teacher: {
             select: { id: true, fullName: true },
+          },
+          topic: {
+            select: { id: true, name: true, slug: true, color: true, icon: true },
           },
           modules: {
             include: {
@@ -78,6 +83,9 @@ export class CoursesRepository {
       include: {
         teacher: {
           select: { id: true, fullName: true },
+        },
+        topic: {
+          select: { id: true, name: true, slug: true, color: true, icon: true },
         },
         _count: {
           select: { enrollments: true },

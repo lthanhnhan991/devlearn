@@ -1,73 +1,49 @@
 import Link from 'next/link';
-import type { CourseTopic } from '@/types';
-import { LABELS } from '@/types';
+import type { TopicDto } from '@/types';
 import { cn } from '@/lib/cn';
 
 export interface TopicTileProps {
-  topic: CourseTopic;
-  description?: string;
+  topic: TopicDto;
 }
 
-const TOPIC_STYLES: Record<CourseTopic, { bg: string; iconBg: string; text: string; icon: string }> = {
-  PROGRAMMING: {
-    bg: 'hover:border-[#1D5E8C]',
-    iconBg: 'bg-[#1D5E8C]/10 text-[#1D5E8C]',
-    text: 'text-[#1D5E8C]',
-    icon: '{ }',
-  },
-  DATABASE: {
-    bg: 'hover:border-[#37474F]',
-    iconBg: 'bg-[#37474F]/10 text-[#37474F]',
-    text: 'text-[#37474F]',
-    icon: '⛁',
-  },
-  WEB: {
-    bg: 'hover:border-[#00796B]',
-    iconBg: 'bg-[#00796B]/10 text-[#00796B]',
-    text: 'text-[#00796B]',
-    icon: '🌐',
-  },
-  SOFTWARE_ENGINEERING: {
-    bg: 'hover:border-[#4A148C]',
-    iconBg: 'bg-[#4A148C]/10 text-[#4A148C]',
-    text: 'text-[#4A148C]',
-    icon: '⚙',
-  },
+const ICON_MAP: Record<string, string> = {
+  code: '{ }',
+  database: '⛁',
+  globe: '🌐',
+  bug: '🐛',
+  cpu: '⚡',
+  server: '🖥',
+  shield: '🛡',
+  book: '📖',
 };
 
-export function TopicTile({ topic, description }: TopicTileProps) {
-  const style = TOPIC_STYLES[topic] ?? {
-    bg: 'hover:border-client-primary',
-    iconBg: 'bg-client-primary/10 text-client-primary',
-    text: 'text-client-primary',
-    icon: '📚',
-  };
+export function TopicTile({ topic }: TopicTileProps) {
+  const iconSymbol = (topic.icon && ICON_MAP[topic.icon]) || '📚';
+  const customColor = topic.color ?? '#1D5E8C';
 
   return (
     <Link
-      href={`/courses?topic=${topic}`}
-      className={cn(
-        'group flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md',
-        style.bg,
-      )}
+      href={`/courses?topic=${topic.slug}`}
+      className="group flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
     >
       <div
-        className={cn(
-          'flex size-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold',
-          style.iconBg,
-        )}
+        className="flex size-12 shrink-0 items-center justify-center rounded-lg text-xl font-bold transition-transform group-hover:scale-105"
+        style={{
+          backgroundColor: `${customColor}18`,
+          color: customColor,
+        }}
       >
-        {style.icon}
+        {iconSymbol}
       </div>
-      <div className="flex-1">
-        <h3 className="font-bold text-foreground transition-colors group-hover:text-client-primary">
-          {LABELS.topic[topic] ?? topic}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold text-foreground transition-colors group-hover:text-client-primary truncate">
+          {topic.name}
         </h3>
-        {description ? (
-          <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+        {topic.description ? (
+          <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">{topic.description}</p>
         ) : (
           <span className="text-xs font-medium text-slate-400 group-hover:underline">
-            Xem khóa học →
+            {topic.courseCount} khóa học →
           </span>
         )}
       </div>

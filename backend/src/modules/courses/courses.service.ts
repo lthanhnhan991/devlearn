@@ -6,7 +6,7 @@ import type {
   CourseExamOutlineDto,
   ListCoursesQuery,
 } from '../../types/dto/catalog';
-import type { CourseLevel, CourseTopic } from '../../types/constants';
+import type { CourseLevel } from '../../types/constants';
 
 export class CoursesService {
   constructor(private readonly repo: CoursesRepository = defaultRepo) {}
@@ -66,7 +66,7 @@ export class CoursesService {
       return {
         id: course.id,
         title: course.title,
-        topic: course.topic as CourseTopic,
+        topic: course.topic,
         level: course.level as CourseLevel,
         teacher: course.teacher,
         lessonCount,
@@ -187,7 +187,7 @@ export class CoursesService {
       id: course.id,
       title: course.title,
       description: course.description,
-      topic: course.topic as CourseTopic,
+      topic: course.topic,
       level: course.level as CourseLevel,
       teacher: course.teacher,
       lessonCount,

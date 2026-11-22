@@ -7,16 +7,10 @@ import { CourseCard } from '@/components/client/CourseCard';
 import {
   StatStripSkeleton,
   CourseGridSkeleton,
+  TopicGridSkeleton,
 } from '@/components/client/CourseSkeletons';
-import { getPublicStats, listCourses } from '@/services';
-import type { CourseCardDto, CourseTopic, PublicStatsDto } from '@/types';
-
-const FEATURED_TOPICS: { topic: CourseTopic; description: string }[] = [
-  { topic: 'PROGRAMMING', description: 'Python, Java, thuật toán và cấu trúc dữ liệu' },
-  { topic: 'DATABASE', description: 'SQL, PostgreSQL, thiết kế cơ sở dữ liệu' },
-  { topic: 'WEB', description: 'HTML/CSS, JavaScript, Next.js hiện đại' },
-  { topic: 'SOFTWARE_ENGINEERING', description: 'Kiểm thử, Git, quy trình phát triển phần mềm' },
-];
+import { getPublicStats, listCourses, listTopics } from '@/services';
+import type { CourseCardDto, PublicStatsDto, TopicDto } from '@/types';
 
 async function StatStripData() {
   let stats: PublicStatsDto | null = null;
@@ -26,6 +20,32 @@ async function StatStripData() {
     // Bỏ qua lỗi kết nối
   }
   return <StatStrip stats={stats} />;
+}
+
+async function FeaturedTopicsData() {
+  let topics: TopicDto[] = [];
+  try {
+    const list = await listTopics();
+    topics = list.filter((t) => t.courseCount > 0).slice(0, 8);
+  } catch {
+    // Bỏ qua lỗi kết nối
+  }
+
+  if (topics.length === 0) {
+    return (
+      <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+        <p>Đang cập nhật các chủ đề đào tạo.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {topics.map((item) => (
+        <TopicTile key={item.id} topic={item} />
+      ))}
+    </div>
+  );
 }
 
 async function PopularCoursesData() {
@@ -142,15 +162,9 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURED_TOPICS.map((item) => (
-              <TopicTile
-                key={item.topic}
-                topic={item.topic}
-                description={item.description}
-              />
-            ))}
-          </div>
+          <Suspense fallback={<TopicGridSkeleton />}>
+            <FeaturedTopicsData />
+          </Suspense>
         </section>
 
         {/* Khóa học phổ biến */}

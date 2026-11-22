@@ -1,11 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { COURSE_LEVELS, COURSE_TOPICS, LABELS } from '@/types';
+import { COURSE_LEVELS, LABELS } from '@/types';
+import type { TopicDto } from '@/types';
+import { listTopics } from '@/services';
 
-export function CourseFilterSidebar() {
+export interface CourseFilterSidebarProps {
+  initialTopics?: TopicDto[];
+}
+
+export function CourseFilterSidebar({ initialTopics }: CourseFilterSidebarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [topics, setTopics] = useState<TopicDto[]>(initialTopics ?? []);
+
+  useEffect(() => {
+    if (initialTopics && initialTopics.length > 0) return;
+    let cancelled = false;
+    listTopics()
+      .then((data) => {
+        if (!cancelled) setTopics(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [initialTopics]);
 
   const selectedTopics = searchParams.getAll('topic');
   const selectedLevels = searchParams.getAll('level');
@@ -59,20 +80,30 @@ export function CourseFilterSidebar() {
       <div className="space-y-3">
         <h3 className="text-sm font-semibold text-slate-800">Chủ đề</h3>
         <div className="space-y-2">
-          {COURSE_TOPICS.map((topic) => {
-            const isChecked = selectedTopics.includes(topic);
-            return (
-              <label key={topic} className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700 hover:text-foreground">
-                <input
-                  type="checkbox"
-                  checked={isChecked}
-                  onChange={(e) => handleFilterChange('topic', topic, e.target.checked)}
-                  className="size-4 rounded border-slate-300 text-client-primary focus:ring-client-primary"
-                />
-                <span>{LABELS.topic[topic] ?? topic}</span>
-              </label>
-            );
-          })}
+          {topics.length > 0 ? (
+            topics.map((topic) => {
+              const isChecked = selectedTopics.includes(topic.slug);
+              return (
+                <label
+                  key={topic.id}
+                  className="flex cursor-pointer items-center justify-between text-sm text-slate-700 hover:text-foreground"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => handleFilterChange('topic', topic.slug, e.target.checked)}
+                      className="size-4 rounded border-slate-300 text-client-primary focus:ring-client-primary"
+                    />
+                    <span>{topic.name}</span>
+                  </div>
+                  <span className="text-xs text-slate-400">({topic.courseCount})</span>
+                </label>
+              );
+            })
+          ) : (
+            <p className="text-xs text-slate-400 italic">Đang tải chủ đề…</p>
+          )}
         </div>
       </div>
 
@@ -83,7 +114,10 @@ export function CourseFilterSidebar() {
           {COURSE_LEVELS.map((level) => {
             const isChecked = selectedLevels.includes(level);
             return (
-              <label key={level} className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700 hover:text-foreground">
+              <label
+                key={level}
+                className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-700 hover:text-foreground"
+              >
                 <input
                   type="checkbox"
                   checked={isChecked}

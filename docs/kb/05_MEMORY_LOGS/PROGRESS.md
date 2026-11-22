@@ -37,6 +37,33 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 
 ## Nhật ký (mới nhất trên cùng)
 
+### 2026-11-22 · Fix Hydration & Instant Navigation Next.js 16.4.6 · Agent
+- **Tác vụ**: Sửa lỗi hydration mismatch tại `UserMenu.tsx` khi tải trang chủ `/` và lỗi segment validation `instant navigation` tại segment `/admin` (`page.tsx` bị dropped).
+- **Đã làm**:
+  - Dùng cờ `mounted` kết hợp `status === 'loading'` trong `Navbar.tsx` (và `AdminShell.tsx`) đảm bảo HTML render từ SSR và lần hydrate đầu tiên ở Client đồng nhất 100%, không lệch DOM giữa skeleton và UserMenu/nút đăng nhập.
+  - Bổ sung `suppressHydrationWarning` phòng vệ tại `UserMenu.tsx` và Topbar `AdminShell.tsx`.
+  - Chuyển `admin/(panel)/layout.tsx` sang Server Component layout và khai báo `export const instant = false;` tập trung ở layout chung (đã gỡ ở `page.tsx`) theo chuẩn Next.js 16.4.6 để áp dụng cho toàn bộ nhánh phân hệ `/admin/(panel)` được bảo vệ bởi auth guard (`StaffGuard`).
+
+### 2026-11-22 · Fix Typecheck Frontend Topics · Agent
+- **Tác vụ**: Sửa lỗi kiểu `TS2379` (`exactOptionalPropertyTypes: true`) và `TS2322` (`ButtonProps` không nhận `className`) tại `frontend/src/app/admin/(panel)/topics/page.tsx`.
+- **Đã làm**:
+  - Bổ sung biến thể `'admin-danger'` chuẩn design system vào `ButtonVariant` và `VARIANT_CLASSES` tại `frontend/src/components/ui/Button.tsx`.
+  - Cập nhật nút xóa trong modal xác nhận tại `topics/page.tsx` sang `variant="admin-danger"`, bỏ prop `className`.
+  - Sửa `listAdminTopics(query ? { q: query } : undefined)` tương thích chuẩn `exactOptionalPropertyTypes: true`.
+
+### 2026-11-22 · P02b & P04-Topics · Agent — Hoàn tất chuyển đổi Chủ đề động (ADR-018) cho Client & Quản trị Admin A09
+- **Tác vụ**: Triển khai toàn diện chủ đề động (`topics`) cho Phase 02b (Client) và hoàn thành trước phân hệ Quản lý chủ đề A09 (Phase 04) theo các tài liệu ADR-018, concept-topics, api-catalog, api-admin-topics và bộ ảnh UI `ADMIN · 09..12`.
+- **Đã làm**:
+  - **DTO & Types**: Thêm `dto/topic.ts` (`TopicRefDto`, `TopicDto`), `dto/admin-topic.ts` (`AdminTopicDto`, `CreateTopicReq`, `UpdateTopicReq`, `ReorderTopicsReq`). Cập nhật `dto/catalog.ts` (`topic` chuyển sang `TopicRefDto`, query `topic` nhận mảng slug). Cập nhật `constants.ts` (thêm `TOPIC_ICON_KEYS`, `TOPIC_COLOR_REGEX`, bỏ `COURSE_TOPICS`), `labels.ts` (bỏ nhãn topic cứng), `errors.ts` (thêm các mã lỗi `TOPIC_*`), `seed-ids.ts` (thêm 5 UUID cố định). Đồng bộ types sang `frontend/src/types/`.
+  - **Database & Migration & Seed**: Cập nhật `schema.prisma` (thêm model `Topic`, cập nhật `Course.topicId` tham chiếu `Topic` với `onDelete: Restrict`). Tạo migration `20261122000000_p02b_topics/migration.sql` kèm backfill SQL an toàn. Cập nhật `seed.ts` upsert 4 chủ đề hoạt động + 1 chủ đề ẩn mẫu và gán `topicId` cho các khóa học.
+  - **Backend Modules**: Tạo `modules/topics` với repository, service (kèm helper `slugify`), controller và routes (hỗ trợ `GET /topics` công khai và các API quản trị `/admin/topics`). Cập nhật `modules/courses` lọc `topic` theo slug và mapper trả về `TopicRefDto`. Mount routers tại `app.ts`.
+  - **Frontend Services & UI**:
+    - `catalog.http.ts`: thêm `listTopics()`.
+    - `admin-topic.http.ts`: tạo trọn bộ API quản trị chủ đề.
+    - Client UI: `CourseCard`, `CourseInfoCard`, `CourseDetailPage` hiển thị tên và màu từ `topic.color`. `TopicTile` và trang chủ nạp chủ đề động từ `listTopics()`. `CourseFilterSidebar` lọc theo slug động kèm số lượng khóa học.
+    - Admin UI: Thêm mục "Chủ đề" vào `AdminShell`. Xây dựng màn A09 `/admin/topics` (quản lý danh sách, tìm kiếm, đổi thứ tự sắp xếp, toggle hoạt động, modal thêm/sửa với palette màu và icon, modal xóa an toàn chống xóa chủ đề đang dùng).
+- **Tiếp theo**: Bàn giao Tech Lead chạy `./sync-types.sh`, migrate/seed DB, typecheck và kiểm thử trên dev server.
+
 ### 2026-11-21 · KB · SA — Bổ sung chủ đề động (`topics`, ADR-018)
 - **Tác vụ**: Đồng bộ KB với thiết kế mới: bảng `topics` + `courses.topic_id` (Đồ án bản `_1` §3.1) thay cho chủ đề cố định.
 - **Đã làm**: thêm [[adr-018-dynamic-topics]], [[concept-topics]], [[api-admin-topics]], [[database-migration-topics]]; cập nhật ERD, Prisma schema, seed, hợp đồng API (66 endpoint công khai), UI (C02/C03/C08, màn A09), design system, ma trận quyền, [[delta-vs-thesis]], plan P02 (mục P02-T) và P04 (A09).

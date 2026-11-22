@@ -55,7 +55,7 @@ async function CourseDetailContent({
             Khoa CNTT · Khóa học
           </span>
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-client-primary">
-            {LABELS.topic[course.topic] ?? course.topic}
+            {course.topic.name}
           </span>
         </div>
 

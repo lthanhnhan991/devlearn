@@ -95,13 +95,82 @@ async function main() {
     sampleStudents.push(sv);
   }
 
+  // 1.5 Topics (P02b — ADR-018)
+  const topicsData = [
+    {
+      id: SEED_IDS.topicProgramming,
+      name: 'Lập trình',
+      slug: 'lap-trinh',
+      description: 'Ngôn ngữ và tư duy lập trình căn bản đến nâng cao',
+      color: '#1D5E8C',
+      icon: 'code',
+      isActive: true,
+      displayOrder: 0,
+    },
+    {
+      id: SEED_IDS.topicDatabase,
+      name: 'Cơ sở dữ liệu',
+      slug: 'co-so-du-lieu',
+      description: 'Thiết kế, truy vấn và tối ưu hóa hệ thống dữ liệu',
+      color: '#37474F',
+      icon: 'database',
+      isActive: true,
+      displayOrder: 1,
+    },
+    {
+      id: SEED_IDS.topicWeb,
+      name: 'Web',
+      slug: 'web',
+      description: 'Phát triển ứng dụng web hiện đại',
+      color: '#00796B',
+      icon: 'globe',
+      isActive: true,
+      displayOrder: 2,
+    },
+    {
+      id: SEED_IDS.topicSoftwareEngineering,
+      name: 'Công nghệ phần mềm',
+      slug: 'cong-nghe-phan-mem',
+      description: 'Quy trình, kiến trúc và kiểm thử phần mềm',
+      color: '#2E7D32',
+      icon: 'bug',
+      isActive: true,
+      displayOrder: 3,
+    },
+    {
+      id: SEED_IDS.topicAi,
+      name: 'Trí tuệ nhân tạo',
+      slug: 'tri-tue-nhan-tao',
+      description: 'Mô hình học máy và trợ lý thông minh',
+      color: '#6A1B9A',
+      icon: 'cpu',
+      isActive: false, // inactive sample topic
+      displayOrder: 4,
+    },
+  ];
+
+  for (const t of topicsData) {
+    await prisma.topic.upsert({
+      where: { id: t.id },
+      update: {
+        name: t.name,
+        description: t.description,
+        color: t.color,
+        icon: t.icon,
+        isActive: t.isActive,
+        displayOrder: t.displayOrder,
+      },
+      create: t,
+    });
+  }
+
   // 2. Courses
   const coursesData = [
     {
       id: SEED_IDS.coursePython,
       title: 'Nhập môn Python',
       description: 'Khóa học cung cấp kiến thức nền tảng về ngôn ngữ lập trình Python, cú pháp cơ bản, xử lý chuỗi, mảng và lập trình hàm. Phù hợp cho người mới bắt đầu.',
-      topic: 'PROGRAMMING',
+      topicId: SEED_IDS.topicProgramming,
       level: 'BEGINNER',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher.id,
@@ -110,7 +179,7 @@ async function main() {
       id: SEED_IDS.courseJava,
       title: 'Java hướng đối tượng',
       description: 'Làm chủ tư duy lập trình hướng đối tượng (OOP) với Java. Bao gồm tính đóng gói, kế thừa, đa hình, trừu tượng và các design pattern căn bản.',
-      topic: 'PROGRAMMING',
+      topicId: SEED_IDS.topicProgramming,
       level: 'INTERMEDIATE',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher2.id,
@@ -119,7 +188,7 @@ async function main() {
       id: SEED_IDS.courseSql,
       title: 'SQL cơ bản',
       description: 'Học cách thiết kế cơ sở dữ liệu quan hệ, viết câu truy vấn SQL từ cơ bản đến nâng cao (SELECT, JOIN, GROUP BY, subquery).',
-      topic: 'DATABASE',
+      topicId: SEED_IDS.topicDatabase,
       level: 'BEGINNER',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher.id,
@@ -128,7 +197,7 @@ async function main() {
       id: SEED_IDS.courseNextjs,
       title: 'Next.js thực chiến',
       description: 'Xây dựng ứng dụng web hiện đại với Next.js App Router, React Server Components, Server Actions và tích hợp cơ sở dữ liệu.',
-      topic: 'WEB',
+      topicId: SEED_IDS.topicWeb,
       level: 'INTERMEDIATE',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher.id,
@@ -137,7 +206,7 @@ async function main() {
       id: SEED_IDS.coursePostgres,
       title: 'PostgreSQL nâng cao',
       description: 'Tối ưu hóa chỉ mục Indexing, phân vùng Partitioning, Full-Text Search và tối ưu hóa hiệu năng câu truy vấn trong hệ thống lớn.',
-      topic: 'DATABASE',
+      topicId: SEED_IDS.topicDatabase,
       level: 'INTERMEDIATE',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher2.id,
@@ -146,7 +215,7 @@ async function main() {
       id: SEED_IDS.courseTesting,
       title: 'Kiểm thử phần mềm',
       description: 'Phương pháp kiểm thử hộp đen, hộp trắng, viết unit test, integration test và kiểm thử tự động với Vitest / Playwright.',
-      topic: 'SOFTWARE_ENGINEERING',
+      topicId: SEED_IDS.topicSoftwareEngineering,
       level: 'BEGINNER',
       status: CourseStatus.PUBLISHED,
       teacherId: teacher2.id,
@@ -155,7 +224,7 @@ async function main() {
       id: SEED_IDS.courseGit,
       title: 'Git và GitHub cơ bản',
       description: 'Quản lý phiên bản mã nguồn, quy trình làm việc theo nhánh Git flow, giải quyết xung đột conflict và cộng tác nhóm.',
-      topic: 'PROGRAMMING',
+      topicId: SEED_IDS.topicProgramming,
       level: 'BEGINNER',
       status: CourseStatus.DRAFT,
       teacherId: teacher.id,
@@ -168,7 +237,7 @@ async function main() {
       update: {
         title: c.title,
         description: c.description,
-        topic: c.topic,
+        topicId: c.topicId,
         level: c.level,
         status: c.status,
       },

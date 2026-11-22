@@ -35,23 +35,23 @@ Quy trình: [[workflow-solo-dev]] — làm trọn một lượt, không mock.
 - [x] P02-13 `prisma/seed.ts`: 2 giảng viên, 6 khóa + module/bài/bài kiểm tra, ghi danh cho SV mẫu ([[database-seed-data]]) *(↻ P02-T10: seed thêm `topics`)*
 - [x] ▶️ Tech Lead chạy: `cd backend && npm run prisma:migrate -- --name p02_catalog` rồi `npm run db:seed`
 
-## Điều chỉnh: Chủ đề động (`topics`) — P02b ⬜
+## Điều chỉnh: Chủ đề động (`topics`) — P02b ✅
 > Thứ tự: DTO → UI → gọi API → Backend → DB. Ánh xạ mã cũ → chủ đề mới và SQL backfill: [[database-migration-topics]]. Quy tắc: [[concept-topics]].
 ### DTO
-- [ ] P02-T1 `backend/src/types/dto/topic.ts` (mới): `TopicRefDto`, `TopicDto`; sửa `dto/catalog.ts`: `CourseCardDto.topic` và `CourseDetailDto.topic` → `TopicRefDto`, tham số `topic` của query danh sách → mảng **slug**; `constants.ts` (bỏ mã chủ đề cố định; thêm `TOPIC_COLOR_REGEX`, `TOPIC_ICON_KEYS`), `labels.ts` (bỏ nhãn chủ đề), `errors.ts` (thêm `TOPIC_*`) → `./sync-types.sh` ([[api-catalog]])
+- [x] P02-T1 `backend/src/types/dto/topic.ts` (mới): `TopicRefDto`, `TopicDto`; sửa `dto/catalog.ts`: `CourseCardDto.topic` và `CourseDetailDto.topic` → `TopicRefDto`, tham số `topic` của query danh sách → mảng **slug**; `constants.ts` (bỏ mã chủ đề cố định; thêm `TOPIC_COLOR_REGEX`, `TOPIC_ICON_KEYS`), `labels.ts` (bỏ nhãn chủ đề), `errors.ts` (thêm `TOPIC_*`) → `./sync-types.sh` ([[api-catalog]])
 ### UI
-- [ ] P02-T2 `CourseFilterSidebar`: danh sách chủ đề từ `GET /topics` (kèm số khóa), đồng bộ URL `?topic=<slug>`; bỏ danh sách chủ đề hardcode
-- [ ] P02-T3 `TopicTile` (C02): từ `GET /topics`, chỉ chủ đề `courseCount > 0`, tối đa 8 → `/courses?topic=<slug>`
-- [ ] P02-T4 `CourseCard` / `CourseInfoCard`: màu = `topic.color` (`null` ⇒ token `client.slate`), nhãn = `topic.name` (`MyCourseRow` ở P03 áp dụng khi làm)
+- [x] P02-T2 `CourseFilterSidebar`: danh sách chủ đề từ `GET /topics` (kèm số khóa), đồng bộ URL `?topic=<slug>`; bỏ danh sách chủ đề hardcode
+- [x] P02-T3 `TopicTile` (C02): từ `GET /topics`, chỉ chủ đề `courseCount > 0`, tối đa 8 → `/courses?topic=<slug>`
+- [x] P02-T4 `CourseCard` / `CourseInfoCard`: màu = `topic.color` (`null` ⇒ token `client.slate`), nhãn = `topic.name` (`MyCourseRow` ở P03 áp dụng khi làm)
 ### Gọi API (http)
-- [ ] P02-T5 `services/http/catalog.http.ts`: thêm `listTopics`; `listCourses` truyền `topic` = slug
+- [x] P02-T5 `services/http/catalog.http.ts`: thêm `listTopics`; `listCourses` truyền `topic` = slug
 ### Backend
-- [ ] P02-T6 `modules/topics` (công khai): `GET /topics` — chỉ `is_active`, sắp `display_order`, `courseCount` = khóa `PUBLISHED`
-- [ ] P02-T7 `modules/courses`: lọc `topic` theo slug (join `topics`); mapper card/detail trả `topic: TopicRefDto`; khóa thuộc chủ đề ẩn **vẫn** được liệt kê
+- [x] P02-T6 `modules/topics` (công khai): `GET /topics` — chỉ `is_active`, sắp `display_order`, `courseCount` = khóa `PUBLISHED`
+- [x] P02-T7 `modules/courses`: lọc `topic` theo slug (join `topics`); mapper card/detail trả `topic: TopicRefDto`; khóa thuộc chủ đề ẩn **vẫn** được liệt kê
 ### Cập nhật DB
-- [ ] P02-T8 `schema.prisma`: thêm model `Topic`; `Course.topic` (String) → `Course.topicId` + `topic Topic @relation(..., onDelete: Restrict)` + `@@index([topicId])` ([[database-prisma-schema]])
-- [ ] P02-T9 Migration `p02b_topics` + CHECK màu: Cách A (`db:reset`, chỉ dev) hoặc Cách B (backfill từ `courses.topic`) — [[database-migration-topics]]
-- [ ] P02-T10 `seed-ids.ts` thêm `TOPIC_*_ID`; `seed.ts`: upsert 4 chủ đề hoạt động + 1 chủ đề ẩn mẫu (`tri-tue-nhan-tao`); khóa gán `topicId` ([[database-seed-data]])
+- [x] P02-T8 `schema.prisma`: thêm model `Topic`; `Course.topic` (String) → `Course.topicId` + `topic Topic @relation(..., onDelete: Restrict)` + `@@index([topicId])` ([[database-prisma-schema]])
+- [x] P02-T9 Migration `p02b_topics` + CHECK màu: Cách A (`db:reset`, chỉ dev) hoặc Cách B (backfill từ `courses.topic`) — [[database-migration-topics]]
+- [x] P02-T10 `seed-ids.ts` thêm `TOPIC_*_ID`; `seed.ts`: upsert 4 chủ đề hoạt động + 1 chủ đề ẩn mẫu (`tri-tue-nhan-tao`); khóa gán `topicId` ([[database-seed-data]])
 - [ ] ▶️ Tech Lead chạy: (Cách A) `cd backend && npm run db:reset` — hoặc (Cách B) `npx prisma migrate dev --create-only --name p02b_topics` → sửa SQL → `npx prisma migrate dev` → `npm run db:seed`; rồi khởi động lại backend
 
 ## Checklist test tay (Tech Lead — bước 3)

@@ -12,6 +12,7 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
       : `${course.totalDurationMinutes} phút`;
 
   const infoItems = [
+    { label: 'Chủ đề', value: course.topic.name },
     { label: 'Học phí', value: 'Miễn phí' },
     { label: 'Thời lượng', value: durationText },
     { label: 'Cấp độ', value: LABELS.level[course.level] ?? course.level },
@@ -22,8 +23,13 @@ export function CourseInfoCard({ course }: CourseInfoCardProps) {
     { label: 'Giảng viên', value: course.teacher.fullName },
   ];
 
+  const bgColor = course.topic.color ?? '#1D5E8C';
+
   return (
-    <div className="rounded-xl bg-[#1D5E8C] p-6 text-white shadow-md">
+    <div
+      className="rounded-xl p-6 text-white shadow-md"
+      style={{ backgroundColor: bgColor }}
+    >
       <h3 className="text-lg font-bold tracking-tight text-white border-b border-white/20 pb-3">
         Thông tin khóa học
       </h3>

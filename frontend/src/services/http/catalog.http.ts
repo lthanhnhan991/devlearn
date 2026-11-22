@@ -5,6 +5,7 @@ import type {
   CourseDetailDto,
   EnrollResultDto,
   ListCoursesQuery,
+  TopicDto,
 } from '@/types';
 
 export interface PaginationMeta {
@@ -21,6 +22,10 @@ export interface CourseListResponse {
 
 export async function getPublicStats(): Promise<PublicStatsDto> {
   return apiClient.get<PublicStatsDto>('/public/stats');
+}
+
+export async function listTopics(): Promise<TopicDto[]> {
+  return apiClient.get<TopicDto[]>('/topics');
 }
 
 export async function listCourses(query?: Partial<ListCoursesQuery>): Promise<CourseListResponse> {
@@ -56,6 +61,7 @@ export async function enrollCourse(courseId: string): Promise<EnrollResultDto> {
 
 export const catalogService = {
   getPublicStats,
+  listTopics,
   listCourses,
   getCourseDetail,
   enrollCourse,

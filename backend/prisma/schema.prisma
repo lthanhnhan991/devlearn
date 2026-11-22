@@ -58,18 +58,37 @@ model User {
   @@map("users")
 }
 
+// ───────────── Topics (P02b — ADR-018) ─────────────
+model Topic {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @unique @db.VarChar(100)
+  slug         String   @unique @db.VarChar(100)
+  description  String   @default("") @db.Text
+  color        String?  @db.VarChar(7)
+  icon         String?  @db.VarChar(50)
+  isActive     Boolean  @default(true) @map("is_active")
+  displayOrder Int      @default(0) @map("display_order")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  courses Course[]
+
+  @@index([isActive, displayOrder])
+  @@map("topics")
+}
+
 // ───────────── Courses ─────────────
 model Course {
   id          String       @id @default(uuid()) @db.Uuid
   title       String       @db.VarChar(200)
   description String       @default("") @db.Text
-  topic       String       @db.VarChar(100)
+  topicId     String       @map("topic_id") @db.Uuid
   level       String       @db.VarChar(20)
   status      CourseStatus @default(DRAFT)
   teacherId   String       @map("teacher_id") @db.Uuid
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
 
   teacher     User         @relation("CourseTeacher", fields: [teacherId], references: [id])
+  topic       Topic        @relation(fields: [topicId], references: [id], onDelete: Restrict)
   modules     Module[]
   enrollments Enrollment[]
   exams       Exam[]
@@ -78,6 +97,7 @@ model Course {
 
   @@index([teacherId])
   @@index([status])
+  @@index([topicId])
   @@map("courses")
 }
 

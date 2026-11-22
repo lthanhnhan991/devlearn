@@ -76,6 +76,22 @@ export function CourseCatalogGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
+export function TopicGridSkeleton() {
+  return (
+    <div role="status" aria-busy="true" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {[0, 1, 2, 3].map((i) => (
+        <div key={i} className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <Skeleton className="size-12 rounded-lg shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-3 w-32" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CourseCatalogSkeleton() {
   return (
     <div role="status" aria-busy="true" className="space-y-6">

@@ -62,10 +62,11 @@ export function UserMenu({ user }: { user: UserDto }) {
   const isStudent = user.role === 'STUDENT';
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative" suppressHydrationWarning>
       <button
         ref={triggerRef}
         type="button"
+        suppressHydrationWarning
         aria-label={`Menu tài khoản của ${user.fullName}`}
         aria-haspopup="menu"
         aria-expanded={open}

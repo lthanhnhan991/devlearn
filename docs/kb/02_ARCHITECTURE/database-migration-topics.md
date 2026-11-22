@@ -42,10 +42,10 @@ CREATE INDEX "topics_is_active_display_order_idx" ON "topics"("is_active", "disp
 ALTER TABLE "topics" ADD CONSTRAINT "topics_color_chk" CHECK ("color" IS NULL OR "color" ~ '^#[0-9A-Fa-f]{6}$');
 
 INSERT INTO "topics" ("id","name","slug","color","icon","display_order") VALUES
-  ('<TOPIC_PROGRAMMING_ID>','Lập trình','lap-trinh','#1D5E8C','code',0),
-  ('<TOPIC_DATABASE_ID>','Cơ sở dữ liệu','co-so-du-lieu','#37474F','database',1),
-  ('<TOPIC_WEB_ID>','Web','web','#00796B','globe',2),
-  ('<TOPIC_SOFTWARE_ENGINEERING_ID>','Công nghệ phần mềm','cong-nghe-phan-mem','#2E7D32','bug',3);
+  ('20000000-0000-0000-0000-000000000001','Lập trình','lap-trinh','#1D5E8C','code',0),
+  ('20000000-0000-0000-0000-000000000002','Cơ sở dữ liệu','co-so-du-lieu','#37474F','database',1),
+  ('20000000-0000-0000-0000-000000000003','Web','web','#00796B','globe',2),
+  ('20000000-0000-0000-0000-000000000004','Công nghệ phần mềm','cong-nghe-phan-mem','#2E7D32','bug',3);
 
 ALTER TABLE "courses" ADD COLUMN "topic_id" UUID;
 UPDATE "courses" c SET "topic_id" = t."id" FROM "topics" t

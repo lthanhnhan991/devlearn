@@ -1,7 +1,12 @@
 import type { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
-export type ButtonVariant = 'client-primary' | 'client-outline' | 'admin-primary' | 'admin-outline';
+export type ButtonVariant =
+  | 'client-primary'
+  | 'client-outline'
+  | 'admin-primary'
+  | 'admin-outline'
+  | 'admin-danger';
 export type ButtonSize = 'md' | 'lg';
 
 export interface ButtonStyleOptions {
@@ -24,6 +29,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     'rounded-lg bg-admin-primary text-white hover:bg-admin-primary-hover focus-visible:outline-admin-primary',
   'admin-outline':
     'rounded-lg border border-slate-300 bg-white text-admin-navy hover:bg-admin-bg focus-visible:outline-admin-primary',
+  'admin-danger':
+    'rounded-lg bg-rose-600 text-white hover:bg-rose-700 focus-visible:outline-rose-600',
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

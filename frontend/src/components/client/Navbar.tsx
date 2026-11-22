@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/shared/Logo';
@@ -54,6 +54,11 @@ function NavLinksFallback() {
 
 export function Navbar() {
   const { status, user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white">
@@ -93,7 +98,7 @@ export function Navbar() {
             />
           </div>
 
-          {status === 'loading' ? (
+          {!mounted || status === 'loading' ? (
             <div
               className="size-10 animate-pulse rounded-full bg-slate-200"
               aria-label="Đang nạp thông tin người dùng"

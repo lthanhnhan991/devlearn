@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { COURSE_LEVELS, COURSE_TOPICS } from '../constants';
+import { COURSE_LEVELS } from '../constants';
+import { topicRefDtoSchema } from './topic';
 
 export const publicStatsDtoSchema = z.object({
   courseCount: z.number(),
@@ -18,7 +19,7 @@ export type PersonRefDto = z.infer<typeof personRefDtoSchema>;
 export const courseCardDtoSchema = z.object({
   id: z.string(),
   title: z.string(),
-  topic: z.enum(COURSE_TOPICS),
+  topic: topicRefDtoSchema,
   level: z.enum(COURSE_LEVELS),
   teacher: personRefDtoSchema,
   lessonCount: z.number(),
@@ -67,7 +68,7 @@ export const courseDetailDtoSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),
-  topic: z.enum(COURSE_TOPICS),
+  topic: topicRefDtoSchema,
   level: z.enum(COURSE_LEVELS),
   teacher: personRefDtoSchema,
   lessonCount: z.number(),
@@ -91,7 +92,7 @@ export type EnrollResultDto = z.infer<typeof enrollResultDtoSchema>;
 
 export const listCoursesQuerySchema = z.object({
   q: z.string().optional(),
-  topic: z.union([z.string(), z.array(z.string())]).optional(),
+  topic: z.union([z.string(), z.array(z.string())]).optional(), // slugs
   level: z.union([z.string(), z.array(z.string())]).optional(),
   sort: z.enum(['newest', 'popular']).default('newest'),
   page: z.coerce.number().int().min(1).default(1),
