@@ -18,7 +18,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 |---|---|---|---|---|---|
 | P00 | [[plan-phase-00-foundation]] | — | — | ✅ | Hoàn thành thực tế; spike Cloudinary/Gemini hoãn (Q-09/Q-10) |
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
-| P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất — Tech Lead test thực tế thành công |
+| P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện (P02 gốc + P02b topics + fix runtime) — test thực tế thành công |
 | P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
@@ -36,6 +36,10 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-22 · Chốt Phase 02 (Catalog, Enroll & Dynamic Topics P02b) · Agent & Tech Lead
+- **Tác vụ**: Tech Lead hoàn tất kiểm thử thực tế toàn bộ Phase 02 (Client C02/C03/C04, luồng đăng ký học, chủ đề động topics P02b, màn A09 quản trị chủ đề `/admin/topics`). Đã vá sạch các lỗi runtime Next.js 16.4.6 (`UserMenu` hydration mismatch, instant navigation validation tại `/admin`).
+- **Kết quả**: Tất cả checklist kiểm thử đã đạt [x]. Đóng Phase 02, sẵn sàng mở Phase 03 ([[plan-phase-03-learning-progress]]).
 
 ### 2026-11-22 · Fix Hydration & Instant Navigation Next.js 16.4.6 · Agent
 - **Tác vụ**: Sửa lỗi hydration mismatch tại `UserMenu.tsx` khi tải trang chủ `/` và lỗi segment validation `instant navigation` tại segment `/admin` (`page.tsx` bị dropped).

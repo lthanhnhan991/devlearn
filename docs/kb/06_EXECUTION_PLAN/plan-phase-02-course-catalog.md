@@ -12,7 +12,7 @@ updated: 2026-11-21
 
 **Phạm vi**: C02 trang chủ, C03 danh mục + lọc, C04 chi tiết (2 trạng thái), đăng ký học. **Phụ thuộc**: P01. **FILE_MAPPING**: CL-03…CL-06. **Cỡ**: M.
 Quy trình: [[workflow-solo-dev]] — làm trọn một lượt, không mock.
-**Trạng thái**: Phase 02 gốc ✅ (đã test, chủ đề còn là mã cố định `courses.topic`). **Điều chỉnh chủ đề động (`topics`, [[adr-018-dynamic-topics]]) ⬜** — xem mục **P02-T** bên dưới. Các mục `[x]` giữ nguyên; chỉ chú thích `↻` ở những mục bị ảnh hưởng.
+**Trạng thái**: Hoàn tất toàn diện & đã kiểm thử thành công (Phase 02 gốc + Chủ đề động `topics` P02b theo [[adr-018-dynamic-topics]] + Quản trị chủ đề A09). Sẵn sàng chuyển sang Phase 03.
 
 ## Việc cần làm
 ### DTO
@@ -52,19 +52,19 @@ Quy trình: [[workflow-solo-dev]] — làm trọn một lượt, không mock.
 - [x] P02-T8 `schema.prisma`: thêm model `Topic`; `Course.topic` (String) → `Course.topicId` + `topic Topic @relation(..., onDelete: Restrict)` + `@@index([topicId])` ([[database-prisma-schema]])
 - [x] P02-T9 Migration `p02b_topics` + CHECK màu: Cách A (`db:reset`, chỉ dev) hoặc Cách B (backfill từ `courses.topic`) — [[database-migration-topics]]
 - [x] P02-T10 `seed-ids.ts` thêm `TOPIC_*_ID`; `seed.ts`: upsert 4 chủ đề hoạt động + 1 chủ đề ẩn mẫu (`tri-tue-nhan-tao`); khóa gán `topicId` ([[database-seed-data]])
-- [ ] ▶️ Tech Lead chạy: (Cách A) `cd backend && npm run db:reset` — hoặc (Cách B) `npx prisma migrate dev --create-only --name p02b_topics` → sửa SQL → `npx prisma migrate dev` → `npm run db:seed`; rồi khởi động lại backend
+- [x] ▶️ Tech Lead chạy: (Cách A) `cd backend && npm run db:reset` — hoặc (Cách B) `npx prisma migrate dev --create-only --name p02b_topics` → sửa SQL → `npx prisma migrate dev` → `npm run db:seed`; rồi khởi động lại backend (đã hoàn thành thực tế)
 
 ## Checklist test tay (Tech Lead — bước 3)
 - [x] Trang chủ hiện số liệu + 4 khóa phổ biến; Danh mục lọc chủ đề/cấp độ/tìm kiếm đúng, URL giữ bộ lọc
 - [x] Chi tiết khóa: tên module/bài hiện, **không lộ link file**; khóa `DRAFT` không xem được
 - [x] Đăng ký học ⇒ chuyển sang "Đã đăng ký"; bấm lần nữa không lỗi; khách bị chuyển về đăng nhập
 
-### Checklist test tay bổ sung (chủ đề động) ⬜
-- [ ] Trang chủ: tile chủ đề lấy từ hệ thống, đúng thứ tự `display_order`; chủ đề không có khóa `PUBLISHED` không hiện tile
-- [ ] Danh mục: cột Chủ đề động kèm số khóa; chọn nhiều chủ đề lọc đúng; URL dạng `?topic=lap-trinh`; slug lạ ⇒ danh sách rỗng, không lỗi
-- [ ] Chủ đề ẩn mẫu (`tri-tue-nhan-tao`) **không** hiện ở tile/bộ lọc
-- [ ] Màu thẻ khóa khớp `topic.color`; chủ đề `color = null` dùng màu mặc định
-- [ ] Sau migration không còn khóa nào thiếu `topic_id`; `GET /courses` và `GET /courses/:id` trả `topic` là **đối tượng**
+### Checklist test tay bổ sung (chủ đề động) ✅
+- [x] Trang chủ: tile chủ đề lấy từ hệ thống, đúng thứ tự `display_order`; chủ đề không có khóa `PUBLISHED` không hiện tile
+- [x] Danh mục: cột Chủ đề động kèm số khóa; chọn nhiều chủ đề lọc đúng; URL dạng `?topic=lap-trinh`; slug lạ ⇒ danh sách rỗng, không lỗi
+- [x] Chủ đề ẩn mẫu (`tri-tue-nhan-tao`) **không** hiện ở tile/bộ lọc
+- [x] Màu thẻ khóa khớp `topic.color`; chủ đề `color = null` dùng màu mặc định
+- [x] Sau migration không còn khóa nào thiếu `topic_id`; `GET /courses` và `GET /courses/:id` trả `topic` là **đối tượng**
 
 ## Rủi ro
 Đếm `lessonCount`/thời lượng gây N+1 ⇒ dùng truy vấn tổng hợp một lần.
