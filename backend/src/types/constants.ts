@@ -23,3 +23,6 @@ export type ContentType = (typeof CONTENT_TYPES)[number];
 
 export const EXAM_STATUSES = ['DRAFT', 'OPEN', 'CLOSED'] as const;
 export type ExamStatus = (typeof EXAM_STATUSES)[number];
+
+export const DOC_STATUSES = ['PENDING', 'PROCESSING', 'READY', 'FAILED'] as const;
+export type DocStatus = (typeof DOC_STATUSES)[number];

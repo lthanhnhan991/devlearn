@@ -20,7 +20,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
 | P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện (P02 gốc + P02b topics + fix runtime) — test thực tế thành công |
 | P03 | [[plan-phase-03-learning-progress]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện — Tech Lead test thực tế thành công |
-| P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
+| P04 | [[plan-phase-04-admin-content]] | ✅ | ✅ | ⬜ | Đã hoàn thành UI & BE (A02, A03, Preview, upload Cloudinary), chờ Tech Lead test |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
 | P06 | [[plan-phase-06-exam-admin-stats]] | ⬜ | ⬜ | ⬜ | |
 | P07 | [[plan-phase-07-rag-service]] | — | ⬜ | ⬜ | không có UI; spike Gemini trước |
@@ -36,6 +36,24 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-23 · Hoàn thành UI & Backend Phase 04 (Quản lý khóa học & Soạn nội dung) · Agent
+- **Tác vụ**: Triển khai trọn vẹn Phase 04 theo `plan-phase-04-admin-content.md` (phạm vi A02, A03, AD-03…AD-06, IN-09).
+- **Đã làm**:
+  - **DTO & Types**: Bổ sung `admin-course.ts`, `admin-content.ts` tại `backend/src/types/dto/` và `frontend/src/types/dto/`, export tại `index.ts`. Thêm mã lỗi `EXAM_HAS_ATTEMPTS`, `FILE_TOO_LARGE`, `UNSUPPORTED_FILE_TYPE`, `AI_UNAVAILABLE` tại `errors.ts`, enum `DOC_STATUSES` tại `constants.ts`.
+  - **Backend & Cloudinary**:
+    - Thư viện `cloudinary.ts`: Tích hợp upload stream / destroy file Cloudinary với chế độ giả lập graceful khi thiếu credentials (không làm crash app).
+    - Middleware `upload.ts`: Giới hạn dung lượng (video ≤ 100 MB, PDF ≤ 10 MB) và MIME types qua multer ghi đĩa tạm.
+    - Module Courses (`admin-courses.service.ts`, `controller`, `routes`): Danh sách khóa học (phân trang, lọc, tìm kiếm), tạo/sửa khóa học (kiểm tra `TOPIC_INACTIVE`), chuyển trạng thái xuất bản (kiểm tra `COURSE_NOT_READY` có ≥ 1 bài học xuất bản), xóa khóa học (chặn khi có học viên `COURSE_HAS_ENROLLMENTS`).
+    - Module Content (`admin-content.service.ts`, `controller`, `routes`): Cấu trúc khóa học, CRUD module và reorder trong transaction (chặn xóa module có attempt bài thi `EXAM_HAS_ATTEMPTS`), CRUD bài học và reorder trong transaction, upload tệp bài học (tự động upsert `AiDocument` trạng thái `PENDING` khi upload PDF, cập nhật thời lượng video).
+    - Gắn routers vào `app.ts` tại `/api/v1/admin/courses` và `/api/v1/admin`.
+  - **Frontend Services**: `admin-course.http.ts` và `admin-content.http.ts` (upload tệp kèm báo cáo tiến trình phần trăm qua XHR).
+  - **Frontend UI**:
+    - Component `InfoBanner`: Banner xanh hiển thị liên kết "Quản lý nội dung hiển thị ở CLIENT · ...".
+    - Màn A02 (`/admin/courses`): Bảng danh sách khóa học, tìm kiếm, lọc trạng thái, phân trang, chip chủ đề động (kèm chấm màu và nhãn `(đã ẩn)` nếu inactive), công tắc đổi trạng thái xuất bản, modal tạo/sửa khóa học (select chủ đề động), modal xác nhận xóa khóa học có cảnh báo chặn xóa khi đã có học viên.
+    - Màn A03 (`/admin/lessons`): Dropdown chọn khóa học, cây cấu trúc `StructureTree` (thêm/sửa/xóa/đổi thứ tự module và bài học), form soạn bài `LessonForm` (tiêu đề, loại nội dung VIDEO/PDF, nhập link YouTube hoặc vùng kéo thả tải tệp Cloudinary có thanh tiến trình XHR, checkbox xuất bản bài học).
+    - Màn Xem trước (`/admin/lessons/[lessonId]/preview`): Tái sử dụng `LessonViewer` cho phép Giảng viên/Quản trị viên xem trực tiếp nội dung video/PDF mà không cần ghi danh hay tính tiến độ học tập.
+- **Tiếp theo**: Chờ Tech Lead chạy `./sync-types.sh`, `typecheck` và kiểm thử thủ công trên trình duyệt.
 
 ### 2026-11-23 · Chốt Phase 03 (Tiến độ học tập & Khóa học của tôi) · Agent & Tech Lead
 - **Tác vụ**: Tech Lead hoàn tất kiểm thử thực tế toàn bộ Phase 03 (Màn C08 `/my-courses`, màn C05 `/learn/...`, tính tiến độ chuẩn hoá `computeProgress`, hoàn thành bài học idempotent, chặn khóa chưa đăng ký, sửa Instant Navigation Next.js 16).

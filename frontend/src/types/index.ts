@@ -6,4 +6,6 @@ export * from './dto/auth';
 export * from './dto/catalog';
 export * from './dto/topic';
 export * from './dto/admin-topic';
+export * from './dto/admin-course';
+export * from './dto/admin-content';
 export * from './dto/learning';

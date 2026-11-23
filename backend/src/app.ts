@@ -9,6 +9,8 @@ import { publicRouter } from './modules/public/public.routes';
 import { coursesRouter } from './modules/courses/courses.routes';
 import { publicTopicsRouter, adminTopicsRouter } from './modules/topics/topics.routes';
 import { lessonsRouter, meRouter } from './modules/progress/progress.routes';
+import { adminCoursesRouter } from './modules/courses/admin-courses.routes';
+import { adminContentRouter } from './modules/content/admin-content.routes';
 
 export function createApp() {
   const app = express();
@@ -29,6 +31,8 @@ export function createApp() {
   app.use('/api/v1/me', meRouter);
   app.use('/api/v1/topics', publicTopicsRouter);
   app.use('/api/v1/admin/topics', adminTopicsRouter);
+  app.use('/api/v1/admin/courses', adminCoursesRouter);
+  app.use('/api/v1/admin', adminContentRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
