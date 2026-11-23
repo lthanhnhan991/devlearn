@@ -19,7 +19,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 | P00 | [[plan-phase-00-foundation]] | — | — | ✅ | Hoàn thành thực tế; spike Cloudinary/Gemini hoãn (Q-09/Q-10) |
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
 | P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện (P02 gốc + P02b topics + fix runtime) — test thực tế thành công |
-| P03 | [[plan-phase-03-learning-progress]] | ⬜ | ⬜ | ⬜ | |
+| P03 | [[plan-phase-03-learning-progress]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện — Tech Lead test thực tế thành công |
 | P04 | [[plan-phase-04-admin-content]] | ⬜ | ⬜ | ⬜ | spike Cloudinary trước |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
 | P06 | [[plan-phase-06-exam-admin-stats]] | ⬜ | ⬜ | ⬜ | |
@@ -36,6 +36,33 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-23 · Chốt Phase 03 (Tiến độ học tập & Khóa học của tôi) · Agent & Tech Lead
+- **Tác vụ**: Tech Lead hoàn tất kiểm thử thực tế toàn bộ Phase 03 (Màn C08 `/my-courses`, màn C05 `/learn/...`, tính tiến độ chuẩn hoá `computeProgress`, hoàn thành bài học idempotent, chặn khóa chưa đăng ký, sửa Instant Navigation Next.js 16).
+- **Kết quả**: Toàn bộ checklist kiểm thử đã đạt [x]. Đóng Phase 03, sẵn sàng mở Phase 04 ([[plan-phase-04-admin-content]]).
+
+### 2026-11-23 · Fix Instant Navigation Phase 03 · Agent
+- **Tác vụ**: Sửa lỗi segment instant navigation tại `src/app/(learn)/learn/[courseId]/lessons/[lessonId]/page.tsx` và cấu trúc hóa Server Component + Client View cho Phase 03.
+- **Đã làm**:
+  - Chuyển `(learn)/learn/[courseId]/lessons/[lessonId]/page.tsx` thành Server Component có `export const instant = false;` và bọc `<Suspense>` xung quanh Client View `LearnLessonView`.
+  - Tương tự, chuyển `(client)/my-courses/page.tsx` thành Server Component có `export const instant = false;` và bọc `<Suspense>` xung quanh Client View `MyCoursesView` (kèm logic bảo vệ auth chuyển hướng về `/login?next=`).
+  - Giữ `export const instant = false;` ở `(learn)/layout.tsx` đảm bảo tính tương thích đồng bộ cho toàn bộ phân hệ học tập.
+
+### 2026-11-23 · Fix Typecheck Progress Repository · Agent
+- **Tác vụ**: Sửa lỗi kiểu `TS2353` tại `progress.repository.ts:173` do truy vấn model `Attempt` sai tên trường (`userId` → `studentId`).
+- **Đã làm**: Cập nhật hàm `findUserAttempts` dùng đúng trường `where: { studentId }` theo đúng Prisma schema.
+
+### 2026-11-22 · Phase 03 — Tiến độ học tập & Khóa học của tôi (C05 & C08) · Agent
+- **Tác vụ**: Triển khai toàn bộ Phase 03 theo `plan-phase-03-learning-progress.md` (phạm vi C05 Giao diện học tập, C08 Khóa học của tôi, CL-07…CL-09).
+- **Đã làm**:
+  - **DTO & Types**: Bổ sung `dto/learning.ts` (`LearnStructureDto`, `LessonContentDto`, `CompleteResultDto`, `MyCourseDto`, `LearningSummaryDto`), cập nhật `constants.ts` (thêm `ContentType`, `ExamStatus`) và `labels.ts` (thêm `examStatus`). Đồng bộ types sang `frontend/src/types/`.
+  - **Database & Seed**: Tận dụng model `LessonProgress` đã sẵn sàng trong `schema.prisma`. Cập nhật `seed.ts` để nạp dữ liệu tiến độ mẫu cho sinh viên Lê Thanh Nhàn (Python ~35%, PostgreSQL ~70%, Next.js 0%).
+  - **Backend Modules**: Tạo `modules/progress` gồm repository, service (hàm `computeProgress` duy nhất chuẩn hoá phần trăm tiến độ và điểm tiếp tục học `resumeLessonId`), controller và router (`/courses/:courseId/learn`, `/lessons/:id`, `/lessons/:id/complete` idempotent, `/me/courses`, `/me/learning-summary`). Mount routers tại `app.ts`.
+  - **Frontend Services & UI**:
+    - `learning.http.ts`: Tạo trọn bộ API gọi backend.
+    - Layout `(learn)`: Đặt `export const instant = false;` và bọc `StudentGuard`.
+    - Màn C05 (`/learn/[courseId]/lessons/[lessonId]`): `LearnHeader` (logo, tên khóa, thanh tiến độ %, nút Thoát), `LessonSidebar` (danh sách module, tiến độ từng module, trạng thái bài học, hàng kiểm tra), `LessonViewer` (xem video Cloudinary/YouTube, xem PDF, trạng thái lỗi + Thử lại), các nút điều hướng Bài trước/Tiếp theo và nút Hoàn thành bài học kèm banner chúc mừng hoàn thành 100%.
+    - Màn C08 (`/my-courses`): Tab Đang học / Đã hoàn thành, danh sách `MyCourseRow` (màu theo `topic.color`, tên, thanh tiến độ, nút Bắt đầu / Tiếp tục học) và thẻ `LearningSummaryCard` (tổng quan số lượng và điểm trung bình).
 
 ### 2026-11-22 · Chốt Phase 02 (Catalog, Enroll & Dynamic Topics P02b) · Agent & Tech Lead
 - **Tác vụ**: Tech Lead hoàn tất kiểm thử thực tế toàn bộ Phase 02 (Client C02/C03/C04, luồng đăng ký học, chủ đề động topics P02b, màn A09 quản trị chủ đề `/admin/topics`). Đã vá sạch các lỗi runtime Next.js 16.4.6 (`UserMenu` hydration mismatch, instant navigation validation tại `/admin`).

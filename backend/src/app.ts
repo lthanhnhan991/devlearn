@@ -8,6 +8,7 @@ import { authRouter } from './modules/auth/auth.routes';
 import { publicRouter } from './modules/public/public.routes';
 import { coursesRouter } from './modules/courses/courses.routes';
 import { publicTopicsRouter, adminTopicsRouter } from './modules/topics/topics.routes';
+import { lessonsRouter, meRouter } from './modules/progress/progress.routes';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,8 @@ export function createApp() {
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/public', publicRouter);
   app.use('/api/v1/courses', coursesRouter);
+  app.use('/api/v1/lessons', lessonsRouter);
+  app.use('/api/v1/me', meRouter);
   app.use('/api/v1/topics', publicTopicsRouter);
   app.use('/api/v1/admin/topics', adminTopicsRouter);
 

@@ -9,4 +9,9 @@ export const LABELS = {
     DRAFT: 'Bản nháp',
     PUBLISHED: 'Đã xuất bản',
   },
+  examStatus: {
+    DRAFT: 'Nháp',
+    OPEN: 'Đang mở',
+    CLOSED: 'Đã đóng',
+  },
 } as const;

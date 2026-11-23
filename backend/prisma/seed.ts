@@ -328,6 +328,49 @@ async function main() {
     });
   }
 
+  // 3.1 Sample LessonProgress for student Na (Phase 03: Python ~35%, SQL ~70%, Next.js 0%)
+  const pythonLessons = await prisma.lesson.findMany({
+    where: { isPublished: true, module: { courseId: SEED_IDS.coursePython } },
+    orderBy: [{ module: { position: 'asc' } }, { position: 'asc' }],
+  });
+  for (const l of pythonLessons.slice(0, 4)) {
+    await prisma.lessonProgress.upsert({
+      where: {
+        userId_lessonId: {
+          userId: studentNa.id,
+          lessonId: l.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: studentNa.id,
+        lessonId: l.id,
+        completedAt: new Date(),
+      },
+    });
+  }
+
+  const sqlLessons = await prisma.lesson.findMany({
+    where: { isPublished: true, module: { courseId: SEED_IDS.courseSql } },
+    orderBy: [{ module: { position: 'asc' } }, { position: 'asc' }],
+  });
+  for (const l of sqlLessons.slice(0, 8)) {
+    await prisma.lessonProgress.upsert({
+      where: {
+        userId_lessonId: {
+          userId: studentNa.id,
+          lessonId: l.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: studentNa.id,
+        lessonId: l.id,
+        completedAt: new Date(),
+      },
+    });
+  }
+
   // Sample enrollments from other students
   for (const sv of sampleStudents.slice(0, 8)) {
     await prisma.enrollment.upsert({

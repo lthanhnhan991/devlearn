@@ -5,6 +5,7 @@ export * from './auth.service';
 export * from './http/auth.http';
 export * from './http/catalog.http';
 export * from './http/admin-topic.http';
+export * from './http/learning.http';
 export { authHttp };
 
 export const authService: AuthService = authHttp;
