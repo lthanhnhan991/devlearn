@@ -56,4 +56,10 @@ export const adminCourseListQuerySchema = z.object({
   sort: z.enum(['newest', 'title']).optional().default('newest'),
 });
 
-export type AdminCourseListQuery = z.infer<typeof adminCourseListQuerySchema>;
+export interface AdminCourseListQuery {
+  q?: string | undefined;
+  status?: 'DRAFT' | 'PUBLISHED' | undefined;
+  page?: number | undefined;
+  pageSize?: number | undefined;
+  sort?: 'newest' | 'title' | undefined;
+}

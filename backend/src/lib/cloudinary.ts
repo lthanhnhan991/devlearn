@@ -2,15 +2,17 @@ import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 import { env } from '../config/env';
 
-const hasCredentials = Boolean(
-  env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET,
-);
+const cloudName = env.CLOUDINARY_CLOUD_NAME;
+const apiKey = env.CLOUDINARY_API_KEY;
+const apiSecret = env.CLOUDINARY_API_SECRET;
 
-if (hasCredentials) {
+const hasCredentials = Boolean(cloudName && apiKey && apiSecret);
+
+if (cloudName && apiKey && apiSecret) {
   cloudinary.config({
-    cloud_name: env.CLOUDINARY_CLOUD_NAME,
-    api_key: env.CLOUDINARY_API_KEY,
-    api_secret: env.CLOUDINARY_API_SECRET,
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
     secure: true,
   });
 }
@@ -18,7 +20,7 @@ if (hasCredentials) {
 export interface UploadResult {
   secure_url: string;
   public_id: string;
-  duration?: number;
+  duration?: number | undefined;
 }
 
 export async function uploadToCloudinary(
@@ -65,14 +67,13 @@ export async function destroyFromCloudinary(
   publicId: string,
   resourceType: 'video' | 'raw' | 'image' = 'raw',
 ): Promise<void> {
-  if (!hasCredentials || !publicId || publicId.startsWith('local_')) {
+  if (!hasCredentials) {
     return;
   }
 
   try {
     await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
-  } catch (error) {
-    // Best-effort: chỉ log cảnh báo, không làm gián đoạn luồng chính
-    console.warn(`[Cloudinary] Không thể xóa file ${publicId}:`, error);
+  } catch {
+    // Best-effort cleanup, không ngắt luồng
   }
 }

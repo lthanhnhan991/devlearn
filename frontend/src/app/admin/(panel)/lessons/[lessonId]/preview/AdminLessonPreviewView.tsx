@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 
 interface AdminLessonPreviewViewProps {
   lessonId: string;
-  courseId?: string;
+  courseId?: string | undefined;
 }
 
 export function AdminLessonPreviewView({ lessonId, courseId }: AdminLessonPreviewViewProps) {
@@ -73,6 +73,10 @@ export function AdminLessonPreviewView({ lessonId, courseId }: AdminLessonPrevie
     durationSeconds: lesson.durationSeconds,
     courseId: courseId ?? '',
     moduleId: lesson.moduleId,
+    isCompleted: false,
+    prevLessonId: null,
+    nextLessonId: null,
+    progressPercent: 0,
   };
 
   return (

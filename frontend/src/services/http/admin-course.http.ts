@@ -7,14 +7,16 @@ import type {
   AdminCourseListQuery,
 } from '@/types';
 
+export interface AdminCourseListMeta {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface AdminCourseListResponse {
   data: AdminCourseRowDto[];
-  meta: {
-    page: number;
-    pageSize: number;
-    total: number;
-    totalPages: number;
-  };
+  meta: AdminCourseListMeta;
 }
 
 export async function listAdminCourses(query?: AdminCourseListQuery): Promise<AdminCourseListResponse> {
@@ -27,7 +29,7 @@ export async function listAdminCourses(query?: AdminCourseListQuery): Promise<Ad
 
   const queryStr = params.toString();
   const path = queryStr ? `/admin/courses?${queryStr}` : '/admin/courses';
-  return apiClient.get<AdminCourseListResponse>(path);
+  return apiClient.getWithMeta<AdminCourseRowDto[], AdminCourseListMeta>(path);
 }
 
 export async function createCourse(data: CreateCourseReq): Promise<AdminCourseDto> {

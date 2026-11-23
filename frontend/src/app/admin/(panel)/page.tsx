@@ -1,3 +1,5 @@
+export const instant = false;
+
 export default function AdminDashboardPlaceholderPage() {
   return (
     <div className="space-y-4">
