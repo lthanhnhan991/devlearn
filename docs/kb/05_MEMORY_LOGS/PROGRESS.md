@@ -20,7 +20,7 @@ Quy trình 3 bước ([[workflow-solo-dev]]): **Bước 1** DTO + UI + gọi API
 | P01 | [[plan-phase-01-auth]] | ✅ | ✅ | ✅ | Hoàn tất — test DB thực tế thành công |
 | P02 | [[plan-phase-02-course-catalog]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện (P02 gốc + P02b topics + fix runtime) — test thực tế thành công |
 | P03 | [[plan-phase-03-learning-progress]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện — Tech Lead test thực tế thành công |
-| P04 | [[plan-phase-04-admin-content]] | ✅ | ✅ | ⬜ | Đã hoàn thành UI & BE (A02, A03, Preview, upload Cloudinary), chờ Tech Lead test |
+| P04 | [[plan-phase-04-admin-content]] | ✅ | ✅ | ✅ | Hoàn tất toàn diện (A02, A03, A09, Preview, Cloudinary, Repo/Service) — Tech Lead test thực tế thành công |
 | P05 | [[plan-phase-05-exam-student]] | ⬜ | ⬜ | ⬜ | |
 | P06 | [[plan-phase-06-exam-admin-stats]] | ⬜ | ⬜ | ⬜ | |
 | P07 | [[plan-phase-07-rag-service]] | — | ⬜ | ⬜ | không có UI; spike Gemini trước |
@@ -36,6 +36,14 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 - TD-01: Cần xóa các file Mock và biến môi trường NEXT_PUBLIC_MOCK_FEATURES còn sót lại — ảnh hưởng: codebase dư thừa — đề xuất: chạy lệnh xóa thủ công
 
 ## Nhật ký (mới nhất trên cùng)
+
+### 2026-11-25 · Chốt sổ Phase 04 (Quản lý khóa học & Soạn nội dung) · Agent
+- **Tác vụ**: Ghi nhận hoàn thành kiểm thử tay toàn diện Phase 04 theo xác nhận của Tech Lead, cập nhật đồng bộ `plan-phase-04-admin-content.md`, `PROGRESS.md`, `FILE_MAPPING.md` và `FILE_MAPPING_ADMIN.md`.
+- **Tổng kết Phase 04**:
+  - **UI & API**: Hoàn chỉnh A02 (Quản lý khóa học), A03 (Soạn module/bài học, upload video/PDF với progress), A09 (Quản lý chủ đề động), và trang Xem trước bài học ở client (`/admin/lessons/[lessonId]/preview`). Căn chỉnh giao diện bám sát `docs/design/` và xử lý tương thích Next.js 16 (`instant = false`).
+  - **Backend & Kiến trúc**: Tách bạch triệt để Repository vs. Service cho `courses` và `content`, bổ sung chú thích danh sách API ở đầu tất cả module router, và pass 100% `npm run typecheck` (`exactOptionalPropertyTypes: true`) ở cả backend lẫn frontend.
+  - **Cloudinary & PDF**: Upload PDF dưới `resource_type: 'image'` (+ `format: 'pdf'`) để hiển thị inline mượt mà trong `LessonViewer`; đồng bộ thao tác gỡ/xóa/ghi đè tệp giữa UI ↔ DB ↔ Cloudinary dựa trên `resolveCloudinaryResourceType`.
+- **Trạng thái**: Sẵn sàng bước sang **Phase 05 — Bài kiểm tra phía học viên**.
 
 ### 2026-11-25 · Chuyển upload PDF sang resource_type 'image' & xác định resource_type động khi destroy · Agent
 - **Tác vụ**: Chuyển upload PDF trên Cloudinary từ `raw` sang `image` (+ `format: 'pdf'`) để trình duyệt xem trực tiếp inline, đồng thời xác định `resourceType` theo URL thực tế khi xóa tệp trên Cloudinary.

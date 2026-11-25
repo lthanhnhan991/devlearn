@@ -59,4 +59,4 @@ Mỗi tính năng `x` có: gọi API ở `W:services/http/x.http.ts` (`W:service
 | IN-06 | Express skeleton: env, error handler, validate, authenticate | `A:middlewares/*`, `A:config/env.ts` | P00 | ⬜ TODO |
 | IN-07 | RAG service: ingest / query / delete / health | `R:*` | P07 | ⬜ TODO |
 | IN-08 | `rag-client`, callback `/internal`, job quét treo | `A:lib/rag-client.ts`, `A:modules/internal/`, `A:jobs/*` | P08 | ⬜ TODO |
-| IN-09 | Cloudinary upload/destroy + multer | `A:lib/cloudinary.ts`, `A:middlewares/upload.ts` | P04 | ⬜ TODO |
+| IN-09 | Cloudinary upload/destroy + multer | `A:lib/cloudinary.ts`, `A:middlewares/upload.ts` | P04 | ✅ Đã test |
