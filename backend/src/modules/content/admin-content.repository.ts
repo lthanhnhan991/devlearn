@@ -174,6 +174,8 @@ export class AdminContentRepository {
       title?: string | undefined;
       contentType?: ContentType | undefined;
       fileUrl?: string | null | undefined;
+      filePublicId?: string | null | undefined;
+      durationSeconds?: number | null | undefined;
       isPublished?: boolean | undefined;
     },
   ) {
@@ -181,6 +183,8 @@ export class AdminContentRepository {
     if (data.title !== undefined) updateData.title = data.title;
     if (data.contentType !== undefined) updateData.contentType = data.contentType;
     if (data.fileUrl !== undefined) updateData.fileUrl = data.fileUrl;
+    if (data.filePublicId !== undefined) updateData.filePublicId = data.filePublicId;
+    if (data.durationSeconds !== undefined) updateData.durationSeconds = data.durationSeconds;
     if (data.isPublished !== undefined) updateData.isPublished = data.isPublished;
 
     return prisma.lesson.update({

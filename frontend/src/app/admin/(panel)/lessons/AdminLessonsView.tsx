@@ -184,7 +184,7 @@ export function AdminLessonsView() {
       const updated = await updateLesson(selectedLessonId, {
         title: formTitle.trim(),
         contentType: formContentType,
-        fileUrl: formFileUrl.trim() || null,
+        fileUrl: formFileUrl.trim() === '' ? null : formFileUrl.trim(),
         isPublished: formIsPublished,
       });
 
@@ -205,6 +205,43 @@ export function AdminLessonsView() {
       setFormError(err instanceof Error ? err.message : 'Không thể lưu bài học.');
     } finally {
       setFormSaving(false);
+    }
+  }
+
+  // Gỡ tệp và đồng bộ ngay với Backend & Cloudinary
+  async function handleRemoveFile() {
+    if (!selectedLessonId) return;
+    setFormFileUrl('');
+    setUploadError(null);
+
+    // Nếu bài học hiện tại đang có file, tự động gọi API cập nhật fileUrl = null để xóa file trên Cloudinary và DB
+    if (selectedLesson?.fileUrl) {
+      try {
+        setFormSaving(true);
+        const updated = await updateLesson(selectedLessonId, {
+          title: formTitle.trim() || selectedLesson.title,
+          contentType: formContentType,
+          fileUrl: null,
+          isPublished: formIsPublished,
+        });
+
+        setSelectedLesson(updated);
+        setFormSuccess(true);
+
+        if (structure) {
+          setStructure({
+            ...structure,
+            modules: structure.modules.map((m) => ({
+              ...m,
+              lessons: m.lessons.map((l) => (l.id === updated.id ? updated : l)),
+            })),
+          });
+        }
+      } catch (err: unknown) {
+        setFormError(err instanceof Error ? err.message : 'Gỡ tệp thất bại.');
+      } finally {
+        setFormSaving(false);
+      }
     }
   }
 
@@ -917,7 +954,7 @@ export function AdminLessonsView() {
                           <span className="truncate text-slate-700 max-w-xs">{formFileUrl}</span>
                           <button
                             type="button"
-                            onClick={() => setFormFileUrl('')}
+                            onClick={handleRemoveFile}
                             className="text-rose-600 hover:underline shrink-0 ml-2"
                           >
                             Xóa tệp
@@ -998,7 +1035,7 @@ export function AdminLessonsView() {
                       <span className="truncate text-slate-700 max-w-xs">{formFileUrl}</span>
                       <button
                         type="button"
-                        onClick={() => setFormFileUrl('')}
+                        onClick={handleRemoveFile}
                         className="text-rose-600 hover:underline shrink-0 ml-2"
                       >
                         Xóa tệp

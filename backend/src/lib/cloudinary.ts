@@ -72,8 +72,21 @@ export async function destroyFromCloudinary(
   }
 
   try {
-    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
-  } catch {
-    // Best-effort cleanup, không ngắt luồng
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+      invalidate: true,
+    });
+
+    if (result && result.result !== 'ok') {
+      console.warn(
+        `[Cloudinary] destroy non-ok response: publicId="${publicId}", resourceType="${resourceType}", result=`,
+        result,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[Cloudinary] destroy failed: publicId="${publicId}", resourceType="${resourceType}", error=`,
+      error,
+    );
   }
 }

@@ -65,7 +65,7 @@ export type CreateLessonReq = z.infer<typeof createLessonReqSchema>;
 export const updateLessonReqSchema = z.object({
   title: z.string().trim().min(1, 'Tên bài học không được để trống.').max(200).optional(),
   contentType: z.enum(CONTENT_TYPES).optional(),
-  fileUrl: z.string().url('URL không hợp lệ.').optional().nullable(),
+  fileUrl: z.union([z.string().url('URL không hợp lệ.'), z.literal('')]).optional().nullable(),
   isPublished: z.boolean().optional(),
 });
 

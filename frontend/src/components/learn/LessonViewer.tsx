@@ -113,29 +113,73 @@ export function LessonViewer({ lesson, onRetry }: LessonViewerProps) {
   }
 
   // PDF Content (Gap G-16)
+  const isCloudinaryRawPdf =
+    fileUrl.includes('res.cloudinary.com') &&
+    fileUrl.includes('/raw/upload/') &&
+    !fileUrl.toLowerCase().endsWith('.pdf');
+  const inlinePdfUrl = isCloudinaryRawPdf ? `${fileUrl}.pdf` : fileUrl;
+  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(inlinePdfUrl)}&embedded=true`;
+
   return (
     <div className="w-full space-y-3">
       <div className="h-[640px] w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <iframe
-          src={fileUrl}
-          title={lesson.title}
+        <object
+          data={inlinePdfUrl}
+          type="application/pdf"
           className="w-full h-full"
-          onError={() => setLoadError(true)}
-        />
+          aria-label={lesson.title}
+        >
+          {/* Fallback iframe Google Docs Viewer nếu trình duyệt không tự render PDF trực tiếp */}
+          <iframe
+            src={googleDocsViewerUrl}
+            title={lesson.title}
+            className="w-full h-full border-0"
+            onError={() => setLoadError(true)}
+          >
+            <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
+              <p className="text-sm font-medium text-slate-700 mb-2">
+                Trình duyệt của bạn không hỗ trợ xem trước PDF trực tiếp.
+              </p>
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg bg-client-primary px-4 py-2 text-xs font-semibold text-white hover:bg-client-primary/90"
+              >
+                Tải tệp PDF về máy
+              </a>
+            </div>
+          </iframe>
+        </object>
       </div>
 
-      <div className="flex justify-end">
-        <a
-          href={fileUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-client-primary hover:underline"
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
-          Mở tài liệu PDF trong tab mới
-        </a>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-slate-500">Tài liệu học tập định dạng PDF</span>
+        <div className="flex items-center gap-4">
+          <a
+            href={inlinePdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-semibold text-client-primary hover:underline"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+            </svg>
+            Mở trong tab mới
+          </a>
+          <a
+            href={fileUrl}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-900 hover:underline"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Tải tệp về máy
+          </a>
+        </div>
       </div>
     </div>
   );

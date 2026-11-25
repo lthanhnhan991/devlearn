@@ -241,12 +241,36 @@ export class AdminContentService {
     lessonId: string,
     input: UpdateLessonReq,
   ): Promise<AdminLessonDto> {
-    await this.assertLessonOwner(userId, userRole, lessonId);
+    const lesson = await this.assertLessonOwner(userId, userRole, lessonId);
+
+    let newFilePublicId: string | null | undefined = undefined;
+    let newDurationSeconds: number | null | undefined = undefined;
+
+    // Khi gỡ tệp khỏi bài học (fileUrl truyền vào null hoặc rỗng) hoặc đổi sang URL khác
+    if (input.fileUrl !== undefined) {
+      const isRemoving = input.fileUrl === null || input.fileUrl.trim() === '';
+
+      if (isRemoving) {
+        if (lesson.filePublicId) {
+          const resourceType = lesson.contentType === 'VIDEO' ? 'video' : 'raw';
+          await destroyFromCloudinary(lesson.filePublicId, resourceType);
+        }
+        newFilePublicId = null;
+        newDurationSeconds = null;
+      } else if (lesson.filePublicId && input.fileUrl !== lesson.fileUrl) {
+        // Đổi sang fileUrl khác (ví dụ link youtube thay cho file upload trước đó)
+        const resourceType = lesson.contentType === 'VIDEO' ? 'video' : 'raw';
+        await destroyFromCloudinary(lesson.filePublicId, resourceType);
+        newFilePublicId = null;
+      }
+    }
 
     const updated = await this.repo.updateLesson(lessonId, {
       title: input.title !== undefined ? input.title.trim() : undefined,
       contentType: input.contentType,
-      fileUrl: input.fileUrl,
+      fileUrl: input.fileUrl !== undefined && input.fileUrl !== null && input.fileUrl.trim() === '' ? null : input.fileUrl,
+      filePublicId: newFilePublicId,
+      durationSeconds: newDurationSeconds,
       isPublished: input.isPublished,
     });
 

@@ -37,6 +37,18 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 
 ## Nhật ký (mới nhất trên cùng)
 
+### 2026-11-25 · Đồng bộ gỡ tệp Cloudinary ↔ DB ↔ UI và hiển thị trực tiếp tài liệu PDF inline · Agent
+- **Tác vụ**: Xử lý đồng bộ luồng gỡ tệp bài học (UI ↔ DB ↔ Cloudinary), hiển thị trực tiếp tài liệu PDF Cloudinary `raw` trong khung xem thay vì tự tải về máy, và dọn dẹp sạch lỗi TypeScript backend.
+- **Đã làm**:
+  - **Đồng bộ gỡ tệp**:
+    - `cloudinary.ts`: Bổ sung `invalidate: true` khi gọi `cloudinary.uploader.destroy()`, thêm log cảnh báo chi tiết `publicId`, `resourceType` và kết quả trả về khi kết quả không phải `'ok'` hoặc khi lỗi.
+    - `admin-content.service.ts`: Trong `updateLesson`, khi `fileUrl` rỗng hoặc `null` (hoặc chuyển sang URL khác như Youtube link), tự động gọi `destroyFromCloudinary(lesson.filePublicId, resourceType)` với đúng resourceType (`video` / `raw`), đồng thời set `fileUrl = null`, `filePublicId = null`, `durationSeconds = null` trong CSDL.
+    - `AdminLessonsView.tsx`: Cập nhật nút "Xóa tệp" gọi hàm `handleRemoveFile()` tự động kích hoạt API cập nhật bài học với `fileUrl: null` để đồng bộ ngay lập tức cả CSDL và Cloudinary.
+  - **Hiển thị PDF Cloudinary inline**:
+    - `LessonViewer.tsx`: Xử lý URL Cloudinary dạng `/raw/upload/...` chưa có đuôi `.pdf` bằng cách tự động gán đuôi `.pdf` để Cloudinary & trình duyệt nhận diện đúng MIME `application/pdf` thay vì kích hoạt tải về máy.
+    - Thay thế `<iframe>` thông thường bằng thẻ `<object type="application/pdf">` kèm fallback Google Docs Viewer nhúng inline và nút tải file / mở tab mới rõ ràng.
+  - **Kiểm thử kiểu dữ liệu**: `cd backend && npm run typecheck` và `cd frontend && npm run typecheck` đều pass 100% với 0 lỗi.
+
 ### 2026-11-25 · Sửa lỗi typecheck Backend sau khi tách Repository & Service · Agent
 - **Tác vụ**: Giải quyết dứt điểm 16 lỗi TypeScript trên 4 file backend (`admin-content.repository.ts`, `admin-content.service.ts`, `admin-courses.repository.ts`, `admin-courses.service.ts`) phát sinh do `exactOptionalPropertyTypes: true` và quan hệ trả về của Prisma.
 - **Đã làm**:
