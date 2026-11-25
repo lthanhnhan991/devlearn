@@ -21,7 +21,7 @@ import type {
   UpdateCourseReq,
   AdminCourseListQuery,
 } from '../../types/dto/admin-course';
-import { destroyFromCloudinary } from '../../lib/cloudinary';
+import { destroyFromCloudinary, resolveCloudinaryResourceType } from '../../lib/cloudinary';
 import {
   AdminCoursesRepository,
   adminCoursesRepository as defaultRepo,
@@ -289,7 +289,7 @@ export class AdminCoursesService {
     const lessons = await this.repo.findCourseLessonsWithFiles(courseId);
     for (const l of lessons) {
       if (l.filePublicId) {
-        await destroyFromCloudinary(l.filePublicId, l.contentType === 'VIDEO' ? 'video' : 'raw');
+        await destroyFromCloudinary(l.filePublicId, resolveCloudinaryResourceType(l.fileUrl, l.contentType));
       }
     }
 

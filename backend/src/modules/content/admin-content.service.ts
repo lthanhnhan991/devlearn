@@ -30,7 +30,11 @@ import type {
   UpdateLessonReq,
   UploadResultDto,
 } from '../../types/dto/admin-content';
-import { uploadToCloudinary, destroyFromCloudinary } from '../../lib/cloudinary';
+import {
+  uploadToCloudinary,
+  destroyFromCloudinary,
+  resolveCloudinaryResourceType,
+} from '../../lib/cloudinary';
 import {
   AdminContentRepository,
   adminContentRepository as defaultRepo,
@@ -178,7 +182,7 @@ export class AdminContentService {
     const lessons = await this.repo.findModuleLessonsWithFiles(moduleId);
     for (const l of lessons) {
       if (l.filePublicId) {
-        await destroyFromCloudinary(l.filePublicId, l.contentType === 'VIDEO' ? 'video' : 'raw');
+        await destroyFromCloudinary(l.filePublicId, resolveCloudinaryResourceType(l.fileUrl, l.contentType));
       }
     }
 
@@ -252,14 +256,14 @@ export class AdminContentService {
 
       if (isRemoving) {
         if (lesson.filePublicId) {
-          const resourceType = lesson.contentType === 'VIDEO' ? 'video' : 'raw';
+          const resourceType = resolveCloudinaryResourceType(lesson.fileUrl, lesson.contentType);
           await destroyFromCloudinary(lesson.filePublicId, resourceType);
         }
         newFilePublicId = null;
         newDurationSeconds = null;
       } else if (lesson.filePublicId && input.fileUrl !== lesson.fileUrl) {
         // Đổi sang fileUrl khác (ví dụ link youtube thay cho file upload trước đó)
-        const resourceType = lesson.contentType === 'VIDEO' ? 'video' : 'raw';
+        const resourceType = resolveCloudinaryResourceType(lesson.fileUrl, lesson.contentType);
         await destroyFromCloudinary(lesson.filePublicId, resourceType);
         newFilePublicId = null;
       }
@@ -304,7 +308,10 @@ export class AdminContentService {
     const lesson = await this.assertLessonOwner(userId, userRole, lessonId);
 
     if (lesson.filePublicId) {
-      await destroyFromCloudinary(lesson.filePublicId, lesson.contentType === 'VIDEO' ? 'video' : 'raw');
+      await destroyFromCloudinary(
+        lesson.filePublicId,
+        resolveCloudinaryResourceType(lesson.fileUrl, lesson.contentType),
+      );
     }
 
     await this.repo.deleteLesson(lessonId);
@@ -320,17 +327,20 @@ export class AdminContentService {
 
     const isVideo = lesson.contentType === 'VIDEO';
     const folder = isVideo ? 'devlearn/videos' : 'devlearn/documents';
-    const resourceType = isVideo ? 'video' : 'raw';
+    const resourceType = isVideo ? 'video' : 'image';
 
-    // Xóa file cũ nếu có
+    // Xóa file cũ nếu có (dựa theo URL thực tế để xóa đúng cả file raw cũ lẫn image/video mới)
     if (lesson.filePublicId) {
-      await destroyFromCloudinary(lesson.filePublicId, resourceType);
+      await destroyFromCloudinary(
+        lesson.filePublicId,
+        resolveCloudinaryResourceType(lesson.fileUrl, lesson.contentType),
+      );
     }
 
-    // Upload lên Cloudinary
+    // Upload lên Cloudinary (PDF upload dưới resource_type 'image' + format 'pdf' để xem inline được)
     let uploadRes;
     try {
-      uploadRes = await uploadToCloudinary(file.path, folder, resourceType);
+      uploadRes = await uploadToCloudinary(file.path, folder, resourceType, isVideo ? undefined : 'pdf');
     } finally {
       // Dọn tệp tạm trên đĩa
       fs.unlink(file.path, () => {});

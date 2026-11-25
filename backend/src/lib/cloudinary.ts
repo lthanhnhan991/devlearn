@@ -17,35 +17,66 @@ if (cloudName && apiKey && apiSecret) {
   });
 }
 
+export type CloudinaryResourceType = 'video' | 'raw' | 'image';
+
 export interface UploadResult {
   secure_url: string;
   public_id: string;
   duration?: number | undefined;
 }
 
+/**
+ * Xác định resource_type thực tế trên Cloudinary dựa vào URL lưu trong DB,
+ * fallback về contentType nếu không nhận diện được từ URL.
+ */
+export function resolveCloudinaryResourceType(
+  fileUrl?: string | null,
+  contentType?: string | null,
+): CloudinaryResourceType {
+  if (fileUrl) {
+    if (fileUrl.includes('/video/upload/')) return 'video';
+    if (fileUrl.includes('/image/upload/')) return 'image';
+    if (fileUrl.includes('/raw/upload/')) return 'raw';
+  }
+  return contentType === 'VIDEO' ? 'video' : 'image';
+}
+
 export async function uploadToCloudinary(
   filePath: string,
   folder: string,
-  resourceType: 'video' | 'raw' | 'image' = 'raw',
+  resourceType: CloudinaryResourceType = 'image',
+  format?: string,
 ): Promise<UploadResult> {
   if (!hasCredentials) {
     // Fallback khi chạy dev không có Cloudinary credentials
     const simulatedId = `local_${Date.now()}`;
+    const ext = format ? `.${format}` : resourceType === 'video' ? '.mp4' : '';
     return {
-      secure_url: `https://res.cloudinary.com/demo/${resourceType}/upload/v1/${folder}/${simulatedId}`,
+      secure_url: `https://res.cloudinary.com/demo/${resourceType}/upload/v1/${folder}/${simulatedId}${ext}`,
       public_id: `${folder}/${simulatedId}`,
       duration: resourceType === 'video' ? 300 : undefined,
     };
   }
 
   return new Promise((resolve, reject) => {
+    const uploadOptions: {
+      folder: string;
+      resource_type: CloudinaryResourceType;
+      use_filename: boolean;
+      unique_filename: boolean;
+      format?: string;
+    } = {
+      folder,
+      resource_type: resourceType,
+      use_filename: false,
+      unique_filename: true,
+    };
+    if (format !== undefined) {
+      uploadOptions.format = format;
+    }
+
     const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: resourceType,
-        use_filename: false,
-        unique_filename: true,
-      },
+      uploadOptions,
       (error, result) => {
         if (error || !result) {
           reject(error ?? new Error('Upload to Cloudinary failed'));
@@ -65,7 +96,7 @@ export async function uploadToCloudinary(
 
 export async function destroyFromCloudinary(
   publicId: string,
-  resourceType: 'video' | 'raw' | 'image' = 'raw',
+  resourceType: CloudinaryResourceType = 'image',
 ): Promise<void> {
   if (!hasCredentials) {
     return;

@@ -119,7 +119,7 @@ export class AdminContentRepository {
   async findModuleLessonsWithFiles(moduleId: string) {
     return prisma.lesson.findMany({
       where: { moduleId, filePublicId: { not: null } },
-      select: { filePublicId: true, contentType: true },
+      select: { filePublicId: true, fileUrl: true, contentType: true },
     });
   }
 

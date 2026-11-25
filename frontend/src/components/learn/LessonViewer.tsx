@@ -113,43 +113,21 @@ export function LessonViewer({ lesson, onRetry }: LessonViewerProps) {
   }
 
   // PDF Content (Gap G-16)
-  const isCloudinaryRawPdf =
-    fileUrl.includes('res.cloudinary.com') &&
-    fileUrl.includes('/raw/upload/') &&
-    !fileUrl.toLowerCase().endsWith('.pdf');
-  const inlinePdfUrl = isCloudinaryRawPdf ? `${fileUrl}.pdf` : fileUrl;
-  const googleDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(inlinePdfUrl)}&embedded=true`;
-
   return (
     <div className="w-full space-y-3">
       <div className="h-[640px] w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <object
-          data={inlinePdfUrl}
+          data={fileUrl}
           type="application/pdf"
           className="w-full h-full"
           aria-label={lesson.title}
         >
-          {/* Fallback iframe Google Docs Viewer nếu trình duyệt không tự render PDF trực tiếp */}
           <iframe
-            src={googleDocsViewerUrl}
+            src={fileUrl}
             title={lesson.title}
             className="w-full h-full border-0"
             onError={() => setLoadError(true)}
-          >
-            <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
-              <p className="text-sm font-medium text-slate-700 mb-2">
-                Trình duyệt của bạn không hỗ trợ xem trước PDF trực tiếp.
-              </p>
-              <a
-                href={fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-lg bg-client-primary px-4 py-2 text-xs font-semibold text-white hover:bg-client-primary/90"
-              >
-                Tải tệp PDF về máy
-              </a>
-            </div>
-          </iframe>
+          />
         </object>
       </div>
 
@@ -157,7 +135,7 @@ export function LessonViewer({ lesson, onRetry }: LessonViewerProps) {
         <span className="text-slate-500">Tài liệu học tập định dạng PDF</span>
         <div className="flex items-center gap-4">
           <a
-            href={inlinePdfUrl}
+            href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 font-semibold text-client-primary hover:underline"

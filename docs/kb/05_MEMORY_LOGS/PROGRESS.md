@@ -37,6 +37,15 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 
 ## Nhật ký (mới nhất trên cùng)
 
+### 2026-11-25 · Chuyển upload PDF sang resource_type 'image' & xác định resource_type động khi destroy · Agent
+- **Tác vụ**: Chuyển upload PDF trên Cloudinary từ `raw` sang `image` (+ `format: 'pdf'`) để trình duyệt xem trực tiếp inline, đồng thời xác định `resourceType` theo URL thực tế khi xóa tệp trên Cloudinary.
+- **Đã làm**:
+  - `cloudinary.ts`: Thêm `resolveCloudinaryResourceType(fileUrl, contentType)` (nhận diện `/video/upload/`, `/image/upload/`, `/raw/upload/`) và tham số `format` cho `uploadToCloudinary`.
+  - `admin-content.service.ts` & `admin-content.repository.ts`: Upload PDF dùng `resource_type: 'image'` + `format: 'pdf'`; mọi thao tác gỡ tệp/ghi đè/xóa bài/xóa module đều lấy `fileUrl` để destroy đúng `resourceType` trên Cloudinary (xử lý được cả file `raw` cũ lẫn `image` mới).
+  - `admin-courses.service.ts` & `admin-courses.repository.ts`: Bổ sung `fileUrl` khi truy vấn danh sách file bài học để `deleteCourse` destroy đúng `resourceType`.
+  - `LessonViewer.tsx`: Gỡ bỏ logic tự nối `.pdf` vào URL `/raw/upload/`, hiển thị trực tiếp `fileUrl` qua `<object>`/`<iframe>` kèm nút mở tab mới và tải về máy.
+  - Cả `backend` và `frontend` đều pass `npm run typecheck` với 0 lỗi.
+
 ### 2026-11-25 · Đồng bộ gỡ tệp Cloudinary ↔ DB ↔ UI và hiển thị trực tiếp tài liệu PDF inline · Agent
 - **Tác vụ**: Xử lý đồng bộ luồng gỡ tệp bài học (UI ↔ DB ↔ Cloudinary), hiển thị trực tiếp tài liệu PDF Cloudinary `raw` trong khung xem thay vì tự tải về máy, và dọn dẹp sạch lỗi TypeScript backend.
 - **Đã làm**:
