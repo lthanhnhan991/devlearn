@@ -23,12 +23,14 @@ export interface AdminCourseDto extends AdminCourseRowDto {
   description: string;
 }
 
+export const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 export const createCourseReqSchema = z.object({
   title: z.string().trim().min(3, 'Tên khóa học phải từ 3 đến 200 ký tự.').max(200, 'Tên khóa học tối đa 200 ký tự.'),
   description: z.string().default(''),
-  topicId: z.string().uuid('ID chủ đề không hợp lệ.'),
+  topicId: z.string().regex(UUID_REGEX, 'ID chủ đề không hợp lệ.'),
   level: z.enum(COURSE_LEVELS),
-  teacherId: z.string().uuid().optional(),
+  teacherId: z.string().regex(UUID_REGEX, 'ID giảng viên không hợp lệ.').optional(),
 });
 
 export type CreateCourseReq = z.infer<typeof createCourseReqSchema>;
@@ -36,7 +38,7 @@ export type CreateCourseReq = z.infer<typeof createCourseReqSchema>;
 export const updateCourseReqSchema = z.object({
   title: z.string().trim().min(3, 'Tên khóa học phải từ 3 đến 200 ký tự.').max(200).optional(),
   description: z.string().optional(),
-  topicId: z.string().uuid('ID chủ đề không hợp lệ.').optional(),
+  topicId: z.string().regex(UUID_REGEX, 'ID chủ đề không hợp lệ.').optional(),
   level: z.enum(COURSE_LEVELS).optional(),
 });
 

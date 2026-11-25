@@ -1,4 +1,17 @@
-import { prisma } from '../../lib/prisma';
+/**
+ * ============================================================================
+ * MODULE: ADMIN COURSES (Quản lý khóa học - Giảng viên & Quản trị viên)
+ * ============================================================================
+ * Danh sách API:
+ * - GET    /api/v1/admin/courses          : Lấy danh sách khóa học (phân trang, lọc, tìm kiếm)
+ * - POST   /api/v1/admin/courses          : Tạo khóa học mới (trạng thái mặc định DRAFT)
+ * - GET    /api/v1/admin/courses/:id      : Lấy chi tiết khóa học quản trị
+ * - PATCH  /api/v1/admin/courses/:id      : Cập nhật thông tin cơ bản khóa học
+ * - PATCH  /api/v1/admin/courses/:id/status: Chuyển đổi trạng thái (DRAFT <-> PUBLISHED)
+ * - DELETE /api/v1/admin/courses/:id      : Xóa khóa học (chặn nếu đã có học viên đăng ký)
+ * ============================================================================
+ */
+
 import { AppError, ERROR_CODES } from '../../types/errors';
 import type { Role } from '../../types/constants';
 import type {
@@ -9,9 +22,14 @@ import type {
   AdminCourseListQuery,
 } from '../../types/dto/admin-course';
 import { destroyFromCloudinary } from '../../lib/cloudinary';
-import type { Prisma } from '@prisma/client';
+import {
+  AdminCoursesRepository,
+  adminCoursesRepository as defaultRepo,
+} from './admin-courses.repository';
 
 export class AdminCoursesService {
+  constructor(private readonly repo: AdminCoursesRepository = defaultRepo) {}
+
   async listCourses(
     userId: string,
     userRole: Role,
@@ -21,43 +39,16 @@ export class AdminCoursesService {
     const pageSize = query.pageSize ?? 20;
     const skip = (page - 1) * pageSize;
 
-    const where: Prisma.CourseWhereInput = {};
+    const teacherId = userRole === 'TEACHER' ? userId : undefined;
 
-    // Phân quyền: TEACHER chỉ thấy khóa của mình; ADMIN thấy toàn bộ
-    if (userRole === 'TEACHER') {
-      where.teacherId = userId;
-    }
-
-    if (query.status) {
-      where.status = query.status;
-    }
-
-    if (query.q && query.q.trim().length > 0) {
-      where.title = { contains: query.q.trim(), mode: 'insensitive' };
-    }
-
-    const orderBy: Prisma.CourseOrderByWithRelationInput =
-      query.sort === 'title' ? { title: 'asc' } : { createdAt: 'desc' };
-
-    const [total, courses] = await Promise.all([
-      prisma.course.count({ where }),
-      prisma.course.findMany({
-        where,
-        skip,
-        take: pageSize,
-        orderBy,
-        include: {
-          topic: true,
-          teacher: { select: { id: true, fullName: true } },
-          _count: {
-            select: {
-              modules: true,
-              enrollments: true,
-            },
-          },
-        },
-      }),
-    ]);
+    const { total, courses } = await this.repo.findManyAndCount({
+      teacherId,
+      status: query.status,
+      q: query.q,
+      sort: query.sort,
+      skip,
+      take: pageSize,
+    });
 
     const data: AdminCourseRowDto[] = courses.map((c) => ({
       id: c.id,
@@ -93,9 +84,7 @@ export class AdminCoursesService {
   }
 
   async createCourse(userId: string, userRole: Role, input: CreateCourseReq): Promise<AdminCourseDto> {
-    const topic = await prisma.topic.findUnique({
-      where: { id: input.topicId },
-    });
+    const topic = await this.repo.findTopicById(input.topicId);
     if (!topic) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy chủ đề.');
     }
@@ -105,25 +94,13 @@ export class AdminCoursesService {
 
     const teacherId = userRole === 'ADMIN' && input.teacherId ? input.teacherId : userId;
 
-    const course = await prisma.course.create({
-      data: {
-        title: input.title.trim(),
-        description: input.description ?? '',
-        topicId: input.topicId,
-        level: input.level,
-        teacherId,
-        status: 'DRAFT',
-      },
-      include: {
-        topic: true,
-        teacher: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            modules: true,
-            enrollments: true,
-          },
-        },
-      },
+    const course = await this.repo.createCourse({
+      title: input.title.trim(),
+      description: input.description ?? '',
+      topicId: input.topicId,
+      level: input.level,
+      teacherId,
+      status: 'DRAFT',
     });
 
     return {
@@ -151,19 +128,7 @@ export class AdminCoursesService {
   }
 
   async getCourse(userId: string, userRole: Role, courseId: string): Promise<AdminCourseDto> {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        topic: true,
-        teacher: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            modules: true,
-            enrollments: true,
-          },
-        },
-      },
-    });
+    const course = await this.repo.findCourseById(courseId);
 
     if (!course) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
@@ -203,9 +168,7 @@ export class AdminCoursesService {
     courseId: string,
     input: UpdateCourseReq,
   ): Promise<AdminCourseDto> {
-    const existing = await prisma.course.findUnique({
-      where: { id: courseId },
-    });
+    const existing = await this.repo.findCourseById(courseId);
     if (!existing) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
     }
@@ -214,7 +177,7 @@ export class AdminCoursesService {
     }
 
     if (input.topicId && input.topicId !== existing.topicId) {
-      const topic = await prisma.topic.findUnique({ where: { id: input.topicId } });
+      const topic = await this.repo.findTopicById(input.topicId);
       if (!topic) {
         throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy chủ đề.');
       }
@@ -223,24 +186,11 @@ export class AdminCoursesService {
       }
     }
 
-    const updated = await prisma.course.update({
-      where: { id: courseId },
-      data: {
-        ...(input.title !== undefined && { title: input.title.trim() }),
-        ...(input.description !== undefined && { description: input.description }),
-        ...(input.topicId !== undefined && { topicId: input.topicId }),
-        ...(input.level !== undefined && { level: input.level }),
-      },
-      include: {
-        topic: true,
-        teacher: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            modules: true,
-            enrollments: true,
-          },
-        },
-      },
+    const updated = await this.repo.updateCourse(courseId, {
+      title: input.title !== undefined ? input.title.trim() : undefined,
+      description: input.description,
+      topicId: input.topicId,
+      level: input.level,
     });
 
     return {
@@ -273,9 +223,7 @@ export class AdminCoursesService {
     courseId: string,
     status: 'DRAFT' | 'PUBLISHED',
   ): Promise<AdminCourseDto> {
-    const existing = await prisma.course.findUnique({
-      where: { id: courseId },
-    });
+    const existing = await this.repo.findCourseById(courseId);
     if (!existing) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
     }
@@ -284,12 +232,7 @@ export class AdminCoursesService {
     }
 
     if (status === 'PUBLISHED') {
-      const publishedLessonsCount = await prisma.lesson.count({
-        where: {
-          isPublished: true,
-          module: { courseId },
-        },
-      });
+      const publishedLessonsCount = await this.repo.countPublishedLessons(courseId);
       if (publishedLessonsCount === 0) {
         throw new AppError(
           ERROR_CODES.COURSE_NOT_READY,
@@ -299,20 +242,7 @@ export class AdminCoursesService {
       }
     }
 
-    const updated = await prisma.course.update({
-      where: { id: courseId },
-      data: { status },
-      include: {
-        topic: true,
-        teacher: { select: { id: true, fullName: true } },
-        _count: {
-          select: {
-            modules: true,
-            enrollments: true,
-          },
-        },
-      },
-    });
+    const updated = await this.repo.updateCourseStatus(courseId, status);
 
     return {
       id: updated.id,
@@ -339,12 +269,7 @@ export class AdminCoursesService {
   }
 
   async deleteCourse(userId: string, userRole: Role, courseId: string): Promise<void> {
-    const existing = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        _count: { select: { enrollments: true } },
-      },
-    });
+    const existing = await this.repo.findCourseById(courseId);
     if (!existing) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
     }
@@ -361,17 +286,14 @@ export class AdminCoursesService {
     }
 
     // Dọn dẹp file Cloudinary của các bài học (best-effort)
-    const lessons = await prisma.lesson.findMany({
-      where: { module: { courseId }, filePublicId: { not: null } },
-      select: { filePublicId: true, contentType: true },
-    });
+    const lessons = await this.repo.findCourseLessonsWithFiles(courseId);
     for (const l of lessons) {
       if (l.filePublicId) {
         await destroyFromCloudinary(l.filePublicId, l.contentType === 'VIDEO' ? 'video' : 'raw');
       }
     }
 
-    await prisma.course.delete({ where: { id: courseId } });
+    await this.repo.deleteCourse(courseId);
   }
 }
 

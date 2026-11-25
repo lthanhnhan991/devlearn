@@ -37,6 +37,28 @@ Xem [[OPEN_QUESTIONS]]. Ghi nợ kỹ thuật mới theo dạng `TD-xx: <mô t�
 
 ## Nhật ký (mới nhất trên cùng)
 
+### 2026-11-25 · Sửa lỗi typecheck Backend sau khi tách Repository & Service · Agent
+- **Tác vụ**: Giải quyết dứt điểm 16 lỗi TypeScript trên 4 file backend (`admin-content.repository.ts`, `admin-content.service.ts`, `admin-courses.repository.ts`, `admin-courses.service.ts`) phát sinh do `exactOptionalPropertyTypes: true` và quan hệ trả về của Prisma.
+- **Đã làm**:
+  - `admin-courses.repository.ts`: Loại bỏ hoàn toàn các thuộc tính có thể mang giá trị `undefined` khi truyền vào `prisma.course.update` bằng cách gán có điều kiện `!== undefined`.
+  - `admin-content.repository.ts`: Gán có điều kiện `!== undefined` cho `prisma.lesson.update`; bổ sung tham số `userId` vào `upsertAiDocument` và điền trường bắt buộc `uploadedBy` cho `ai_documents`.
+  - `admin-content.service.ts`: Truyền đúng `userId` khi gọi `upsertAiDocument`.
+  - Cả `backend` và `frontend` đã vượt qua `npm run typecheck` với 0 lỗi.
+
+### 2026-11-25 · Fix lỗi 400 tạo khóa học, tách triệt để Repository vs Service & chuẩn hóa UI Design · Agent
+- **Tác vụ**: Sửa lỗi 400 Bad Request khi tạo khóa học (`POST /api/v1/admin/courses`), tách riêng repository cho các module `courses` (admin) và `content` (admin), bổ sung chú thích danh sách API ở đầu tất cả các module router, và căn chỉnh UI bám sát thiết kế `docs/design/`.
+- **Đã làm**:
+  - **Sửa lỗi 400 Bad Request**: Phát hiện nguyên nhân do Zod `.uuid()` áp dụng kiểm tra nghiêm ngặt RFC 4122 (bắt buộc version/variant bits) nên từ chối các seed UUID như `SEED_IDS.topicProgramming` (`20000000-0000-0000-0000-000000000001`). Đã thay bằng regex UUID chuẩn PostgreSQL (`/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/`) trong `admin-course.ts` và `admin-content.ts` ở cả backend lẫn frontend.
+  - **Tách bạch Repository vs Service**:
+    - Tạo `backend/src/modules/courses/admin-courses.repository.ts`, chuyển toàn bộ truy vấn Prisma ra khỏi `admin-courses.service.ts`.
+    - Tạo `backend/src/modules/content/admin-content.repository.ts`, chuyển toàn bộ truy vấn Prisma ra khỏi `admin-content.service.ts`.
+    - Đảm bảo 100% các service trong hệ thống không import Prisma trực tiếp (chỉ repo được phép import Prisma).
+  - **Chú thích API danh sách đầy đủ**: Bổ sung khối comment liệt kê đầy đủ Method + Path + mô tả ở đầu các file `*.routes.ts` của toàn bộ các module backend (`auth`, `public`, `topics`, `courses`, `admin-courses`, `admin-content`, `progress`).
+  - **Khớp thiết kế `docs/design/`**:
+    - `AdminShell.tsx`: Hiển thị breadcrumb động ở topbar `Quản trị › Khóa học`, `Quản trị › Bài học`... và nhãn `Vai trò: {Role}  {email}` khớp `ADMIN · 02` & `ADMIN · 03`.
+    - Màn A02 (`AdminCoursesView.tsx`): Sửa placeholder thành `Tìm khóa học`, cập nhật màu chip trạng thái `Đã xuất bản` / `Bản nháp` và hiển thị hành động `Sửa · Xóa` song song với nút `Soạn bài`.
+    - Màn A03 (`AdminLessonsView.tsx`): Bổ sung `InfoBanner` ("Quản lý nội dung hiển thị ở CLIENT · Giao diện học tập"), tiêu đề `Soạn module và bài học`, nút `Lưu`, tiêu đề card `Cấu trúc`, placeholder `[Tên bài]`.
+
 ### 2026-11-23 · Hoàn thành UI & Backend Phase 04 (Quản lý khóa học & Soạn nội dung) · Agent
 - **Tác vụ**: Triển khai trọn vẹn Phase 04 theo `plan-phase-04-admin-content.md` (phạm vi A02, A03, AD-03…AD-06, IN-09).
 - **Đã làm**:

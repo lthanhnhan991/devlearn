@@ -1,3 +1,16 @@
+/**
+ * ============================================================================
+ * MODULE: AUTHENTICATION (Xác thực & Quản lý phiên người dùng)
+ * ============================================================================
+ * Danh sách API:
+ * - POST /api/v1/auth/register     : Đăng ký học viên mới (role STUDENT)
+ * - POST /api/v1/auth/login        : Đăng nhập portal người học (STUDENT)
+ * - POST /api/v1/auth/admin/login  : Đăng nhập portal quản trị (TEACHER, ADMIN)
+ * - POST /api/v1/auth/logout       : Đăng xuất, xóa cookie devlearn_token
+ * - GET  /api/v1/auth/me           : Lấy thông tin tài khoản phiên đăng nhập hiện tại
+ * ============================================================================
+ */
+
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authenticate } from '../../middlewares/authenticate';

@@ -25,6 +25,7 @@ import type {
   ContentType,
 } from '@/types';
 import { Button, buttonStyles } from '@/components/ui/Button';
+import { InfoBanner } from '@/components/admin/InfoBanner';
 import { cn } from '@/lib/cn';
 
 export function AdminLessonsView() {
@@ -426,6 +427,9 @@ export function AdminLessonsView() {
 
   return (
     <div className="space-y-6">
+      {/* InfoBanner */}
+      <InfoBanner targetScreen="Giao diện học tập" />
+
       {/* Top Header & Breadcrumb */}
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -442,11 +446,11 @@ export function AdminLessonsView() {
               {currentCourse?.title || 'Đang tải…'}
             </span>
             <span>›</span>
-            <span className="text-admin-primary font-medium">Soạn bài học</span>
+            <span className="text-admin-primary font-medium">Bài học</span>
           </nav>
 
           <h1 className="mt-2 text-2xl font-bold tracking-tight text-admin-navy">
-            Soạn nội dung & bài học
+            Soạn module và bài học
           </h1>
         </div>
 
@@ -497,7 +501,7 @@ export function AdminLessonsView() {
             disabled={!selectedLessonId || formSaving}
             onClick={() => handleSaveLesson()}
           >
-            {formSaving ? 'Đang lưu…' : 'Lưu bài học'}
+            {formSaving ? 'Đang lưu…' : 'Lưu'}
           </Button>
         </div>
       </div>
@@ -513,11 +517,11 @@ export function AdminLessonsView() {
 
       {/* Two Column Workspace */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-        {/* Left Column: StructureTree (col-span-4) */}
+        {/* Left Column: StructureTree (col-span-5) */}
         <div className="lg:col-span-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h2 className="font-bold text-admin-navy">Cấu trúc khóa học</h2>
+              <h2 className="font-bold text-admin-navy">Cấu trúc</h2>
               <p className="text-xs text-slate-500">Kéo sắp xếp hoặc điều chỉnh thứ tự bài</p>
             </div>
             <button
@@ -754,12 +758,12 @@ export function AdminLessonsView() {
               {/* Lesson Title */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700">
-                  Tiêu đề bài học <span className="text-rose-500">*</span>
+                  Tên bài học <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Giới thiệu cấu trúc biến và kiểu dữ liệu"
+                  placeholder="[Tên bài]"
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
                   className="mt-1.5 h-10 w-full rounded-lg border border-slate-300 px-3.5 text-sm focus-visible:border-admin-primary focus-visible:outline-none"

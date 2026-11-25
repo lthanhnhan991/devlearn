@@ -45,8 +45,10 @@ export const updateModuleReqSchema = z.object({
 
 export type UpdateModuleReq = z.infer<typeof updateModuleReqSchema>;
 
+const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 export const reorderModulesReqSchema = z.object({
-  orderedIds: z.array(z.string().uuid()),
+  orderedIds: z.array(z.string().regex(UUID_REGEX, 'ID module không hợp lệ.')),
 });
 
 export type ReorderModulesReq = z.infer<typeof reorderModulesReqSchema>;
@@ -70,7 +72,7 @@ export const updateLessonReqSchema = z.object({
 export type UpdateLessonReq = z.infer<typeof updateLessonReqSchema>;
 
 export const reorderLessonsReqSchema = z.object({
-  orderedIds: z.array(z.string().uuid()),
+  orderedIds: z.array(z.string().regex(UUID_REGEX, 'ID bài học không hợp lệ.')),
 });
 
 export type ReorderLessonsReq = z.infer<typeof reorderLessonsReqSchema>;

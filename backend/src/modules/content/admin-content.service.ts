@@ -1,5 +1,23 @@
+/**
+ * ============================================================================
+ * MODULE: ADMIN CONTENT (Quản lý Module & Soạn bài học)
+ * ============================================================================
+ * Danh sách API:
+ * - GET    /api/v1/admin/courses/:courseId/structure : Lấy cấu trúc module & bài học của khóa
+ * - POST   /api/v1/admin/courses/:courseId/modules   : Tạo module mới trong khóa học
+ * - PATCH  /api/v1/admin/modules/:moduleId           : Cập nhật tiêu đề module
+ * - PUT    /api/v1/admin/courses/:courseId/modules/order: Sắp xếp lại thứ tự modules
+ * - DELETE /api/v1/admin/modules/:moduleId           : Xóa module (chặn nếu bài thi có lượt làm)
+ * - POST   /api/v1/admin/modules/:moduleId/lessons   : Tạo bài học mới trong module
+ * - GET    /api/v1/admin/lessons/:lessonId           : Lấy chi tiết bài học (soạn & xem trước)
+ * - PATCH  /api/v1/admin/lessons/:lessonId           : Cập nhật thông tin/nội dung bài học
+ * - PUT    /api/v1/admin/modules/:moduleId/lessons/order: Sắp xếp lại thứ tự bài học trong module
+ * - DELETE /api/v1/admin/lessons/:lessonId           : Xóa bài học (kèm dọn tệp Cloudinary)
+ * - POST   /api/v1/admin/lessons/:lessonId/upload    : Tải lên video / PDF (tự động nạp AiDocument)
+ * ============================================================================
+ */
+
 import fs from 'fs';
-import { prisma } from '../../lib/prisma';
 import { AppError, ERROR_CODES } from '../../types/errors';
 import type { Role } from '../../types/constants';
 import type {
@@ -13,13 +31,16 @@ import type {
   UploadResultDto,
 } from '../../types/dto/admin-content';
 import { uploadToCloudinary, destroyFromCloudinary } from '../../lib/cloudinary';
+import {
+  AdminContentRepository,
+  adminContentRepository as defaultRepo,
+} from './admin-content.repository';
 
 export class AdminContentService {
+  constructor(private readonly repo: AdminContentRepository = defaultRepo) {}
+
   private async assertCourseOwner(userId: string, userRole: Role, courseId: string) {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      select: { id: true, teacherId: true },
-    });
+    const course = await this.repo.findCourseOwner(courseId);
     if (!course) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
     }
@@ -30,10 +51,7 @@ export class AdminContentService {
   }
 
   private async assertModuleOwner(userId: string, userRole: Role, moduleId: string) {
-    const mod = await prisma.module.findUnique({
-      where: { id: moduleId },
-      include: { course: { select: { id: true, teacherId: true } } },
-    });
+    const mod = await this.repo.findModuleOwner(moduleId);
     if (!mod) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy module.');
     }
@@ -44,17 +62,7 @@ export class AdminContentService {
   }
 
   private async assertLessonOwner(userId: string, userRole: Role, lessonId: string) {
-    const lesson = await prisma.lesson.findUnique({
-      where: { id: lessonId },
-      include: {
-        module: {
-          include: {
-            course: { select: { id: true, title: true, teacherId: true } },
-          },
-        },
-        aiDocument: true,
-      },
-    });
+    const lesson = await this.repo.findLessonOwner(lessonId);
     if (!lesson) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy bài học.');
     }
@@ -68,25 +76,7 @@ export class AdminContentService {
   async getCourseStructure(userId: string, userRole: Role, courseId: string): Promise<AdminCourseStructureDto> {
     await this.assertCourseOwner(userId, userRole, courseId);
 
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        modules: {
-          orderBy: { position: 'asc' },
-          include: {
-            lessons: {
-              orderBy: { position: 'asc' },
-              include: {
-                aiDocument: {
-                  select: { id: true, status: true },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
+    const course = await this.repo.findCourseStructure(courseId);
     if (!course) {
       throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy khóa học.');
     }
@@ -122,22 +112,13 @@ export class AdminContentService {
   async createModule(userId: string, userRole: Role, courseId: string, input: CreateModuleReq): Promise<AdminModuleDto> {
     await this.assertCourseOwner(userId, userRole, courseId);
 
-    const maxMod = await prisma.module.findFirst({
-      where: { courseId },
-      orderBy: { position: 'desc' },
-      select: { position: true },
-    });
-    const position = maxMod ? maxMod.position + 1 : 0;
+    const maxPos = await this.repo.findMaxModulePosition(courseId);
+    const position = maxPos !== null ? maxPos + 1 : 0;
 
-    const mod = await prisma.module.create({
-      data: {
-        courseId,
-        title: input.title.trim(),
-        position,
-      },
-      include: {
-        lessons: true,
-      },
+    const mod = await this.repo.createModule({
+      courseId,
+      title: input.title.trim(),
+      position,
     });
 
     return {
@@ -151,18 +132,7 @@ export class AdminContentService {
   async updateModule(userId: string, userRole: Role, moduleId: string, input: UpdateModuleReq): Promise<AdminModuleDto> {
     await this.assertModuleOwner(userId, userRole, moduleId);
 
-    const updated = await prisma.module.update({
-      where: { id: moduleId },
-      data: {
-        ...(input.title !== undefined && { title: input.title.trim() }),
-      },
-      include: {
-        lessons: {
-          orderBy: { position: 'asc' },
-          include: { aiDocument: { select: { id: true, status: true } } },
-        },
-      },
-    });
+    const updated = await this.repo.updateModuleTitle(moduleId, input.title.trim());
 
     return {
       id: updated.id,
@@ -185,24 +155,13 @@ export class AdminContentService {
   async reorderModules(userId: string, userRole: Role, courseId: string, orderedIds: string[]): Promise<string[]> {
     await this.assertCourseOwner(userId, userRole, courseId);
 
-    const total = await prisma.module.count({ where: { courseId } });
+    const total = await this.repo.countModules(courseId);
     const uniqueIds = new Set(orderedIds);
     if (orderedIds.length !== total || uniqueIds.size !== total) {
-      throw new AppError(ERROR_CODES.VALIDATION_ERROR, 400, 'Danh sách id phải đủ và đúng tập module của khóa.');
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, 400, 'Danh sách id phải đủ và đúng tập modules của khóa học.');
     }
 
-    await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < orderedIds.length; i++) {
-        const id = orderedIds[i];
-        if (id) {
-          await tx.module.update({
-            where: { id },
-            data: { position: i },
-          });
-        }
-      }
-    });
-
+    await this.repo.reorderModules(orderedIds);
     return orderedIds;
   }
 
@@ -210,53 +169,36 @@ export class AdminContentService {
     await this.assertModuleOwner(userId, userRole, moduleId);
 
     // Chặn xóa nếu module có bài kiểm tra đã có lượt làm
-    const examWithAttempts = await prisma.exam.findFirst({
-      where: {
-        moduleId,
-        attempts: { some: {} },
-      },
-    });
+    const examWithAttempts = await this.repo.findExamWithAttempts(moduleId);
     if (examWithAttempts) {
       throw new AppError(ERROR_CODES.EXAM_HAS_ATTEMPTS, 409, 'Module có bài kiểm tra đã có lượt làm, không thể xóa.');
     }
 
-    // Xóa file Cloudinary của các bài trong module
-    const lessons = await prisma.lesson.findMany({
-      where: { moduleId, filePublicId: { not: null } },
-      select: { filePublicId: true, contentType: true },
-    });
+    // Xóa file Cloudinary của các bài trong module (best-effort)
+    const lessons = await this.repo.findModuleLessonsWithFiles(moduleId);
     for (const l of lessons) {
       if (l.filePublicId) {
         await destroyFromCloudinary(l.filePublicId, l.contentType === 'VIDEO' ? 'video' : 'raw');
       }
     }
 
-    await prisma.module.delete({ where: { id: moduleId } });
+    await this.repo.deleteModule(moduleId);
   }
 
   // ───────────── Lessons ─────────────
   async createLesson(userId: string, userRole: Role, moduleId: string, input: CreateLessonReq): Promise<AdminLessonDto> {
     await this.assertModuleOwner(userId, userRole, moduleId);
 
-    const maxLesson = await prisma.lesson.findFirst({
-      where: { moduleId },
-      orderBy: { position: 'desc' },
-      select: { position: true },
-    });
-    const position = maxLesson ? maxLesson.position + 1 : 0;
+    const maxPos = await this.repo.findMaxLessonPosition(moduleId);
+    const position = maxPos !== null ? maxPos + 1 : 0;
 
-    const lesson = await prisma.lesson.create({
-      data: {
-        moduleId,
-        title: input.title.trim(),
-        contentType: input.contentType,
-        fileUrl: input.fileUrl ?? null,
-        isPublished: input.isPublished ?? false,
-        position,
-      },
-      include: {
-        aiDocument: { select: { id: true, status: true } },
-      },
+    const lesson = await this.repo.createLesson({
+      moduleId,
+      title: input.title.trim(),
+      contentType: input.contentType,
+      fileUrl: input.fileUrl ?? null,
+      isPublished: input.isPublished ?? false,
+      position,
     });
 
     return {
@@ -268,12 +210,17 @@ export class AdminContentService {
       durationSeconds: lesson.durationSeconds,
       position: lesson.position,
       isPublished: lesson.isPublished,
-      aiDocument: lesson.aiDocument ? { id: lesson.aiDocument.id, status: lesson.aiDocument.status } : null,
+      aiDocument: null,
     };
   }
 
   async getLesson(userId: string, userRole: Role, lessonId: string): Promise<AdminLessonDto> {
-    const lesson = await this.assertLessonOwner(userId, userRole, lessonId);
+    await this.assertLessonOwner(userId, userRole, lessonId);
+
+    const lesson = await this.repo.findLessonById(lessonId);
+    if (!lesson) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, 404, 'Không tìm thấy bài học.');
+    }
 
     return {
       id: lesson.id,
@@ -288,28 +235,19 @@ export class AdminContentService {
     };
   }
 
-  async updateLesson(userId: string, userRole: Role, lessonId: string, input: UpdateLessonReq): Promise<AdminLessonDto> {
-    const lesson = await this.assertLessonOwner(userId, userRole, lessonId);
+  async updateLesson(
+    userId: string,
+    userRole: Role,
+    lessonId: string,
+    input: UpdateLessonReq,
+  ): Promise<AdminLessonDto> {
+    await this.assertLessonOwner(userId, userRole, lessonId);
 
-    if (input.contentType && input.contentType !== lesson.contentType && (lesson.fileUrl || lesson.filePublicId)) {
-      throw new AppError(
-        ERROR_CODES.VALIDATION_ERROR,
-        400,
-        'Không thể đổi loại nội dung khi bài học đã có file đính kèm. Vui lòng xóa file trước.',
-      );
-    }
-
-    const updated = await prisma.lesson.update({
-      where: { id: lessonId },
-      data: {
-        ...(input.title !== undefined && { title: input.title.trim() }),
-        ...(input.contentType !== undefined && { contentType: input.contentType }),
-        ...(input.fileUrl !== undefined && { fileUrl: input.fileUrl }),
-        ...(input.isPublished !== undefined && { isPublished: input.isPublished }),
-      },
-      include: {
-        aiDocument: { select: { id: true, status: true } },
-      },
+    const updated = await this.repo.updateLesson(lessonId, {
+      title: input.title !== undefined ? input.title.trim() : undefined,
+      contentType: input.contentType,
+      fileUrl: input.fileUrl,
+      isPublished: input.isPublished,
     });
 
     return {
@@ -328,24 +266,13 @@ export class AdminContentService {
   async reorderLessons(userId: string, userRole: Role, moduleId: string, orderedIds: string[]): Promise<string[]> {
     await this.assertModuleOwner(userId, userRole, moduleId);
 
-    const total = await prisma.lesson.count({ where: { moduleId } });
+    const total = await this.repo.countLessons(moduleId);
     const uniqueIds = new Set(orderedIds);
     if (orderedIds.length !== total || uniqueIds.size !== total) {
       throw new AppError(ERROR_CODES.VALIDATION_ERROR, 400, 'Danh sách id phải đủ và đúng tập bài học của module.');
     }
 
-    await prisma.$transaction(async (tx) => {
-      for (let i = 0; i < orderedIds.length; i++) {
-        const id = orderedIds[i];
-        if (id) {
-          await tx.lesson.update({
-            where: { id },
-            data: { position: i },
-          });
-        }
-      }
-    });
-
+    await this.repo.reorderLessons(orderedIds);
     return orderedIds;
   }
 
@@ -356,7 +283,7 @@ export class AdminContentService {
       await destroyFromCloudinary(lesson.filePublicId, lesson.contentType === 'VIDEO' ? 'video' : 'raw');
     }
 
-    await prisma.lesson.delete({ where: { id: lessonId } });
+    await this.repo.deleteLesson(lessonId);
   }
 
   async uploadLessonFile(
@@ -368,71 +295,41 @@ export class AdminContentService {
     const lesson = await this.assertLessonOwner(userId, userRole, lessonId);
 
     const isVideo = lesson.contentType === 'VIDEO';
-    const isPdf = lesson.contentType === 'PDF';
-
-    if (isVideo && !['video/mp4', 'video/webm'].includes(file.mimetype)) {
-      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-      throw new AppError(ERROR_CODES.UNSUPPORTED_FILE_TYPE, 415, 'Bài học video chỉ chấp nhận file MP4 hoặc WebM.');
-    }
-
-    if (isPdf && file.mimetype !== 'application/pdf') {
-      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-      throw new AppError(ERROR_CODES.UNSUPPORTED_FILE_TYPE, 415, 'Bài học tài liệu chỉ chấp nhận file PDF.');
-    }
-
-    const courseId = lesson.module.courseId;
-    const folder = `devlearn/courses/${courseId}/lessons`;
+    const folder = isVideo ? 'devlearn/videos' : 'devlearn/documents';
     const resourceType = isVideo ? 'video' : 'raw';
 
+    // Xóa file cũ nếu có
+    if (lesson.filePublicId) {
+      await destroyFromCloudinary(lesson.filePublicId, resourceType);
+    }
+
+    // Upload lên Cloudinary
     let uploadRes;
     try {
       uploadRes = await uploadToCloudinary(file.path, folder, resourceType);
     } finally {
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
+      // Dọn tệp tạm trên đĩa
+      fs.unlink(file.path, () => {});
     }
 
-    // Xóa file Cloudinary cũ nếu có
-    if (lesson.filePublicId && lesson.filePublicId !== uploadRes.public_id) {
-      await destroyFromCloudinary(lesson.filePublicId, resourceType);
-    }
-
+    // Nếu là PDF, tự động nạp hoặc cập nhật bản ghi ai_documents
     let createdAiDoc = null;
-
-    if (isPdf) {
-      // PDF tự động tạo/cập nhật ai_document
-      createdAiDoc = await prisma.aiDocument.upsert({
-        where: { lessonId: lesson.id },
-        create: {
-          courseId,
-          lessonId: lesson.id,
-          uploadedBy: userId,
-          fileName: file.originalname,
-          fileUrl: uploadRes.secure_url,
-          filePublicId: uploadRes.public_id,
-          status: 'PENDING',
-        },
-        update: {
-          fileName: file.originalname,
-          fileUrl: uploadRes.secure_url,
-          filePublicId: uploadRes.public_id,
-          status: 'PENDING',
-          errorMessage: null,
-        },
+    if (!isVideo) {
+      createdAiDoc = await this.repo.upsertAiDocument({
+        courseId: lesson.module.course.id,
+        lessonId: lesson.id,
+        userId,
+        fileName: file.originalname,
+        fileUrl: uploadRes.secure_url,
+        filePublicId: uploadRes.public_id,
+        status: 'PENDING',
       });
     }
 
-    const updatedLesson = await prisma.lesson.update({
-      where: { id: lessonId },
-      data: {
-        fileUrl: uploadRes.secure_url,
-        filePublicId: uploadRes.public_id,
-        durationSeconds: uploadRes.duration ?? lesson.durationSeconds,
-      },
-      include: {
-        aiDocument: { select: { id: true, status: true } },
-      },
+    const updatedLesson = await this.repo.updateLessonFile(lessonId, {
+      fileUrl: uploadRes.secure_url,
+      filePublicId: uploadRes.public_id,
+      durationSeconds: uploadRes.duration ?? lesson.durationSeconds,
     });
 
     return {

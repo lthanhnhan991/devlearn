@@ -70,7 +70,18 @@ export function AdminShell({ children }: AdminShellProps) {
   }
 
   const roleLabel =
-    user?.role === 'ADMIN' ? 'Quản trị viên' : user?.role === 'TEACHER' ? 'Giảng viên' : 'Sinh viên';
+    user?.role === 'ADMIN' ? 'Admin' : user?.role === 'TEACHER' ? 'Teacher' : 'Student';
+
+  const breadcrumbSection = (() => {
+    if (pathname.startsWith('/admin/courses')) return 'Khóa học';
+    if (pathname.startsWith('/admin/topics')) return 'Chủ đề';
+    if (pathname.startsWith('/admin/lessons')) return 'Bài học';
+    if (pathname.startsWith('/admin/exams')) return 'Bài kiểm tra';
+    if (pathname.startsWith('/admin/exam-stats')) return 'Thống kê bài kiểm tra';
+    if (pathname.startsWith('/admin/ai-documents')) return 'Tài liệu AI';
+    if (pathname.startsWith('/admin/users')) return 'Người dùng';
+    return 'Dashboard';
+  })();
 
   return (
     <div className="flex min-h-screen bg-admin-bg font-sans">
@@ -148,8 +159,10 @@ export function AdminShell({ children }: AdminShellProps) {
       <div className="flex flex-1 flex-col pl-64">
         {/* Topbar */}
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <span className="font-semibold text-admin-navy">DevLearn Quản trị</span>
+          <div className="flex items-center gap-1.5 text-sm">
+            <span className="font-medium text-slate-500">Quản trị</span>
+            <span className="text-slate-400">›</span>
+            <span className="font-semibold text-admin-navy">{breadcrumbSection}</span>
           </div>
 
           <div className="flex items-center gap-4 text-sm" suppressHydrationWarning>
